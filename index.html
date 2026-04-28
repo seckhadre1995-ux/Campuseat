@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CampusEat - 3 Services (Matin, Soir, Nuit)</title>
+    <title>CampusEat - QR Instantané</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Librairie Scanner Gérant -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <!-- NOUVEAU : Librairie Générateur de QR Code Instantané -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         ::-webkit-scrollbar { display: none; }
         .notif-enter { transform: translateY(0); opacity: 1; }
@@ -20,7 +23,7 @@
     <div class="w-full max-w-md bg-gray-50 h-screen flex flex-col shadow-2xl relative overflow-hidden">
         
         <!-- ========================================== -->
-        <!-- 📷 MODAL SCANNER GÉRANT AMÉLIORÉ           -->
+        <!-- 📷 MODAL SCANNER GÉRANT                    -->
         <!-- ========================================== -->
         <div id="scanner-modal" class="hidden absolute inset-0 bg-gray-900 z-[200] flex-col">
             <div class="p-5 flex justify-between items-center text-white border-b border-gray-700">
@@ -29,18 +32,16 @@
             </div>
             <div class="flex-1 flex flex-col items-center justify-center p-4">
                 <div id="reader" class="w-full max-w-sm rounded-2xl overflow-hidden shadow-lg border-4 border-blue-500 bg-black min-h-[300px]"></div>
-                
                 <div class="mt-6 flex gap-4 w-full">
                     <button onclick="window.restartScanner()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-xl font-bold">
-                        <i class="fa-solid fa-rotate"></i> Relancer
+                        <i class="fa-solid fa-rotate"></i> Relancer Caméra
                     </button>
                 </div>
-                <p class="text-gray-400 text-xs mt-4 text-center">Placez le QR Code dans le cadre.</p>
             </div>
         </div>
 
         <!-- ========================================== -->
-        <!-- 🔐 ÉCRAN DE CONNEXION / INSCRIPTION        -->
+        <!-- 🔐 ÉCRAN AUTHENTIFICATION                  -->
         <!-- ========================================== -->
         <div id="auth-screen" class="absolute inset-0 bg-orange-600 z-[100] flex flex-col items-center justify-center p-6 text-white transition-all duration-500 overflow-y-auto">
             <i class="fa-solid fa-shield-halved text-6xl mb-2"></i>
@@ -48,7 +49,6 @@
             <p class="text-orange-200 mb-6 text-center text-xs">Accès sécurisé pour la cantine.</p>
             
             <div class="bg-white w-full rounded-2xl p-6 text-gray-800 shadow-2xl">
-                <!-- Tabs Login/Register -->
                 <div class="flex mb-4 border-b border-gray-200">
                     <button id="tab-login" onclick="window.switchAuthTab('login')" class="flex-1 pb-2 text-center font-bold tab-active">Connexion</button>
                     <button id="tab-register" onclick="window.switchAuthTab('register')" class="flex-1 pb-2 text-center font-bold text-gray-400">S'inscrire</button>
@@ -82,7 +82,7 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- 🔔 BANNIÈRE NOTIFICATION                   -->
+        <!-- 🔔 NOTIFICATION                            -->
         <!-- ========================================== -->
         <div id="notification-banner" class="absolute top-4 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-50 flex items-center gap-3 border-l-4 border-orange-500 transition-all duration-500 notif-leave">
             <div id="notif-icon" class="bg-orange-100 p-2 rounded-full"><i class="fa-solid fa-bell text-orange-600 text-xl"></i></div>
@@ -107,7 +107,6 @@
 
         <main class="flex-1 overflow-y-auto p-5 pb-24 relative">
             
-            <!-- AFFICHAGE DU SERVICE ACTUEL (MATIN/SOIR/NUIT) -->
             <div id="current-service-banner" class="bg-gray-800 text-white text-center py-2 rounded-xl mb-4 text-sm font-bold uppercase tracking-widest shadow-md">
                 Service : <span id="service-name-display" class="text-yellow-400">FERMÉ</span>
             </div>
@@ -128,15 +127,31 @@
                     <p id="ticket-closed-msg" class="text-center text-xs text-red-500 mt-2 font-bold hidden">La cantine est actuellement fermée.</p>
                 </div>
 
+                <!-- ZONE DU TICKET DÉJÀ PRIS (QR Code + Rang) -->
                 <div id="my-ticket-zone" class="hidden mt-6 border-2 border-orange-500 bg-white rounded-2xl p-6 text-center shadow-lg relative">
-                    <p class="text-gray-600 font-medium">Ton numéro :</p>
-                    <p id="my-ticket-number" class="text-7xl font-black text-orange-600 my-2">#0</p>
                     
-                    <div class="mt-4 bg-gray-100 p-4 rounded-xl inline-block border border-gray-200">
-                        <p class="text-xs text-gray-500 mb-2 font-bold uppercase"><i class="fa-solid fa-lock"></i> Pass Unique</p>
-                        <img id="qr-code-img" src="" alt="QR Code" class="w-32 h-32 mx-auto">
+                    <!-- Le Compteur de Rang en temps réel -->
+                    <div id="queue-status-box" class="bg-orange-50 border border-orange-200 p-3 rounded-lg mb-4 text-gray-700 shadow-inner">
+                        <p class="font-bold text-sm">⏳ Personnes avant toi :</p>
+                        <p id="people-before-me" class="text-3xl font-black text-orange-600">0</p>
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-2 uppercase">Valable uniquement pour le service <span id="my-ticket-service-name" class="font-bold text-orange-600"></span></p>
+                    
+                    <!-- L'alerte quand c'est son tour -->
+                    <div id="turn-status-box" class="hidden bg-green-500 text-white p-4 rounded-lg mb-4 font-bold shadow-md animate-pulse">
+                        <p class="text-xl">🍽️ C'EST TON TOUR !</p>
+                        <p class="text-xs mt-1">Présente ton QR Code au guichet.</p>
+                    </div>
+
+                    <p class="text-gray-600 font-medium mt-2">Ton numéro :</p>
+                    <p id="my-ticket-number" class="text-6xl font-black text-orange-600 mb-4">#0</p>
+                    
+                    <!-- LE QR CODE GENERÉ INSTANTANÉMENT EN JAVASCRIPT -->
+                    <div class="bg-white p-4 rounded-xl inline-block border border-gray-200 shadow-sm">
+                        <p class="text-xs text-gray-500 mb-2 font-bold uppercase"><i class="fa-solid fa-qrcode"></i> Scan au guichet</p>
+                        <!-- Le QR Code va apparaître DANS cette div -->
+                        <div id="qrcode-container" class="flex justify-center mx-auto"></div>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-3 uppercase font-bold">Ticket valable pour le <span id="my-ticket-service-name" class="text-orange-600"></span></p>
                 </div>
             </div>
 
@@ -144,16 +159,12 @@
             <!-- VUE CANTINE (GÉRANT)                       -->
             <!-- ========================================== -->
             <div id="view-resto" class="hidden h-full flex flex-col">
-                <!-- Onglets Gérant -->
                 <div class="flex bg-gray-800 rounded-xl p-1 mb-4">
                     <button onclick="window.switchAdminTab('service')" id="btn-tab-service" class="flex-1 py-2 text-sm font-bold text-white bg-gray-600 rounded-lg">Service</button>
                     <button onclick="window.switchAdminTab('history')" id="btn-tab-history" class="flex-1 py-2 text-sm font-bold text-gray-400 hover:text-white">Historique</button>
                 </div>
 
-                <!-- Onglet 1 : SERVICE -->
                 <div id="admin-service" class="bg-gray-800 rounded-2xl p-6 text-center text-white shadow-xl">
-                    
-                    <!-- SÉLECTEUR DE REPAS -->
                     <div class="flex justify-between gap-2 mb-6 border-b border-gray-600 pb-4">
                         <button onclick="window.setService('MATIN')" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-xs font-bold py-2 rounded-lg text-white">MATIN</button>
                         <button onclick="window.setService('SOIR')" class="flex-1 bg-orange-500 hover:bg-orange-600 text-xs font-bold py-2 rounded-lg text-white">SOIR</button>
@@ -175,15 +186,12 @@
                     </button>
                 </div>
 
-                <!-- Onglet 2 : HISTORIQUE & FRAUDES -->
                 <div id="admin-history" class="hidden bg-white rounded-2xl shadow-xl flex-1 flex flex-col overflow-hidden border border-gray-200">
                     <div class="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
                         <h3 class="font-bold text-gray-800"><i class="fa-solid fa-list-check"></i> Historique (<span id="history-service-name"></span>)</h3>
                         <span id="total-served" class="bg-orange-100 text-orange-600 px-2 py-1 rounded-md text-xs font-bold">0</span>
                     </div>
-                    <div id="history-list" class="flex-1 overflow-y-auto p-2 space-y-2">
-                        <!-- Liste générée en JS -->
-                    </div>
+                    <div id="history-list" class="flex-1 overflow-y-auto p-2 space-y-2"></div>
                 </div>
             </div>
 
@@ -208,24 +216,21 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Variables Globales
         let authMode = 'login'; 
         let cardImageBase64 = null;
         let currentUser = localStorage.getItem('campusEat_user');
         let matricule = localStorage.getItem('campusEat_matricule');
         
-        let myTicket = localStorage.getItem('campusEat_myTicket');
-        let myTicketMeal = localStorage.getItem('campusEat_myTicketMeal'); // Pour quel repas est ce ticket ?
+        let myTicket = null;
+        let myTicketMeal = null;
 
         let todayDate = new Date().toISOString().split('T')[0]; 
         let currentServing = 0;
-        let activeService = 'FERMÉ'; // Géré par Firebase (MATIN, SOIR, NUIT, FERMÉ)
+        let activeService = 'FERMÉ'; 
         let html5QrCode = null;
 
-        // ==========================================
-        // 🔐 AUTHENTIFICATION
-        // ==========================================
-        window.switchAuthTab = function(mode) { /* ... identique ... */ 
+        // AUTHENTIFICATION
+        window.switchAuthTab = function(mode) { 
             authMode = mode;
             document.getElementById('tab-login').classList.toggle('tab-active', mode === 'login');
             document.getElementById('tab-login').classList.toggle('text-gray-400', mode !== 'login');
@@ -243,10 +248,7 @@
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 500;
-                    const scaleSize = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = img.height * scaleSize;
+                    canvas.width = 500; canvas.height = img.height * (500 / img.width);
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     cardImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
@@ -267,7 +269,7 @@
 
             if (authMode === 'register') {
                 if (snapshot.exists()) return window.showNotification("❌ Compte déjà existant !", true);
-                if (!cardImageBase64) return window.showNotification("⚠️ Photo carte étudiant obligatoire.", true);
+                if (!cardImageBase64) return window.showNotification("⚠️ Photo carte obligatoire.", true);
                 await set(userRef, { password: pwd, cardImage: cardImageBase64, createdAt: Date.now() });
                 doLogin(mat);
             } else {
@@ -296,7 +298,7 @@
             if (currentUser === 'student') {
                 document.getElementById('view-student').classList.remove('hidden');
                 document.getElementById('user-display').innerText = "👤 " + matricule;
-                if(myTicket) generateQR();
+                checkMyTicketInDB(); 
             } else if (currentUser === 'resto') {
                 document.getElementById('view-resto').classList.remove('hidden');
                 document.getElementById('user-display').innerText = "👨‍🍳 Panel Gérant";
@@ -304,43 +306,49 @@
                 document.getElementById('auth-screen').classList.remove('hidden');
             }
         }
-        checkLoginState();
 
         // ==========================================
-        // 🟢 SYNCHRO 3 REPAS (Firebase)
+        // 🔒 VÉRIFICATION TICKET DANS LA BASE DE DONNÉES
         // ==========================================
-        // Écouter le service actif
+        async function checkMyTicketInDB() {
+            if (currentUser !== 'student' || activeService === 'FERMÉ') {
+                myTicket = null; updateUI(); return;
+            }
+            const myTicketRef = ref(db, `service_tickets/${todayDate}/${activeService}/${matricule}`);
+            const snap = await get(myTicketRef);
+            if (snap.exists()) {
+                myTicket = snap.val();
+                myTicketMeal = activeService;
+                generateQR();
+            } else {
+                myTicket = null;
+            }
+            updateUI();
+        }
+
+        // ==========================================
+        // 🟢 SYNCHRONISATION TEMPS RÉEL
+        // ==========================================
         onValue(ref(db, 'system/activeService'), (snapshot) => {
             activeService = snapshot.val() || 'FERMÉ';
             document.getElementById('service-name-display').innerText = activeService;
             document.getElementById('history-service-name').innerText = activeService;
             
-            // Logique Étudiant: Si le service change, vérifier si le ticket est toujours valide
             if (currentUser === 'student') {
                 const btn = document.getElementById('btn-take-ticket');
                 const msg = document.getElementById('ticket-closed-msg');
-                
                 if (activeService === 'FERMÉ') {
                     btn.disabled = true; msg.classList.remove('hidden');
                 } else {
                     btn.disabled = false; msg.classList.add('hidden');
                 }
-
-                // Si l'étudiant a un ticket pour le Matin, mais qu'on est le Soir -> On efface son ticket de son écran
-                if (myTicket && myTicketMeal !== activeService) {
-                    myTicket = null; myTicketMeal = null;
-                    localStorage.removeItem('campusEat_myTicket');
-                    localStorage.removeItem('campusEat_myTicketMeal');
-                    updateUI();
-                }
+                checkMyTicketInDB(); 
             }
 
-            // Écouter l'historique DU SERVICE ACTIF (pour le gérant)
             if(currentUser === 'resto' && activeService !== 'FERMÉ') {
                 onValue(ref(db, `history/${todayDate}/${activeService}`), (snap) => {
                     const historyList = document.getElementById('history-list');
-                    historyList.innerHTML = '';
-                    let count = 0;
+                    historyList.innerHTML = ''; let count = 0;
                     snap.forEach((child) => {
                         const data = child.val(); count++;
                         const timeStr = new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -356,62 +364,86 @@
             }
         });
 
-        // Écouter la file d'attente
         onValue(ref(db, 'queue'), (snapshot) => {
             const data = snapshot.val();
             if (data) { currentServing = data.currentServing || 0; updateUI(); }
         });
 
         // ==========================================
-        // 🎟️ PRENDRE UN TICKET (ÉTUDIANT)
+        // 🎟️ PRENDRE UN TICKET (SÉCURISÉ)
         // ==========================================
-        window.takeTicket = function() {
+        window.takeTicket = async function() {
             if(activeService === 'FERMÉ') return alert("La cantine est fermée.");
+            document.getElementById('btn-take-ticket').disabled = true;
 
-            // Vérifier s'il a déjà mangé PENDANT CE SERVICE précis
-            get(ref(db, `history/${todayDate}/${activeService}`)).then(snap => {
-                let alreadyPassed = false;
-                snap.forEach(child => { if(child.val().matricule === matricule && child.val().status === 'validé') alreadyPassed = true; });
-                
-                if(alreadyPassed) return window.showNotification(`🚫 Vous avez déjà mangé ce ${activeService.toLowerCase()}.`, true);
+            const myTicketRef = ref(db, `service_tickets/${todayDate}/${activeService}/${matricule}`);
+            const ticketSnap = await get(myTicketRef);
+            if(ticketSnap.exists()) {
+                window.showNotification("Tu as déjà un ticket pour ce service !", true);
+                checkMyTicketInDB(); 
+                return;
+            }
 
-                runTransaction(ref(db, 'queue/lastTicket'), (val) => (val || 0) + 1).then((res) => {
-                    myTicket = res.snapshot.val();
-                    myTicketMeal = activeService; // On enregistre pour quel repas c'est !
-                    localStorage.setItem('campusEat_myTicket', myTicket);
-                    localStorage.setItem('campusEat_myTicketMeal', myTicketMeal);
-                    generateQR();
-                    updateUI();
-                });
+            const historyRef = ref(db, `history/${todayDate}/${activeService}`);
+            const histSnap = await get(historyRef);
+            let alreadyPassed = false;
+            histSnap.forEach(child => { if(child.val().matricule === matricule && child.val().status === 'validé') alreadyPassed = true; });
+            
+            if(alreadyPassed) {
+                window.showNotification(`🚫 Tu as déjà mangé ce ${activeService.toLowerCase()}.`, true);
+                document.getElementById('btn-take-ticket').disabled = false;
+                return;
+            }
+
+            runTransaction(ref(db, 'queue/lastTicket'), (val) => (val || 0) + 1).then(async (res) => {
+                myTicket = res.snapshot.val();
+                myTicketMeal = activeService;
+                await set(myTicketRef, myTicket);
+                generateQR();
+                updateUI();
+                window.showNotification(`🎟️ Ton ticket est validé !`);
             });
         };
 
+        // ==========================================
+        // 📷 GÉNÉRATION DU QR CODE INSTANTANÉE (OFFLINE)
+        // ==========================================
         function generateQR() {
-            // MATRICULE | TICKET | DATE | REPAS
             const qrData = `${matricule}|${myTicket}|${todayDate}|${myTicketMeal}`;
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrData)}`;
-            document.getElementById('qr-code-img').src = qrUrl;
             document.getElementById('my-ticket-service-name').innerText = myTicketMeal;
+            
+            const qrContainer = document.getElementById("qrcode-container");
+            qrContainer.innerHTML = ""; // Vider l'ancien QR Code s'il y en a un
+
+            // Génération avec la librairie intégrée
+            new QRCode(qrContainer, {
+                text: qrData,
+                width: 160,
+                height: 160,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
         }
 
         // ==========================================
-        // 👨‍🍳 CONTRÔLE GÉRANT (SCAN ET SERVICES)
+        // 👨‍🍳 CONTRÔLE GÉRANT
         // ==========================================
         window.setService = function(serviceName) {
-            if(confirm(`Passer au service : ${serviceName} ?\nCela remettra la file d'attente à zéro.`)) {
+            if(confirm(`Ouvrir le service : ${serviceName} ?\nCela va réinitialiser la file.`)) {
                 set(ref(db, 'system/activeService'), serviceName);
-                set(ref(db, 'queue'), { lastTicket: 0, currentServing: 0 }); // Reset queue
+                set(ref(db, 'queue'), { lastTicket: 0, currentServing: 0 });
             }
         };
 
         window.callNext = function() { set(ref(db, 'queue/currentServing'), currentServing + 1); };
 
         window.openScanner = function() {
-            if(activeService === 'FERMÉ') return alert("Veuillez d'abord ouvrir un service (Matin/Soir/Nuit).");
+            if(activeService === 'FERMÉ') return alert("Ouvrez d'abord un service !");
             document.getElementById('scanner-modal').classList.remove('hidden'); document.getElementById('scanner-modal').classList.add('flex');
             if(html5QrCode) html5QrCode.clear();
             html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess).catch(e => alert("Erreur Caméra"));
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess).catch(e => alert("Erreur Caméra."));
         };
 
         window.closeScanner = function() {
@@ -426,8 +458,8 @@
                 const parts = decodedText.split('|');
                 const matScan = parts[0]; const ticketScan = parseInt(parts[1]); const dateScan = parts[2]; const mealScan = parts[3];
 
-                if(dateScan !== todayDate) return alert(`🚨 TICKET EXPIRÉ !\nCe ticket date du ${dateScan}.`);
-                if(mealScan !== activeService) return alert(`🚨 MAUVAIS REPAS !\nCe ticket est pour le ${mealScan}, mais nous sommes au service ${activeService}.`);
+                if(dateScan !== todayDate) return alert(`🚨 TICKET EXPIRÉ ! Date: ${dateScan}`);
+                if(mealScan !== activeService) return alert(`🚨 MAUVAIS REPAS ! Billet ${mealScan} scanné pendant le ${activeService}.`);
 
                 const historyRef = ref(db, `history/${todayDate}/${activeService}/${ticketScan}`);
                 const snap = await get(historyRef);
@@ -438,9 +470,9 @@
                     return;
                 }
 
-                if(confirm(`✅ VÉRIFICATION OK\nÉtudiant : ${matScan}\nValider son repas du ${activeService} ?`)) {
+                if(confirm(`✅ VÉRIFICATION OK\nÉtudiant : ${matScan}\nValider son repas ?`)) {
                     await set(historyRef, { matricule: matScan, timestamp: Date.now(), status: 'validé' });
-                    window.showNotification(`✅ Repas ${activeService} validé pour ${matScan}.`);
+                    window.showNotification(`✅ Repas validé pour ${matScan}.`);
                 }
             } catch(e) { alert("❌ QR Code invalide."); }
         }
@@ -452,7 +484,9 @@
             document.getElementById('btn-tab-history').className = tab === 'history' ? "flex-1 py-2 text-sm font-bold text-white bg-gray-600 rounded-lg" : "flex-1 py-2 text-sm font-bold text-gray-400";
         };
 
-        // UI
+        // ==========================================
+        // 🔄 MISE A JOUR INTERFACE ET RANG
+        // ==========================================
         function updateUI() {
             document.getElementById('student-current-serving').innerText = currentServing > 0 ? currentServing : "-";
             document.getElementById('resto-current-serving').innerText = currentServing > 0 ? currentServing : "-";
@@ -461,7 +495,18 @@
                 document.getElementById('ticket-action-zone').classList.add('hidden');
                 document.getElementById('my-ticket-zone').classList.remove('hidden');
                 document.getElementById('my-ticket-number').innerText = "#" + myTicket;
-            } else {
+
+                let peopleBefore = myTicket - currentServing;
+                if (peopleBefore <= 0) {
+                    document.getElementById('queue-status-box').classList.add('hidden');
+                    document.getElementById('turn-status-box').classList.remove('hidden');
+                } else {
+                    document.getElementById('queue-status-box').classList.remove('hidden');
+                    document.getElementById('turn-status-box').classList.add('hidden');
+                    document.getElementById('people-before-me').innerText = peopleBefore;
+                }
+
+            } else if (currentUser === 'student') {
                 document.getElementById('ticket-action-zone').classList.remove('hidden');
                 document.getElementById('my-ticket-zone').classList.add('hidden');
             }
@@ -474,6 +519,8 @@
             banner.classList.remove('notif-leave'); banner.classList.add('notif-enter');
             setTimeout(() => { banner.classList.remove('notif-enter'); banner.classList.add('notif-leave'); }, 4000);
         };
+
+        checkLoginState(); 
     </script>
 </body>
 </html>
