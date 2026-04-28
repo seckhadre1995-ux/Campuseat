@@ -3,19 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CampusEat - Auth & QR Code</title>
+    <title>CampusEat - Scanner Inclus</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Librairie pour le Scanner QR Code -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
         ::-webkit-scrollbar { display: none; }
         .notif-enter { transform: translateY(0); opacity: 1; }
         .notif-leave { transform: translateY(-150%); opacity: 0; }
+        /* Style pour forcer la vidéo du scanner à bien s'afficher */
+        #reader video { object-fit: cover; border-radius: 1rem; }
     </style>
 </head>
 <body class="bg-gray-200 font-sans antialiased text-gray-800 flex justify-center">
 
     <div class="w-full max-w-md bg-gray-50 h-screen flex flex-col shadow-2xl relative overflow-hidden">
         
+        <!-- ========================================== -->
+        <!-- 📷 MODAL SCANNER DE QR CODE (RESTO)        -->
+        <!-- ========================================== -->
+        <div id="scanner-modal" class="hidden absolute inset-0 bg-gray-900 z-[200] flex-col">
+            <div class="p-5 flex justify-between items-center text-white border-b border-gray-700">
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-camera"></i> Scanner le Pass</h3>
+                <button onclick="window.closeScanner()" class="text-red-500 font-bold text-3xl leading-none">&times;</button>
+            </div>
+            <div class="flex-1 flex flex-col items-center justify-center p-4">
+                <!-- La caméra s'affichera ici -->
+                <div id="reader" class="w-full max-w-sm rounded-2xl overflow-hidden shadow-lg border-4 border-orange-500"></div>
+                <p class="text-gray-400 text-sm mt-6 text-center">Placez le QR Code de l'étudiant dans le cadre.</p>
+            </div>
+        </div>
+
         <!-- ========================================== -->
         <!-- 🔐 ÉCRAN DE CONNEXION (LOGIN)              -->
         <!-- ========================================== -->
@@ -34,7 +53,6 @@
                 </button>
             </div>
             
-            <!-- Accès Admin Resto caché -->
             <button onclick="window.loginAsResto()" class="mt-8 text-xs text-orange-300 underline opacity-70">
                 Je suis le gérant de la cantine
             </button>
@@ -66,16 +84,12 @@
 
         <main class="flex-1 overflow-y-auto p-5 pb-24">
             
-            <!-- Status de connexion Firebase -->
             <div id="connection-status" class="text-center text-xs text-gray-400 mb-4 font-mono">
                 🔴 Connexion au serveur...
             </div>
 
-            <!-- ========================================== -->
-            <!-- VUE ÉTUDIANT                               -->
-            <!-- ========================================== -->
+            <!-- VUE ÉTUDIANT -->
             <div id="view-student" class="hidden space-y-6">
-                
                 <div class="bg-white border border-gray-100 rounded-2xl p-5 text-center shadow-sm">
                     <p class="text-gray-500 text-sm font-medium uppercase">Numéro au guichet</p>
                     <p id="student-current-serving" class="text-6xl font-black text-orange-600 mt-2">-</p>
@@ -96,7 +110,7 @@
                     <div id="waiting-status" class="mt-4">
                         <p class="font-bold text-gray-800 mb-2"><span id="people-before-me" class="text-orange-600 text-xl">0</span> avant toi.</p>
                         
-                        <!-- LE VRAI QR CODE S'AFFICHERA ICI -->
+                        <!-- LE VRAI QR CODE -->
                         <div class="mt-4 bg-gray-100 p-4 rounded-xl inline-block border border-gray-200">
                             <p class="text-xs text-gray-500 mb-2 font-bold uppercase">Pass Resto Sécurisé</p>
                             <img id="qr-code-img" src="" alt="QR Code" class="w-32 h-32 mx-auto">
@@ -114,9 +128,7 @@
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- VUE CANTINE (ADMIN)                        -->
-            <!-- ========================================== -->
+            <!-- VUE CANTINE -->
             <div id="view-resto" class="hidden bg-gray-800 rounded-2xl p-6 text-center text-white shadow-xl">
                 <p class="text-orange-400 font-bold mb-4">PANEL SERVICE</p>
                 <div class="bg-gray-700 rounded-xl p-6">
@@ -130,7 +142,8 @@
                 </button>
                 
                 <div class="border-t border-gray-600 pt-4 mt-4 flex gap-2">
-                    <button class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-3 rounded-lg flex flex-col items-center gap-1">
+                    <!-- LE BOUTON SCANNER -->
+                    <button onclick="window.openScanner()" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-3 rounded-lg flex flex-col items-center gap-1">
                         <i class="fa-solid fa-qrcode text-xl"></i> Scanner
                     </button>
                     <button onclick="window.resetQueue()" class="w-1/2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-3 rounded-lg flex flex-col items-center gap-1">
@@ -168,8 +181,8 @@
         let myTicket = localStorage.getItem('campusEat_myTicket');
         if(myTicket) myTicket = parseInt(myTicket);
         
-        let currentUser = localStorage.getItem('campusEat_user'); // Profil (Étudiant ou Resto)
-        let matricule = localStorage.getItem('campusEat_matricule'); // Le matricule de l'étudiant
+        let currentUser = localStorage.getItem('campusEat_user'); 
+        let matricule = localStorage.getItem('campusEat_matricule');
 
         // ==========================================
         // 🔐 GESTION DU LOGIN
@@ -179,23 +192,19 @@
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('view-student').classList.remove('hidden');
                 document.getElementById('user-display').innerText = "👤 " + matricule;
-                if(myTicket) generateQR(); // Régénérer le QR code au chargement
+                if(myTicket) generateQR();
             } else if (currentUser === 'resto') {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('view-resto').classList.remove('hidden');
                 document.getElementById('user-display').innerText = "👨‍🍳 Compte Cantine";
             } else {
-                // Pas connecté
                 document.getElementById('login-screen').classList.remove('hidden');
             }
         }
 
         window.login = function() {
             const matInput = document.getElementById('matricule-input').value.trim();
-            if(matInput.length < 3) {
-                alert("Veuillez entrer un matricule valide !");
-                return;
-            }
+            if(matInput.length < 3) { alert("Veuillez entrer un matricule valide !"); return; }
             currentUser = 'student';
             matricule = matInput.toUpperCase();
             localStorage.setItem('campusEat_user', currentUser);
@@ -206,7 +215,7 @@
 
         window.loginAsResto = function() {
             let pass = prompt("Mot de passe Admin :");
-            if(pass === "admin123") { // Faux mot de passe pour le test
+            if(pass === "admin123") {
                 currentUser = 'resto';
                 localStorage.setItem('campusEat_user', currentUser);
                 window.showNotification("👨‍🍳 Mode Cantine activé !");
@@ -217,8 +226,7 @@
         };
 
         window.logout = function() {
-            currentUser = null;
-            matricule = null;
+            currentUser = null; matricule = null;
             localStorage.removeItem('campusEat_user');
             localStorage.removeItem('campusEat_matricule');
             document.getElementById('view-student').classList.add('hidden');
@@ -226,7 +234,6 @@
             checkLogin();
         };
 
-        // On vérifie au lancement
         checkLogin();
 
         // ==========================================
@@ -245,13 +252,65 @@
         });
 
         // ==========================================
-        // 🎟️ LOGIQUE FILE & QR CODE
+        // 📷 LOGIQUE DU SCANNER QR CODE (RESTO)
+        // ==========================================
+        let html5QrCode;
+
+        window.openScanner = function() {
+            const modal = document.getElementById('scanner-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            html5QrCode = new Html5Qrcode("reader");
+            // facingMode: "environment" force l'utilisation de la caméra arrière sur smartphone
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                onScanSuccess
+            ).catch((err) => {
+                alert("Erreur de caméra : " + err);
+                window.closeScanner();
+            });
+        };
+
+        window.closeScanner = function() {
+            const modal = document.getElementById('scanner-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if(html5QrCode) {
+                html5QrCode.stop().catch(err => console.log(err));
+            }
+        };
+
+        function onScanSuccess(decodedText, decodedResult) {
+            // Quand un QR Code est détecté !
+            window.closeScanner(); // On ferme la caméra
+
+            try {
+                // On décode "MAT-2024|TICKET:5"
+                const parts = decodedText.split('|');
+                const matScan = parts[0];
+                const ticketScan = parseInt(parts[1].split(':')[1]);
+
+                // VÉRIFICATION DE LA SÉCURITÉ
+                if (ticketScan === currentServing) {
+                    alert(`✅ VALIDÉ !\nÉtudiant : ${matScan}\nTicket #${ticketScan} autorisé.`);
+                } else if (ticketScan < currentServing) {
+                    alert(`❌ REFUSÉ !\nLe ticket #${ticketScan} est déjà passé (on sert le #${currentServing}).`);
+                } else {
+                    alert(`⏳ TROP TÔT !\nÉtudiant : ${matScan}\nTicket #${ticketScan}. Attendez votre tour (on sert le #${currentServing}).`);
+                }
+            } catch(e) {
+                alert("❌ QR Code non reconnu. Ce n'est pas un code CampusEat.");
+            }
+        }
+
+        // ==========================================
+        // 🎟️ LOGIQUE FILE
         // ==========================================
         function generateQR() {
-            // Le QR Code contiendra : "MAT-2024|TICKET:5"
             const qrData = `${matricule}|TICKET:${myTicket}`;
-            // On utilise une API gratuite pour générer l'image du QR Code
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrData)}`;
             document.getElementById('qr-code-img').src = qrUrl;
         }
 
@@ -263,7 +322,7 @@
                 if (result.committed) {
                     myTicket = result.snapshot.val();
                     localStorage.setItem('campusEat_myTicket', myTicket);
-                    generateQR(); // On crée le QR Code !
+                    generateQR(); 
                     updateUI();
                     window.showNotification("🎟️ Ton ticket #" + myTicket + " est validé !");
                 }
@@ -303,13 +362,8 @@
 
                 let pos = myTicket - currentServing;
                 if (pos <= 0) {
-                    // C'est mon tour
                     document.getElementById('waiting-status').classList.add('hidden');
                     document.getElementById('ready-status').classList.remove('hidden');
-                    
-                    // Vibration si possible (Fonctionnalité Vraie App)
-                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-
                 } else {
                     document.getElementById('waiting-status').classList.remove('hidden');
                     document.getElementById('ready-status').classList.add('hidden');
