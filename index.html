@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CampusEat - Sécurisé & Anti-Fraude</title>
+    <title>CampusEat - 3 Services (Matin, Soir, Nuit)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -35,7 +35,7 @@
                         <i class="fa-solid fa-rotate"></i> Relancer
                     </button>
                 </div>
-                <p class="text-gray-400 text-xs mt-4 text-center">Placez le QR Code de l'étudiant dans le cadre pour vérifier l'authenticité.</p>
+                <p class="text-gray-400 text-xs mt-4 text-center">Placez le QR Code dans le cadre.</p>
             </div>
         </div>
 
@@ -45,7 +45,7 @@
         <div id="auth-screen" class="absolute inset-0 bg-orange-600 z-[100] flex flex-col items-center justify-center p-6 text-white transition-all duration-500 overflow-y-auto">
             <i class="fa-solid fa-shield-halved text-6xl mb-2"></i>
             <h1 class="text-3xl font-black mb-1">CampusEat Pro</h1>
-            <p class="text-orange-200 mb-6 text-center text-xs">Accès sécurisé et vérifié.</p>
+            <p class="text-orange-200 mb-6 text-center text-xs">Accès sécurisé pour la cantine.</p>
             
             <div class="bg-white w-full rounded-2xl p-6 text-gray-800 shadow-2xl">
                 <!-- Tabs Login/Register -->
@@ -64,9 +64,8 @@
                         <input type="password" id="pwd-input" placeholder="••••••••" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500">
                     </div>
                     
-                    <!-- Uniquement pour l'inscription -->
                     <div id="register-fields" class="hidden mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
-                        <label class="block text-xs font-bold text-gray-500 mb-2 uppercase"><i class="fa-solid fa-id-card"></i> Photo Carte Étudiant (Obligatoire)</label>
+                        <label class="block text-xs font-bold text-gray-500 mb-2 uppercase"><i class="fa-solid fa-id-card"></i> Photo Carte Étudiant</label>
                         <input type="file" id="id-card-upload" accept="image/*" class="w-full text-xs" onchange="window.handleImageUpload(event)">
                         <img id="card-preview" class="mt-2 hidden w-full h-32 object-cover rounded-lg border border-gray-300">
                     </div>
@@ -98,17 +97,20 @@
         <!-- ========================================== -->
         <header class="bg-orange-600 text-white p-5 rounded-b-3xl shadow-md z-10 flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-bold"><i class="fa-solid fa-shield-halved"></i> CampusEat</h1>
+                <h1 class="text-xl font-bold"><i class="fa-solid fa-utensils"></i> CampusEat</h1>
                 <p id="user-display" class="text-xs text-orange-200 mt-1 font-mono"></p>
             </div>
             <button onclick="window.logout()" class="text-xs bg-black bg-opacity-20 px-3 py-2 rounded-lg hover:bg-opacity-40 transition">
-                Déconnexion <i class="fa-solid fa-right-from-bracket"></i>
+                Déconnexion
             </button>
         </header>
 
         <main class="flex-1 overflow-y-auto p-5 pb-24 relative">
             
-            <div id="connection-status" class="text-center text-xs text-gray-400 mb-4 font-mono">🔴 Réseau...</div>
+            <!-- AFFICHAGE DU SERVICE ACTUEL (MATIN/SOIR/NUIT) -->
+            <div id="current-service-banner" class="bg-gray-800 text-white text-center py-2 rounded-xl mb-4 text-sm font-bold uppercase tracking-widest shadow-md">
+                Service : <span id="service-name-display" class="text-yellow-400">FERMÉ</span>
+            </div>
 
             <!-- ========================================== -->
             <!-- VUE ÉTUDIANT                               -->
@@ -120,9 +122,10 @@
                 </div>
 
                 <div id="ticket-action-zone" class="mt-6">
-                    <button onclick="window.takeTicket()" class="w-full bg-orange-600 text-white font-bold py-4 rounded-xl text-lg shadow-lg active:scale-95 transition">
+                    <button id="btn-take-ticket" onclick="window.takeTicket()" class="w-full bg-orange-600 text-white font-bold py-4 rounded-xl text-lg shadow-lg active:scale-95 transition disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed">
                         <i class="fa-solid fa-ticket"></i> Prendre un ticket
                     </button>
+                    <p id="ticket-closed-msg" class="text-center text-xs text-red-500 mt-2 font-bold hidden">La cantine est actuellement fermée.</p>
                 </div>
 
                 <div id="my-ticket-zone" class="hidden mt-6 border-2 border-orange-500 bg-white rounded-2xl p-6 text-center shadow-lg relative">
@@ -133,7 +136,7 @@
                         <p class="text-xs text-gray-500 mb-2 font-bold uppercase"><i class="fa-solid fa-lock"></i> Pass Unique</p>
                         <img id="qr-code-img" src="" alt="QR Code" class="w-32 h-32 mx-auto">
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-2 uppercase">Valable uniquement aujourd'hui</p>
+                    <p class="text-[10px] text-gray-400 mt-2 uppercase">Valable uniquement pour le service <span id="my-ticket-service-name" class="font-bold text-orange-600"></span></p>
                 </div>
             </div>
 
@@ -149,7 +152,16 @@
 
                 <!-- Onglet 1 : SERVICE -->
                 <div id="admin-service" class="bg-gray-800 rounded-2xl p-6 text-center text-white shadow-xl">
-                    <div class="bg-gray-700 rounded-xl p-6 mb-6">
+                    
+                    <!-- SÉLECTEUR DE REPAS -->
+                    <div class="flex justify-between gap-2 mb-6 border-b border-gray-600 pb-4">
+                        <button onclick="window.setService('MATIN')" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-xs font-bold py-2 rounded-lg text-white">MATIN</button>
+                        <button onclick="window.setService('SOIR')" class="flex-1 bg-orange-500 hover:bg-orange-600 text-xs font-bold py-2 rounded-lg text-white">SOIR</button>
+                        <button onclick="window.setService('NUIT')" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-xs font-bold py-2 rounded-lg text-white">NUIT</button>
+                        <button onclick="window.setService('FERMÉ')" class="flex-1 bg-red-600 hover:bg-red-700 text-xs font-bold py-2 rounded-lg text-white"><i class="fa-solid fa-stop"></i></button>
+                    </div>
+
+                    <div class="bg-gray-700 rounded-xl p-6 mb-6 relative">
                         <p class="text-gray-400 text-sm">Appel en cours</p>
                         <p id="resto-current-serving" class="text-7xl font-black text-orange-400 mt-2">-</p>
                     </div>
@@ -158,20 +170,16 @@
                         👉 APPELER SUIVANT
                     </button>
                     
-                    <button onclick="window.openScanner()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 mb-4">
-                        <i class="fa-solid fa-qrcode text-2xl"></i> SCANNER & VÉRIFIER
-                    </button>
-
-                    <button onclick="window.resetQueue()" class="w-full border border-red-500 text-red-500 py-3 rounded-xl text-sm font-bold hover:bg-red-500 hover:text-white">
-                        <i class="fa-solid fa-trash"></i> Vider la file (Fin journée)
+                    <button onclick="window.openScanner()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-qrcode text-2xl"></i> SCANNER LE PASS
                     </button>
                 </div>
 
                 <!-- Onglet 2 : HISTORIQUE & FRAUDES -->
                 <div id="admin-history" class="hidden bg-white rounded-2xl shadow-xl flex-1 flex flex-col overflow-hidden border border-gray-200">
                     <div class="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                        <h3 class="font-bold text-gray-800"><i class="fa-solid fa-list-check"></i> Historique du jour</h3>
-                        <span id="total-served" class="bg-orange-100 text-orange-600 px-2 py-1 rounded-md text-xs font-bold">0 servis</span>
+                        <h3 class="font-bold text-gray-800"><i class="fa-solid fa-list-check"></i> Historique (<span id="history-service-name"></span>)</h3>
+                        <span id="total-served" class="bg-orange-100 text-orange-600 px-2 py-1 rounded-md text-xs font-bold">0</span>
                     </div>
                     <div id="history-list" class="flex-1 overflow-y-auto p-2 space-y-2">
                         <!-- Liste générée en JS -->
@@ -201,32 +209,32 @@
         const db = getDatabase(app);
 
         // Variables Globales
-        let authMode = 'login'; // 'login' ou 'register'
+        let authMode = 'login'; 
         let cardImageBase64 = null;
         let currentUser = localStorage.getItem('campusEat_user');
         let matricule = localStorage.getItem('campusEat_matricule');
+        
         let myTicket = localStorage.getItem('campusEat_myTicket');
-        let todayDate = new Date().toISOString().split('T')[0]; // ex: 2024-10-25
+        let myTicketMeal = localStorage.getItem('campusEat_myTicketMeal'); // Pour quel repas est ce ticket ?
 
-        let lastTicket = 0;
+        let todayDate = new Date().toISOString().split('T')[0]; 
         let currentServing = 0;
+        let activeService = 'FERMÉ'; // Géré par Firebase (MATIN, SOIR, NUIT, FERMÉ)
         let html5QrCode = null;
 
         // ==========================================
-        // 🔐 GESTION AUTHENTIFICATION & INSCRIPTION
+        // 🔐 AUTHENTIFICATION
         // ==========================================
-        window.switchAuthTab = function(mode) {
+        window.switchAuthTab = function(mode) { /* ... identique ... */ 
             authMode = mode;
             document.getElementById('tab-login').classList.toggle('tab-active', mode === 'login');
             document.getElementById('tab-login').classList.toggle('text-gray-400', mode !== 'login');
             document.getElementById('tab-register').classList.toggle('tab-active', mode === 'register');
             document.getElementById('tab-register').classList.toggle('text-gray-400', mode !== 'register');
-            
             document.getElementById('register-fields').classList.toggle('hidden', mode === 'login');
             document.getElementById('btn-action').innerText = mode === 'login' ? "Se connecter" : "Créer mon compte";
         };
 
-        // Compression d'image Canvas pour Firebase
         window.handleImageUpload = function(event) {
             const file = event.target.files[0];
             if(!file) return;
@@ -235,17 +243,15 @@
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 500; // Compression
+                    const MAX_WIDTH = 500;
                     const scaleSize = MAX_WIDTH / img.width;
                     canvas.width = MAX_WIDTH;
                     canvas.height = img.height * scaleSize;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    cardImageBase64 = canvas.toDataURL('image/jpeg', 0.6); // 60% qualité
-                    
-                    const preview = document.getElementById('card-preview');
-                    preview.src = cardImageBase64;
-                    preview.classList.remove('hidden');
+                    cardImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
+                    document.getElementById('card-preview').src = cardImageBase64;
+                    document.getElementById('card-preview').classList.remove('hidden');
                 }
                 img.src = e.target.result;
             }
@@ -255,61 +261,38 @@
         window.processAuth = async function() {
             const mat = document.getElementById('mat-input').value.trim().toUpperCase();
             const pwd = document.getElementById('pwd-input').value.trim();
-
-            if(!mat || !pwd) return alert("Veuillez remplir tous les champs.");
-
+            if(!mat || !pwd) return alert("Remplissez tous les champs.");
             const userRef = ref(db, `users/${mat}`);
             const snapshot = await get(userRef);
 
             if (authMode === 'register') {
-                if (snapshot.exists()) {
-                    return window.showNotification("❌ Ce matricule possède déjà un compte !", true);
-                }
-                if (!cardImageBase64) {
-                    return window.showNotification("⚠️ La photo de la carte étudiant est obligatoire.", true);
-                }
-                // Création du compte
+                if (snapshot.exists()) return window.showNotification("❌ Compte déjà existant !", true);
+                if (!cardImageBase64) return window.showNotification("⚠️ Photo carte étudiant obligatoire.", true);
                 await set(userRef, { password: pwd, cardImage: cardImageBase64, createdAt: Date.now() });
-                window.showNotification("✅ Compte créé avec succès !");
                 doLogin(mat);
             } else {
-                // Connexion
-                if (!snapshot.exists()) return window.showNotification("❌ Compte introuvable.", true);
-                const data = snapshot.val();
-                if (data.password !== pwd) return window.showNotification("❌ Mot de passe incorrect.", true);
+                if (!snapshot.exists() || snapshot.val().password !== pwd) return window.showNotification("❌ Identifiants incorrects.", true);
                 doLogin(mat);
             }
         };
 
         function doLogin(mat) {
-            currentUser = 'student';
-            matricule = mat;
+            currentUser = 'student'; matricule = mat;
             localStorage.setItem('campusEat_user', currentUser);
             localStorage.setItem('campusEat_matricule', matricule);
             checkLoginState();
         }
 
         window.loginAsResto = function() {
-            if(prompt("Mot de passe Admin (Code: admin):") === "admin") {
-                currentUser = 'resto';
-                localStorage.setItem('campusEat_user', currentUser);
-                checkLoginState();
-            } else {
-                alert("Accès refusé.");
+            if(prompt("Mot de passe Admin:") === "admin") {
+                currentUser = 'resto'; localStorage.setItem('campusEat_user', currentUser); checkLoginState();
             }
         };
 
-        window.logout = function() {
-            localStorage.clear();
-            currentUser = null; matricule = null; myTicket = null;
-            checkLoginState();
-        };
+        window.logout = function() { localStorage.clear(); location.reload(); };
 
         function checkLoginState() {
             document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('view-student').classList.add('hidden');
-            document.getElementById('view-resto').classList.add('hidden');
-
             if (currentUser === 'student') {
                 document.getElementById('view-student').classList.remove('hidden');
                 document.getElementById('user-display').innerText = "👤 " + matricule;
@@ -321,67 +304,82 @@
                 document.getElementById('auth-screen').classList.remove('hidden');
             }
         }
-
         checkLoginState();
 
         // ==========================================
-        // 🟢 SYNCHRONISATION TEMPS RÉEL (FILE & HISTORIQUE)
+        // 🟢 SYNCHRO 3 REPAS (Firebase)
         // ==========================================
-        onValue(ref(db, 'queue'), (snapshot) => {
-            document.getElementById('connection-status').innerText = "🟢 Serveur Sécurisé Connecté";
-            document.getElementById('connection-status').classList.add('text-green-500');
-            const data = snapshot.val();
-            if (data) {
-                lastTicket = data.lastTicket || 0;
-                currentServing = data.currentServing || 0;
-                updateUI();
+        // Écouter le service actif
+        onValue(ref(db, 'system/activeService'), (snapshot) => {
+            activeService = snapshot.val() || 'FERMÉ';
+            document.getElementById('service-name-display').innerText = activeService;
+            document.getElementById('history-service-name').innerText = activeService;
+            
+            // Logique Étudiant: Si le service change, vérifier si le ticket est toujours valide
+            if (currentUser === 'student') {
+                const btn = document.getElementById('btn-take-ticket');
+                const msg = document.getElementById('ticket-closed-msg');
+                
+                if (activeService === 'FERMÉ') {
+                    btn.disabled = true; msg.classList.remove('hidden');
+                } else {
+                    btn.disabled = false; msg.classList.add('hidden');
+                }
+
+                // Si l'étudiant a un ticket pour le Matin, mais qu'on est le Soir -> On efface son ticket de son écran
+                if (myTicket && myTicketMeal !== activeService) {
+                    myTicket = null; myTicketMeal = null;
+                    localStorage.removeItem('campusEat_myTicket');
+                    localStorage.removeItem('campusEat_myTicketMeal');
+                    updateUI();
+                }
+            }
+
+            // Écouter l'historique DU SERVICE ACTIF (pour le gérant)
+            if(currentUser === 'resto' && activeService !== 'FERMÉ') {
+                onValue(ref(db, `history/${todayDate}/${activeService}`), (snap) => {
+                    const historyList = document.getElementById('history-list');
+                    historyList.innerHTML = '';
+                    let count = 0;
+                    snap.forEach((child) => {
+                        const data = child.val(); count++;
+                        const timeStr = new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        const isFraud = data.status === 'fraude';
+                        historyList.innerHTML = `
+                            <div class="p-3 rounded-xl border ${isFraud ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'} flex justify-between items-center shadow-sm">
+                                <div><p class="font-bold text-sm ${isFraud ? 'text-red-600' : 'text-gray-800'}">${data.matricule}</p><p class="text-xs text-gray-500">#${child.key} • ${timeStr}</p></div>
+                                <span class="text-xs font-bold px-2 py-1 rounded ${isFraud ? 'bg-red-200 text-red-700' : 'bg-green-100 text-green-700'}">${isFraud ? 'FRAUDE' : 'Validé'}</span>
+                            </div>` + historyList.innerHTML;
+                    });
+                    document.getElementById('total-served').innerText = count;
+                });
             }
         });
 
-        // Historique du jour (Gérant)
-        onValue(ref(db, `history/${todayDate}`), (snapshot) => {
-            if(currentUser !== 'resto') return;
-            const historyList = document.getElementById('history-list');
-            historyList.innerHTML = '';
-            let count = 0;
-            
-            snapshot.forEach((child) => {
-                const data = child.val();
-                count++;
-                const timeStr = new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const isFraud = data.status === 'fraude';
-                
-                historyList.innerHTML = `
-                    <div class="p-3 rounded-xl border ${isFraud ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'} flex justify-between items-center shadow-sm">
-                        <div>
-                            <p class="font-bold text-sm ${isFraud ? 'text-red-600' : 'text-gray-800'}">${data.matricule}</p>
-                            <p class="text-xs text-gray-500">Ticket #${child.key} • ${timeStr}</p>
-                        </div>
-                        <span class="text-xs font-bold px-2 py-1 rounded ${isFraud ? 'bg-red-200 text-red-700' : 'bg-green-100 text-green-700'}">
-                            ${isFraud ? '<i class="fa-solid fa-triangle-exclamation"></i> TENTATIVE FRAUDE' : '<i class="fa-solid fa-check"></i> Validé'}
-                        </span>
-                    </div>
-                ` + historyList.innerHTML; // Ajout en haut
-            });
-            document.getElementById('total-served').innerText = `${count} enregistrements`;
+        // Écouter la file d'attente
+        onValue(ref(db, 'queue'), (snapshot) => {
+            const data = snapshot.val();
+            if (data) { currentServing = data.currentServing || 0; updateUI(); }
         });
 
         // ==========================================
-        // 🎟️ GESTION DES TICKETS (ÉTUDIANT)
+        // 🎟️ PRENDRE UN TICKET (ÉTUDIANT)
         // ==========================================
         window.takeTicket = function() {
-            // Vérifier si l'étudiant a déjà mangé aujourd'hui
-            get(ref(db, `history/${todayDate}`)).then(snap => {
+            if(activeService === 'FERMÉ') return alert("La cantine est fermée.");
+
+            // Vérifier s'il a déjà mangé PENDANT CE SERVICE précis
+            get(ref(db, `history/${todayDate}/${activeService}`)).then(snap => {
                 let alreadyPassed = false;
                 snap.forEach(child => { if(child.val().matricule === matricule && child.val().status === 'validé') alreadyPassed = true; });
                 
-                if(alreadyPassed) {
-                    return window.showNotification("🚫 Vous avez déjà validé un repas aujourd'hui.", true);
-                }
+                if(alreadyPassed) return window.showNotification(`🚫 Vous avez déjà mangé ce ${activeService.toLowerCase()}.`, true);
 
                 runTransaction(ref(db, 'queue/lastTicket'), (val) => (val || 0) + 1).then((res) => {
                     myTicket = res.snapshot.val();
+                    myTicketMeal = activeService; // On enregistre pour quel repas c'est !
                     localStorage.setItem('campusEat_myTicket', myTicket);
+                    localStorage.setItem('campusEat_myTicketMeal', myTicketMeal);
                     generateQR();
                     updateUI();
                 });
@@ -389,103 +387,72 @@
         };
 
         function generateQR() {
-            // Sécurité : MATRICULE | TICKET | DATE
-            const qrData = `${matricule}|${myTicket}|${todayDate}`;
+            // MATRICULE | TICKET | DATE | REPAS
+            const qrData = `${matricule}|${myTicket}|${todayDate}|${myTicketMeal}`;
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrData)}`;
             document.getElementById('qr-code-img').src = qrUrl;
+            document.getElementById('my-ticket-service-name').innerText = myTicketMeal;
         }
 
         // ==========================================
-        // 📷 SCANNER ET ANTI-FRAUDE (GÉRANT)
+        // 👨‍🍳 CONTRÔLE GÉRANT (SCAN ET SERVICES)
         // ==========================================
-        window.switchAdminTab = function(tab) {
-            document.getElementById('admin-service').classList.toggle('hidden', tab !== 'service');
-            document.getElementById('admin-history').classList.toggle('hidden', tab !== 'history');
-            document.getElementById('btn-tab-service').className = tab === 'service' ? "flex-1 py-2 text-sm font-bold text-white bg-gray-600 rounded-lg" : "flex-1 py-2 text-sm font-bold text-gray-400 hover:text-white";
-            document.getElementById('btn-tab-history').className = tab === 'history' ? "flex-1 py-2 text-sm font-bold text-white bg-gray-600 rounded-lg" : "flex-1 py-2 text-sm font-bold text-gray-400 hover:text-white";
+        window.setService = function(serviceName) {
+            if(confirm(`Passer au service : ${serviceName} ?\nCela remettra la file d'attente à zéro.`)) {
+                set(ref(db, 'system/activeService'), serviceName);
+                set(ref(db, 'queue'), { lastTicket: 0, currentServing: 0 }); // Reset queue
+            }
         };
+
+        window.callNext = function() { set(ref(db, 'queue/currentServing'), currentServing + 1); };
 
         window.openScanner = function() {
-            document.getElementById('scanner-modal').classList.remove('hidden');
-            document.getElementById('scanner-modal').classList.add('flex');
-            startScanner();
-        };
-
-        function startScanner() {
+            if(activeService === 'FERMÉ') return alert("Veuillez d'abord ouvrir un service (Matin/Soir/Nuit).");
+            document.getElementById('scanner-modal').classList.remove('hidden'); document.getElementById('scanner-modal').classList.add('flex');
             if(html5QrCode) html5QrCode.clear();
             html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start(
-                { facingMode: "environment" }, 
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                onScanSuccess,
-                (errorMessage) => { /* ignorer erreurs de frame */ }
-            ).catch(err => {
-                alert("Erreur de caméra. Assurez-vous d'avoir donné les permissions.");
-            });
-        }
-
-        window.restartScanner = function() { startScanner(); };
-        window.closeScanner = function() {
-            document.getElementById('scanner-modal').classList.add('hidden');
-            document.getElementById('scanner-modal').classList.remove('flex');
-            if(html5QrCode) html5QrCode.stop().catch(e=>console.log(e));
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess).catch(e => alert("Erreur Caméra"));
         };
 
+        window.closeScanner = function() {
+            document.getElementById('scanner-modal').classList.add('hidden'); document.getElementById('scanner-modal').classList.remove('flex');
+            if(html5QrCode) html5QrCode.stop().catch(e=>{});
+        };
+        window.restartScanner = window.openScanner;
+
         async function onScanSuccess(decodedText) {
-            window.closeScanner(); // Ferme caméra
-            
+            window.closeScanner(); 
             try {
                 const parts = decodedText.split('|');
-                const matScan = parts[0];
-                const ticketScan = parseInt(parts[1]);
-                const dateScan = parts[2];
+                const matScan = parts[0]; const ticketScan = parseInt(parts[1]); const dateScan = parts[2]; const mealScan = parts[3];
 
-                // 1. Vérif Date
-                if(dateScan !== todayDate) {
-                    alert(`🚨 FRAUDE DÉTECTÉE !\nCe ticket date du ${dateScan}. Il n'est pas valable aujourd'hui.`);
+                if(dateScan !== todayDate) return alert(`🚨 TICKET EXPIRÉ !\nCe ticket date du ${dateScan}.`);
+                if(mealScan !== activeService) return alert(`🚨 MAUVAIS REPAS !\nCe ticket est pour le ${mealScan}, mais nous sommes au service ${activeService}.`);
+
+                const historyRef = ref(db, `history/${todayDate}/${activeService}/${ticketScan}`);
+                const snap = await get(historyRef);
+
+                if(snap.exists() && snap.val().status === 'validé') {
+                    alert(`🚨 DOUBLE PASSAGE !\n${matScan} a DÉJÀ mangé ce ${activeService} !`);
+                    set(ref(db, `history/${todayDate}/${activeService}/FRAUDE_${ticketScan}_${Date.now()}`), { matricule: matScan, timestamp: Date.now(), status: 'fraude' });
                     return;
                 }
 
-                // 2. Vérif Base de données (Anti-double scan)
-                const historyRef = ref(db, `history/${todayDate}/${ticketScan}`);
-                const snap = await get(historyRef);
-
-                if(snap.exists()) {
-                    const data = snap.val();
-                    if(data.status === 'validé') {
-                        // Alerte Fraude + Enregistrement de la tentative
-                        alert(`🚨 DOUBLE PASSAGE !\nL'étudiant ${matScan} a DÉJÀ utilisé ce ticket à ${new Date(data.timestamp).toLocaleTimeString()} !`);
-                        set(ref(db, `history/${todayDate}/FRAUDE_${ticketScan}_${Date.now()}`), {
-                            matricule: matScan, timestamp: Date.now(), status: 'fraude'
-                        });
-                        return;
-                    }
+                if(confirm(`✅ VÉRIFICATION OK\nÉtudiant : ${matScan}\nValider son repas du ${activeService} ?`)) {
+                    await set(historyRef, { matricule: matScan, timestamp: Date.now(), status: 'validé' });
+                    window.showNotification(`✅ Repas ${activeService} validé pour ${matScan}.`);
                 }
-
-                // 3. Validation
-                if(confirm(`✅ VÉRIFICATION OK\nÉtudiant : ${matScan}\nTicket : #${ticketScan}\nValider ce passage ?`)) {
-                    // Marquer comme utilisé
-                    await set(historyRef, {
-                        matricule: matScan,
-                        timestamp: Date.now(),
-                        status: 'validé'
-                    });
-                    window.showNotification(`✅ Ticket #${ticketScan} validé pour ${matScan}.`);
-                }
-
-            } catch(e) {
-                alert("❌ QR Code invalide. Ceci n'est pas un code CampusEat.");
-            }
+            } catch(e) { alert("❌ QR Code invalide."); }
         }
 
-        window.callNext = function() { set(ref(db, 'queue/currentServing'), currentServing + 1); };
-        window.resetQueue = function() {
-            if(confirm("Fin de journée ? Cela remettra les compteurs à zéro.")) {
-                set(ref(db, 'queue'), { lastTicket: 0, currentServing: 0 });
-            }
+        window.switchAdminTab = function(tab) {
+            document.getElementById('admin-service').classList.toggle('hidden', tab !== 'service');
+            document.getElementById('admin-history').classList.toggle('hidden', tab !== 'history');
+            document.getElementById('btn-tab-service').className = tab === 'service' ? "flex-1 py-2 text-sm font-bold text-white bg-gray-600 rounded-lg" : "flex-1 py-2 text-sm font-bold text-gray-400";
+            document.getElementById('btn-tab-history').className = tab === 'history' ? "flex-1 py-2 text-sm font-bold text-white bg-gray-600 rounded-lg" : "flex-1 py-2 text-sm font-bold text-gray-400";
         };
 
-        // UI & NOTIFICATIONS
+        // UI
         function updateUI() {
             document.getElementById('student-current-serving').innerText = currentServing > 0 ? currentServing : "-";
             document.getElementById('resto-current-serving').innerText = currentServing > 0 ? currentServing : "-";
@@ -494,6 +461,9 @@
                 document.getElementById('ticket-action-zone').classList.add('hidden');
                 document.getElementById('my-ticket-zone').classList.remove('hidden');
                 document.getElementById('my-ticket-number').innerText = "#" + myTicket;
+            } else {
+                document.getElementById('ticket-action-zone').classList.remove('hidden');
+                document.getElementById('my-ticket-zone').classList.add('hidden');
             }
         }
 
@@ -506,4 +476,4 @@
         };
     </script>
 </body>
-</html>
+                        </html>
