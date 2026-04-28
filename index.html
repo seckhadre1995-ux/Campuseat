@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CampusEat - Scanner Inclus</title>
+    <title>CampusEat - Sécurisé & Anti-Fraude</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Librairie pour le Scanner QR Code -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
         ::-webkit-scrollbar { display: none; }
         .notif-enter { transform: translateY(0); opacity: 1; }
         .notif-leave { transform: translateY(-150%); opacity: 0; }
-        /* Style pour forcer la vidéo du scanner à bien s'afficher */
-        #reader video { object-fit: cover; border-radius: 1rem; }
+        #reader video { object-fit: cover; border-radius: 1rem; width: 100%; }
+        .tab-active { border-bottom: 4px solid #f97316; color: #f97316; }
     </style>
 </head>
 <body class="bg-gray-200 font-sans antialiased text-gray-800 flex justify-center">
@@ -21,40 +20,65 @@
     <div class="w-full max-w-md bg-gray-50 h-screen flex flex-col shadow-2xl relative overflow-hidden">
         
         <!-- ========================================== -->
-        <!-- 📷 MODAL SCANNER DE QR CODE (RESTO)        -->
+        <!-- 📷 MODAL SCANNER GÉRANT AMÉLIORÉ           -->
         <!-- ========================================== -->
         <div id="scanner-modal" class="hidden absolute inset-0 bg-gray-900 z-[200] flex-col">
             <div class="p-5 flex justify-between items-center text-white border-b border-gray-700">
-                <h3 class="font-bold text-lg"><i class="fa-solid fa-camera"></i> Scanner le Pass</h3>
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-camera"></i> Contrôle Sécurité</h3>
                 <button onclick="window.closeScanner()" class="text-red-500 font-bold text-3xl leading-none">&times;</button>
             </div>
             <div class="flex-1 flex flex-col items-center justify-center p-4">
-                <!-- La caméra s'affichera ici -->
-                <div id="reader" class="w-full max-w-sm rounded-2xl overflow-hidden shadow-lg border-4 border-orange-500"></div>
-                <p class="text-gray-400 text-sm mt-6 text-center">Placez le QR Code de l'étudiant dans le cadre.</p>
+                <div id="reader" class="w-full max-w-sm rounded-2xl overflow-hidden shadow-lg border-4 border-blue-500 bg-black min-h-[300px]"></div>
+                
+                <div class="mt-6 flex gap-4 w-full">
+                    <button onclick="window.restartScanner()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-xl font-bold">
+                        <i class="fa-solid fa-rotate"></i> Relancer
+                    </button>
+                </div>
+                <p class="text-gray-400 text-xs mt-4 text-center">Placez le QR Code de l'étudiant dans le cadre pour vérifier l'authenticité.</p>
             </div>
         </div>
 
         <!-- ========================================== -->
-        <!-- 🔐 ÉCRAN DE CONNEXION (LOGIN)              -->
+        <!-- 🔐 ÉCRAN DE CONNEXION / INSCRIPTION        -->
         <!-- ========================================== -->
-        <div id="login-screen" class="absolute inset-0 bg-orange-600 z-[100] flex flex-col items-center justify-center p-6 text-white transition-all duration-500">
-            <i class="fa-solid fa-rocket text-7xl mb-4 animate-bounce"></i>
-            <h1 class="text-4xl font-black mb-2">CampusEat</h1>
-            <p class="text-orange-200 mb-10 text-center text-sm">Identifie-toi avec ton numéro matricule étudiant.</p>
+        <div id="auth-screen" class="absolute inset-0 bg-orange-600 z-[100] flex flex-col items-center justify-center p-6 text-white transition-all duration-500 overflow-y-auto">
+            <i class="fa-solid fa-shield-halved text-6xl mb-2"></i>
+            <h1 class="text-3xl font-black mb-1">CampusEat Pro</h1>
+            <p class="text-orange-200 mb-6 text-center text-xs">Accès sécurisé et vérifié.</p>
             
             <div class="bg-white w-full rounded-2xl p-6 text-gray-800 shadow-2xl">
-                <div class="mb-4">
-                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Numéro Matricule</label>
-                    <input type="text" id="matricule-input" placeholder="Ex: MAT-2024..." class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 font-mono font-bold focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500 transition">
+                <!-- Tabs Login/Register -->
+                <div class="flex mb-4 border-b border-gray-200">
+                    <button id="tab-login" onclick="window.switchAuthTab('login')" class="flex-1 pb-2 text-center font-bold tab-active">Connexion</button>
+                    <button id="tab-register" onclick="window.switchAuthTab('register')" class="flex-1 pb-2 text-center font-bold text-gray-400">S'inscrire</button>
                 </div>
-                <button onclick="window.login()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all">
-                    Se connecter
-                </button>
+
+                <div id="form-auth">
+                    <div class="mb-3">
+                        <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Matricule</label>
+                        <input type="text" id="mat-input" placeholder="Ex: MAT-1234" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 font-mono font-bold focus:outline-none focus:border-orange-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Mot de passe</label>
+                        <input type="password" id="pwd-input" placeholder="••••••••" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500">
+                    </div>
+                    
+                    <!-- Uniquement pour l'inscription -->
+                    <div id="register-fields" class="hidden mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                        <label class="block text-xs font-bold text-gray-500 mb-2 uppercase"><i class="fa-solid fa-id-card"></i> Photo Carte Étudiant (Obligatoire)</label>
+                        <input type="file" id="id-card-upload" accept="image/*" class="w-full text-xs" onchange="window.handleImageUpload(event)">
+                        <img id="card-preview" class="mt-2 hidden w-full h-32 object-cover rounded-lg border border-gray-300">
+                    </div>
+
+                    <button id="btn-action" onclick="window.processAuth()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all">
+                        Se connecter
+                    </button>
+                </div>
             </div>
             
-            <button onclick="window.loginAsResto()" class="mt-8 text-xs text-orange-300 underline opacity-70">
-                Je suis le gérant de la cantine
+            <button onclick="window.loginAsResto()" class="mt-6 text-xs text-orange-300 underline opacity-70">
+                <i class="fa-solid fa-lock"></i> Accès Gérant (Admin)
             </button>
         </div>
 
@@ -62,9 +86,9 @@
         <!-- 🔔 BANNIÈRE NOTIFICATION                   -->
         <!-- ========================================== -->
         <div id="notification-banner" class="absolute top-4 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-50 flex items-center gap-3 border-l-4 border-orange-500 transition-all duration-500 notif-leave">
-            <div class="bg-orange-100 p-2 rounded-full"><i class="fa-solid fa-bell text-orange-600 text-xl"></i></div>
+            <div id="notif-icon" class="bg-orange-100 p-2 rounded-full"><i class="fa-solid fa-bell text-orange-600 text-xl"></i></div>
             <div>
-                <p class="font-bold text-sm text-gray-800">CampusEat</p>
+                <p class="font-bold text-sm text-gray-800">Système</p>
                 <p class="text-xs text-gray-600 font-medium" id="notif-text">Texte</p>
             </div>
         </div>
@@ -74,26 +98,25 @@
         <!-- ========================================== -->
         <header class="bg-orange-600 text-white p-5 rounded-b-3xl shadow-md z-10 flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-bold"><i class="fa-solid fa-rocket"></i> CampusEat</h1>
+                <h1 class="text-xl font-bold"><i class="fa-solid fa-shield-halved"></i> CampusEat</h1>
                 <p id="user-display" class="text-xs text-orange-200 mt-1 font-mono"></p>
             </div>
             <button onclick="window.logout()" class="text-xs bg-black bg-opacity-20 px-3 py-2 rounded-lg hover:bg-opacity-40 transition">
-                <i class="fa-solid fa-right-from-bracket"></i>
+                Déconnexion <i class="fa-solid fa-right-from-bracket"></i>
             </button>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-5 pb-24">
+        <main class="flex-1 overflow-y-auto p-5 pb-24 relative">
             
-            <div id="connection-status" class="text-center text-xs text-gray-400 mb-4 font-mono">
-                🔴 Connexion au serveur...
-            </div>
+            <div id="connection-status" class="text-center text-xs text-gray-400 mb-4 font-mono">🔴 Réseau...</div>
 
-            <!-- VUE ÉTUDIANT -->
+            <!-- ========================================== -->
+            <!-- VUE ÉTUDIANT                               -->
+            <!-- ========================================== -->
             <div id="view-student" class="hidden space-y-6">
                 <div class="bg-white border border-gray-100 rounded-2xl p-5 text-center shadow-sm">
                     <p class="text-gray-500 text-sm font-medium uppercase">Numéro au guichet</p>
                     <p id="student-current-serving" class="text-6xl font-black text-orange-600 mt-2">-</p>
-                    <p class="text-xs mt-3 text-gray-400"><span id="student-queue-length">0</span> personne(s) en attente</p>
                 </div>
 
                 <div id="ticket-action-zone" class="mt-6">
@@ -102,53 +125,57 @@
                     </button>
                 </div>
 
-                <div id="my-ticket-zone" class="hidden mt-6 border-2 border-orange-500 bg-white rounded-2xl p-6 text-center shadow-lg relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-2 bg-orange-500"></div>
+                <div id="my-ticket-zone" class="hidden mt-6 border-2 border-orange-500 bg-white rounded-2xl p-6 text-center shadow-lg relative">
                     <p class="text-gray-600 font-medium">Ton numéro :</p>
                     <p id="my-ticket-number" class="text-7xl font-black text-orange-600 my-2">#0</p>
                     
-                    <div id="waiting-status" class="mt-4">
-                        <p class="font-bold text-gray-800 mb-2"><span id="people-before-me" class="text-orange-600 text-xl">0</span> avant toi.</p>
-                        
-                        <!-- LE VRAI QR CODE -->
-                        <div class="mt-4 bg-gray-100 p-4 rounded-xl inline-block border border-gray-200">
-                            <p class="text-xs text-gray-500 mb-2 font-bold uppercase">Pass Resto Sécurisé</p>
-                            <img id="qr-code-img" src="" alt="QR Code" class="w-32 h-32 mx-auto">
-                        </div>
+                    <div class="mt-4 bg-gray-100 p-4 rounded-xl inline-block border border-gray-200">
+                        <p class="text-xs text-gray-500 mb-2 font-bold uppercase"><i class="fa-solid fa-lock"></i> Pass Unique</p>
+                        <img id="qr-code-img" src="" alt="QR Code" class="w-32 h-32 mx-auto">
                     </div>
-
-                    <div id="ready-status" class="hidden mt-4 p-4 bg-green-500 text-white rounded-xl shadow-md animate-pulse">
-                        <p class="font-bold text-xl">C'EST TON TOUR ! 🍽️</p>
-                        <p class="text-xs mt-1">Présente ton QR Code au guichet.</p>
-                    </div>
-
-                    <button onclick="window.clearTicket()" class="mt-6 text-xs text-gray-500 underline hover:text-red-500">
-                        J'ai mangé / Annuler mon ticket
-                    </button>
+                    <p class="text-[10px] text-gray-400 mt-2 uppercase">Valable uniquement aujourd'hui</p>
                 </div>
             </div>
 
-            <!-- VUE CANTINE -->
-            <div id="view-resto" class="hidden bg-gray-800 rounded-2xl p-6 text-center text-white shadow-xl">
-                <p class="text-orange-400 font-bold mb-4">PANEL SERVICE</p>
-                <div class="bg-gray-700 rounded-xl p-6">
-                    <p class="text-gray-400 text-sm">Numéro actuel</p>
-                    <p id="resto-current-serving" class="text-7xl font-black mt-2">-</p>
+            <!-- ========================================== -->
+            <!-- VUE CANTINE (GÉRANT)                       -->
+            <!-- ========================================== -->
+            <div id="view-resto" class="hidden h-full flex flex-col">
+                <!-- Onglets Gérant -->
+                <div class="flex bg-gray-800 rounded-xl p-1 mb-4">
+                    <button onclick="window.switchAdminTab('service')" id="btn-tab-service" class="flex-1 py-2 text-sm font-bold text-white bg-gray-600 rounded-lg">Service</button>
+                    <button onclick="window.switchAdminTab('history')" id="btn-tab-history" class="flex-1 py-2 text-sm font-bold text-gray-400 hover:text-white">Historique</button>
                 </div>
-                <p class="mb-6 mt-4 text-orange-300 font-medium"><span id="resto-queue-length">0</span> en attente</p>
-                
-                <button onclick="window.callNext()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-5 rounded-xl text-xl active:scale-95 transition shadow-lg mb-4">
-                    👉 APPELER LE SUIVANT
-                </button>
-                
-                <div class="border-t border-gray-600 pt-4 mt-4 flex gap-2">
-                    <!-- LE BOUTON SCANNER -->
-                    <button onclick="window.openScanner()" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-3 rounded-lg flex flex-col items-center gap-1">
-                        <i class="fa-solid fa-qrcode text-xl"></i> Scanner
+
+                <!-- Onglet 1 : SERVICE -->
+                <div id="admin-service" class="bg-gray-800 rounded-2xl p-6 text-center text-white shadow-xl">
+                    <div class="bg-gray-700 rounded-xl p-6 mb-6">
+                        <p class="text-gray-400 text-sm">Appel en cours</p>
+                        <p id="resto-current-serving" class="text-7xl font-black text-orange-400 mt-2">-</p>
+                    </div>
+                    
+                    <button onclick="window.callNext()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-5 rounded-xl text-xl shadow-lg mb-4">
+                        👉 APPELER SUIVANT
                     </button>
-                    <button onclick="window.resetQueue()" class="w-1/2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-3 rounded-lg flex flex-col items-center gap-1">
-                        <i class="fa-solid fa-trash text-xl"></i> Vider la file
+                    
+                    <button onclick="window.openScanner()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 mb-4">
+                        <i class="fa-solid fa-qrcode text-2xl"></i> SCANNER & VÉRIFIER
                     </button>
+
+                    <button onclick="window.resetQueue()" class="w-full border border-red-500 text-red-500 py-3 rounded-xl text-sm font-bold hover:bg-red-500 hover:text-white">
+                        <i class="fa-solid fa-trash"></i> Vider la file (Fin journée)
+                    </button>
+                </div>
+
+                <!-- Onglet 2 : HISTORIQUE & FRAUDES -->
+                <div id="admin-history" class="hidden bg-white rounded-2xl shadow-xl flex-1 flex flex-col overflow-hidden border border-gray-200">
+                    <div class="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                        <h3 class="font-bold text-gray-800"><i class="fa-solid fa-list-check"></i> Historique du jour</h3>
+                        <span id="total-served" class="bg-orange-100 text-orange-600 px-2 py-1 rounded-md text-xs font-bold">0 servis</span>
+                    </div>
+                    <div id="history-list" class="flex-1 overflow-y-auto p-2 space-y-2">
+                        <!-- Liste générée en JS -->
+                    </div>
                 </div>
             </div>
 
@@ -156,225 +183,324 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 🔥 FIREBASE & LOGIQUE APP                  -->
+    <!-- 🔥 LOGIQUE JAVASCRIPT & FIREBASE           -->
     <!-- ========================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue, set, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, onValue, set, get, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCCYz11kL3ATDZ9qrKm7ZV0ztggMO_cutE",
             authDomain: "campuseat-cdede.firebaseapp.com",
             projectId: "campuseat-cdede",
             databaseURL: "https://campuseat-cdede-default-rtdb.firebaseio.com",
-            storageBucket: "campuseat-cdede.firebasestorage.app",
-            messagingSenderId: "585809761889",
-            appId: "1:585809761889:web:601dd7003f04685da17c20"
+            storageBucket: "campuseat-cdede.firebasestorage.app"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const queueRef = ref(db, 'queue');
+
+        // Variables Globales
+        let authMode = 'login'; // 'login' ou 'register'
+        let cardImageBase64 = null;
+        let currentUser = localStorage.getItem('campusEat_user');
+        let matricule = localStorage.getItem('campusEat_matricule');
+        let myTicket = localStorage.getItem('campusEat_myTicket');
+        let todayDate = new Date().toISOString().split('T')[0]; // ex: 2024-10-25
 
         let lastTicket = 0;
         let currentServing = 0;
-        let myTicket = localStorage.getItem('campusEat_myTicket');
-        if(myTicket) myTicket = parseInt(myTicket);
-        
-        let currentUser = localStorage.getItem('campusEat_user'); 
-        let matricule = localStorage.getItem('campusEat_matricule');
+        let html5QrCode = null;
 
         // ==========================================
-        // 🔐 GESTION DU LOGIN
+        // 🔐 GESTION AUTHENTIFICATION & INSCRIPTION
         // ==========================================
-        function checkLogin() {
-            if (currentUser === 'student') {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('view-student').classList.remove('hidden');
-                document.getElementById('user-display').innerText = "👤 " + matricule;
-                if(myTicket) generateQR();
-            } else if (currentUser === 'resto') {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('view-resto').classList.remove('hidden');
-                document.getElementById('user-display').innerText = "👨‍🍳 Compte Cantine";
-            } else {
-                document.getElementById('login-screen').classList.remove('hidden');
-            }
-        }
-
-        window.login = function() {
-            const matInput = document.getElementById('matricule-input').value.trim();
-            if(matInput.length < 3) { alert("Veuillez entrer un matricule valide !"); return; }
-            currentUser = 'student';
-            matricule = matInput.toUpperCase();
-            localStorage.setItem('campusEat_user', currentUser);
-            localStorage.setItem('campusEat_matricule', matricule);
-            window.showNotification("✅ Connecté en tant que " + matricule);
-            checkLogin();
+        window.switchAuthTab = function(mode) {
+            authMode = mode;
+            document.getElementById('tab-login').classList.toggle('tab-active', mode === 'login');
+            document.getElementById('tab-login').classList.toggle('text-gray-400', mode !== 'login');
+            document.getElementById('tab-register').classList.toggle('tab-active', mode === 'register');
+            document.getElementById('tab-register').classList.toggle('text-gray-400', mode !== 'register');
+            
+            document.getElementById('register-fields').classList.toggle('hidden', mode === 'login');
+            document.getElementById('btn-action').innerText = mode === 'login' ? "Se connecter" : "Créer mon compte";
         };
 
+        // Compression d'image Canvas pour Firebase
+        window.handleImageUpload = function(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 500; // Compression
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    cardImageBase64 = canvas.toDataURL('image/jpeg', 0.6); // 60% qualité
+                    
+                    const preview = document.getElementById('card-preview');
+                    preview.src = cardImageBase64;
+                    preview.classList.remove('hidden');
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        };
+
+        window.processAuth = async function() {
+            const mat = document.getElementById('mat-input').value.trim().toUpperCase();
+            const pwd = document.getElementById('pwd-input').value.trim();
+
+            if(!mat || !pwd) return alert("Veuillez remplir tous les champs.");
+
+            const userRef = ref(db, `users/${mat}`);
+            const snapshot = await get(userRef);
+
+            if (authMode === 'register') {
+                if (snapshot.exists()) {
+                    return window.showNotification("❌ Ce matricule possède déjà un compte !", true);
+                }
+                if (!cardImageBase64) {
+                    return window.showNotification("⚠️ La photo de la carte étudiant est obligatoire.", true);
+                }
+                // Création du compte
+                await set(userRef, { password: pwd, cardImage: cardImageBase64, createdAt: Date.now() });
+                window.showNotification("✅ Compte créé avec succès !");
+                doLogin(mat);
+            } else {
+                // Connexion
+                if (!snapshot.exists()) return window.showNotification("❌ Compte introuvable.", true);
+                const data = snapshot.val();
+                if (data.password !== pwd) return window.showNotification("❌ Mot de passe incorrect.", true);
+                doLogin(mat);
+            }
+        };
+
+        function doLogin(mat) {
+            currentUser = 'student';
+            matricule = mat;
+            localStorage.setItem('campusEat_user', currentUser);
+            localStorage.setItem('campusEat_matricule', matricule);
+            checkLoginState();
+        }
+
         window.loginAsResto = function() {
-            let pass = prompt("Mot de passe Admin :");
-            if(pass === "admin123") {
+            if(prompt("Mot de passe Admin (Code: admin):") === "admin") {
                 currentUser = 'resto';
                 localStorage.setItem('campusEat_user', currentUser);
-                window.showNotification("👨‍🍳 Mode Cantine activé !");
-                checkLogin();
+                checkLoginState();
             } else {
-                alert("Mot de passe incorrect");
+                alert("Accès refusé.");
             }
         };
 
         window.logout = function() {
-            currentUser = null; matricule = null;
-            localStorage.removeItem('campusEat_user');
-            localStorage.removeItem('campusEat_matricule');
+            localStorage.clear();
+            currentUser = null; matricule = null; myTicket = null;
+            checkLoginState();
+        };
+
+        function checkLoginState() {
+            document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('view-student').classList.add('hidden');
             document.getElementById('view-resto').classList.add('hidden');
-            checkLogin();
-        };
 
-        checkLogin();
-
-        // ==========================================
-        // 🟢 FIREBASE TEMPS RÉEL
-        // ==========================================
-        onValue(queueRef, (snapshot) => {
-            const data = snapshot.val();
-            document.getElementById('connection-status').innerText = "🟢 Connecté au réseau de l'Université";
-            document.getElementById('connection-status').classList.replace('text-gray-400', 'text-green-500');
-
-            if (!data) { set(queueRef, { lastTicket: 0, currentServing: 0 }); return; }
-
-            lastTicket = data.lastTicket || 0;
-            currentServing = data.currentServing || 0;
-            updateUI();
-        });
-
-        // ==========================================
-        // 📷 LOGIQUE DU SCANNER QR CODE (RESTO)
-        // ==========================================
-        let html5QrCode;
-
-        window.openScanner = function() {
-            const modal = document.getElementById('scanner-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-
-            html5QrCode = new Html5Qrcode("reader");
-            // facingMode: "environment" force l'utilisation de la caméra arrière sur smartphone
-            html5QrCode.start(
-                { facingMode: "environment" }, 
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                onScanSuccess
-            ).catch((err) => {
-                alert("Erreur de caméra : " + err);
-                window.closeScanner();
-            });
-        };
-
-        window.closeScanner = function() {
-            const modal = document.getElementById('scanner-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            if(html5QrCode) {
-                html5QrCode.stop().catch(err => console.log(err));
-            }
-        };
-
-        function onScanSuccess(decodedText, decodedResult) {
-            // Quand un QR Code est détecté !
-            window.closeScanner(); // On ferme la caméra
-
-            try {
-                // On décode "MAT-2024|TICKET:5"
-                const parts = decodedText.split('|');
-                const matScan = parts[0];
-                const ticketScan = parseInt(parts[1].split(':')[1]);
-
-                // VÉRIFICATION DE LA SÉCURITÉ
-                if (ticketScan === currentServing) {
-                    alert(`✅ VALIDÉ !\nÉtudiant : ${matScan}\nTicket #${ticketScan} autorisé.`);
-                } else if (ticketScan < currentServing) {
-                    alert(`❌ REFUSÉ !\nLe ticket #${ticketScan} est déjà passé (on sert le #${currentServing}).`);
-                } else {
-                    alert(`⏳ TROP TÔT !\nÉtudiant : ${matScan}\nTicket #${ticketScan}. Attendez votre tour (on sert le #${currentServing}).`);
-                }
-            } catch(e) {
-                alert("❌ QR Code non reconnu. Ce n'est pas un code CampusEat.");
+            if (currentUser === 'student') {
+                document.getElementById('view-student').classList.remove('hidden');
+                document.getElementById('user-display').innerText = "👤 " + matricule;
+                if(myTicket) generateQR();
+            } else if (currentUser === 'resto') {
+                document.getElementById('view-resto').classList.remove('hidden');
+                document.getElementById('user-display').innerText = "👨‍🍳 Panel Gérant";
+            } else {
+                document.getElementById('auth-screen').classList.remove('hidden');
             }
         }
 
+        checkLoginState();
+
         // ==========================================
-        // 🎟️ LOGIQUE FILE
+        // 🟢 SYNCHRONISATION TEMPS RÉEL (FILE & HISTORIQUE)
         // ==========================================
+        onValue(ref(db, 'queue'), (snapshot) => {
+            document.getElementById('connection-status').innerText = "🟢 Serveur Sécurisé Connecté";
+            document.getElementById('connection-status').classList.add('text-green-500');
+            const data = snapshot.val();
+            if (data) {
+                lastTicket = data.lastTicket || 0;
+                currentServing = data.currentServing || 0;
+                updateUI();
+            }
+        });
+
+        // Historique du jour (Gérant)
+        onValue(ref(db, `history/${todayDate}`), (snapshot) => {
+            if(currentUser !== 'resto') return;
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = '';
+            let count = 0;
+            
+            snapshot.forEach((child) => {
+                const data = child.val();
+                count++;
+                const timeStr = new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const isFraud = data.status === 'fraude';
+                
+                historyList.innerHTML = `
+                    <div class="p-3 rounded-xl border ${isFraud ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'} flex justify-between items-center shadow-sm">
+                        <div>
+                            <p class="font-bold text-sm ${isFraud ? 'text-red-600' : 'text-gray-800'}">${data.matricule}</p>
+                            <p class="text-xs text-gray-500">Ticket #${child.key} • ${timeStr}</p>
+                        </div>
+                        <span class="text-xs font-bold px-2 py-1 rounded ${isFraud ? 'bg-red-200 text-red-700' : 'bg-green-100 text-green-700'}">
+                            ${isFraud ? '<i class="fa-solid fa-triangle-exclamation"></i> TENTATIVE FRAUDE' : '<i class="fa-solid fa-check"></i> Validé'}
+                        </span>
+                    </div>
+                ` + historyList.innerHTML; // Ajout en haut
+            });
+            document.getElementById('total-served').innerText = `${count} enregistrements`;
+        });
+
+        // ==========================================
+        // 🎟️ GESTION DES TICKETS (ÉTUDIANT)
+        // ==========================================
+        window.takeTicket = function() {
+            // Vérifier si l'étudiant a déjà mangé aujourd'hui
+            get(ref(db, `history/${todayDate}`)).then(snap => {
+                let alreadyPassed = false;
+                snap.forEach(child => { if(child.val().matricule === matricule && child.val().status === 'validé') alreadyPassed = true; });
+                
+                if(alreadyPassed) {
+                    return window.showNotification("🚫 Vous avez déjà validé un repas aujourd'hui.", true);
+                }
+
+                runTransaction(ref(db, 'queue/lastTicket'), (val) => (val || 0) + 1).then((res) => {
+                    myTicket = res.snapshot.val();
+                    localStorage.setItem('campusEat_myTicket', myTicket);
+                    generateQR();
+                    updateUI();
+                });
+            });
+        };
+
         function generateQR() {
-            const qrData = `${matricule}|TICKET:${myTicket}`;
+            // Sécurité : MATRICULE | TICKET | DATE
+            const qrData = `${matricule}|${myTicket}|${todayDate}`;
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrData)}`;
             document.getElementById('qr-code-img').src = qrUrl;
         }
 
-        window.takeTicket = function() {
-            const lastTicketRef = ref(db, 'queue/lastTicket');
-            runTransaction(lastTicketRef, (currentValue) => {
-                return (currentValue || 0) + 1;
-            }).then((result) => {
-                if (result.committed) {
-                    myTicket = result.snapshot.val();
-                    localStorage.setItem('campusEat_myTicket', myTicket);
-                    generateQR(); 
-                    updateUI();
-                    window.showNotification("🎟️ Ton ticket #" + myTicket + " est validé !");
-                }
+        // ==========================================
+        // 📷 SCANNER ET ANTI-FRAUDE (GÉRANT)
+        // ==========================================
+        window.switchAdminTab = function(tab) {
+            document.getElementById('admin-service').classList.toggle('hidden', tab !== 'service');
+            document.getElementById('admin-history').classList.toggle('hidden', tab !== 'history');
+            document.getElementById('btn-tab-service').className = tab === 'service' ? "flex-1 py-2 text-sm font-bold text-white bg-gray-600 rounded-lg" : "flex-1 py-2 text-sm font-bold text-gray-400 hover:text-white";
+            document.getElementById('btn-tab-history').className = tab === 'history' ? "flex-1 py-2 text-sm font-bold text-white bg-gray-600 rounded-lg" : "flex-1 py-2 text-sm font-bold text-gray-400 hover:text-white";
+        };
+
+        window.openScanner = function() {
+            document.getElementById('scanner-modal').classList.remove('hidden');
+            document.getElementById('scanner-modal').classList.add('flex');
+            startScanner();
+        };
+
+        function startScanner() {
+            if(html5QrCode) html5QrCode.clear();
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                onScanSuccess,
+                (errorMessage) => { /* ignorer erreurs de frame */ }
+            ).catch(err => {
+                alert("Erreur de caméra. Assurez-vous d'avoir donné les permissions.");
             });
+        }
+
+        window.restartScanner = function() { startScanner(); };
+        window.closeScanner = function() {
+            document.getElementById('scanner-modal').classList.add('hidden');
+            document.getElementById('scanner-modal').classList.remove('flex');
+            if(html5QrCode) html5QrCode.stop().catch(e=>console.log(e));
         };
 
-        window.callNext = function() {
-            if (currentServing < lastTicket) { set(ref(db, 'queue/currentServing'), currentServing + 1); }
-        };
+        async function onScanSuccess(decodedText) {
+            window.closeScanner(); // Ferme caméra
+            
+            try {
+                const parts = decodedText.split('|');
+                const matScan = parts[0];
+                const ticketScan = parseInt(parts[1]);
+                const dateScan = parts[2];
 
+                // 1. Vérif Date
+                if(dateScan !== todayDate) {
+                    alert(`🚨 FRAUDE DÉTECTÉE !\nCe ticket date du ${dateScan}. Il n'est pas valable aujourd'hui.`);
+                    return;
+                }
+
+                // 2. Vérif Base de données (Anti-double scan)
+                const historyRef = ref(db, `history/${todayDate}/${ticketScan}`);
+                const snap = await get(historyRef);
+
+                if(snap.exists()) {
+                    const data = snap.val();
+                    if(data.status === 'validé') {
+                        // Alerte Fraude + Enregistrement de la tentative
+                        alert(`🚨 DOUBLE PASSAGE !\nL'étudiant ${matScan} a DÉJÀ utilisé ce ticket à ${new Date(data.timestamp).toLocaleTimeString()} !`);
+                        set(ref(db, `history/${todayDate}/FRAUDE_${ticketScan}_${Date.now()}`), {
+                            matricule: matScan, timestamp: Date.now(), status: 'fraude'
+                        });
+                        return;
+                    }
+                }
+
+                // 3. Validation
+                if(confirm(`✅ VÉRIFICATION OK\nÉtudiant : ${matScan}\nTicket : #${ticketScan}\nValider ce passage ?`)) {
+                    // Marquer comme utilisé
+                    await set(historyRef, {
+                        matricule: matScan,
+                        timestamp: Date.now(),
+                        status: 'validé'
+                    });
+                    window.showNotification(`✅ Ticket #${ticketScan} validé pour ${matScan}.`);
+                }
+
+            } catch(e) {
+                alert("❌ QR Code invalide. Ceci n'est pas un code CampusEat.");
+            }
+        }
+
+        window.callNext = function() { set(ref(db, 'queue/currentServing'), currentServing + 1); };
         window.resetQueue = function() {
-            if(confirm("Sûr de vouloir vider la file ? (Fin de journée)")) {
+            if(confirm("Fin de journée ? Cela remettra les compteurs à zéro.")) {
                 set(ref(db, 'queue'), { lastTicket: 0, currentServing: 0 });
             }
         };
 
-        window.clearTicket = function() {
-            localStorage.removeItem('campusEat_myTicket');
-            myTicket = null;
-            document.getElementById('ticket-action-zone').classList.remove('hidden');
-            document.getElementById('my-ticket-zone').classList.add('hidden');
-        };
-
+        // UI & NOTIFICATIONS
         function updateUI() {
-            let qLen = lastTicket - currentServing;
-            if(qLen < 0) qLen = 0;
-
             document.getElementById('student-current-serving').innerText = currentServing > 0 ? currentServing : "-";
             document.getElementById('resto-current-serving').innerText = currentServing > 0 ? currentServing : "-";
-            document.getElementById('student-queue-length').innerText = qLen;
-            document.getElementById('resto-queue-length').innerText = qLen;
 
             if (myTicket && currentUser === 'student') {
                 document.getElementById('ticket-action-zone').classList.add('hidden');
                 document.getElementById('my-ticket-zone').classList.remove('hidden');
                 document.getElementById('my-ticket-number').innerText = "#" + myTicket;
-
-                let pos = myTicket - currentServing;
-                if (pos <= 0) {
-                    document.getElementById('waiting-status').classList.add('hidden');
-                    document.getElementById('ready-status').classList.remove('hidden');
-                } else {
-                    document.getElementById('waiting-status').classList.remove('hidden');
-                    document.getElementById('ready-status').classList.add('hidden');
-                    document.getElementById('people-before-me').innerText = pos;
-                }
             }
         }
 
-        window.showNotification = function(message) {
+        window.showNotification = function(message, isError = false) {
             const banner = document.getElementById('notification-banner');
             document.getElementById('notif-text').innerText = message;
+            document.getElementById('notif-icon').innerHTML = isError ? '<i class="fa-solid fa-triangle-exclamation text-red-600 text-xl"></i>' : '<i class="fa-solid fa-bell text-orange-600 text-xl"></i>';
             banner.classList.remove('notif-leave'); banner.classList.add('notif-enter');
             setTimeout(() => { banner.classList.remove('notif-enter'); banner.classList.add('notif-leave'); }, 4000);
         };
