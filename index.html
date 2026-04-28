@@ -1,1 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusEat - L'App Finale</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar { display: none; }
+        .notif-enter { transform: translateY(0); opacity: 1; }
+        .notif-leave { transform: translateY(-150%); opacity: 0; }
+        .modal-enter { transform: translateY(0); opacity: 1; }
+        .modal-leave { transform: translateY(100%); opacity: 0; }
+        /* Animation de chargement */
+        .loader { border-top-color: #f97316; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-200 font-sans antialiased text-gray-800 flex justify-center">
 
+    <div class="w-full max-w-md bg-gray-50 h-screen flex flex-col shadow-2xl relative overflow-hidden">
+        
+        <!-- =============================== -->
+        <!-- PAGE DE CONNEXION (LOGIN) -->
+        <!-- =============================== -->
+        <div id="login-screen" class="absolute inset-0 bg-orange-600 z-[100] flex flex-col items-center justify-center p-6 text-white transition-opacity duration-500">
+            <i class="fa-solid fa-rocket text-7xl mb-4 animate-bounce"></i>
+            <h1 class="text-4xl font-black mb-2">CampusEat</h1>
+            <p class="text-orange-200 mb-10 text-center">Plus de queue, plus de stress.<br>Mangez vite, étudiez mieux.</p>
+            
+            <div class="bg-white w-full rounded-2xl p-6 text-gray-800 shadow-2xl">
+                <h2 class="text-xl font-bold mb-4 text-center">Connexion Étudiant</h2>
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Numéro Matricule</label>
+                    <input type="text" id="matricule-input" placeholder="Ex: MAT-2024..." value="MAT-2024-8932" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 font-mono font-bold focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
+                </div>
+                <button onclick="login()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all">
+                    Accéder au Resto
+                </button>
+            </div>
+            <p class="text-xs text-orange-200 mt-6">Université Partenaire Officielle</p>
+        </div>
+
+        <!-- =============================== -->
+        <!-- BANNIÈRE NOTIFICATION -->
+        <!-- =============================== -->
+        <div id="notification-banner" class="absolute top-4 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-50 flex items-center gap-3 border-l-4 border-orange-500 transition-all duration-500 notif-leave">
+            <div class="bg-orange-100 p-2 rounded-full"><i class="fa-solid fa-bell text-orange-600 text-xl"></i></div>
+            <div>
+                <p class="font-bold text-sm text-gray-800">CampusEat</p>
+                <p class="text-xs text-gray-600 font-medium" id="notif-text">Texte</p>
+            </div>
+        </div>
+
+        <!-- =============================== -->
+        <!-- POP-UP PAIEMENT (MODAL) -->
+        <!-- =============================== -->
+        <div id="payment-modal" class="absolute inset-0 bg-black bg-opacity-50 z-[60] hidden flex-col justify-end">
+            <!-- La boite blanche qui monte du bas -->
+            <div id="payment-box" class="bg-white rounded-t-3xl p-6 transition-all duration-300 modal-leave">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">Finaliser le paiement</h3>
+                    <button onclick="closePayment()" class="text-gray-400 hover:text-gray-800 text-2xl">&times;</button>
+                </div>
+                
+                <p class="text-gray-500 text-sm mb-2">Montant à payer :</p>
+                <p id="modal-price" class="text-4xl font-black text-gray-800 mb-6">0 CFA</p>
+
+                <!-- Boutons de paiement -->
+                <div id="payment-methods" class="space-y-3">
+                    <button onclick="processPayment('Wave')" class="w-full bg-blue-100 border-2 border-blue-500 text-blue-800 font-bold py-4 rounded-xl flex items-center justify-center gap-3 active:scale-95 transition">
+                        <span class="text-2xl">🌊</span> Payer avec Wave
+                    </button>
+                    <button onclick="processPayment('Orange Money')" class="w-full bg-orange-100 border-2 border-orange-500 text-orange-800 font-bold py-4 rounded-xl flex items-center justify-center gap-3 active:scale-95 transition">
+                        <span class="text-2xl">🟧</span> Payer avec Orange Money
+                    </button>
+                </div>
+
+                <!-- Animation de Succès (Caché au début) -->
+                <div id="payment-success" class="hidden flex-col items-center py-6">
+                    <div class="w-16 h-16 border-4 border-gray-200 rounded-full loader mb-4" id="loading-spinner"></div>
+                    <i id="success-icon" class="fa-solid fa-circle-check text-6xl text-green-500 hidden mb-4 animate-bounce"></i>
+                    <p id="payment-msg" class="font-bold text-lg text-gray-800">Connexion à l'opérateur...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- HEADER GLOBAL -->
+        <header class="bg-orange-600 text-white p-5 rounded-b-3xl shadow-md z-10">
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl font-bold"><i class="fa-solid fa-rocket"></i> CampusEat</h1>
+                <div class="flex gap-2 items-center">
+                    <button id="btn-resto" onclick="switchRole('resto')" class="text-xs bg-black bg-opacity-20 px-2 py-1 rounded hover:bg-opacity-40">👨‍🍳 Resto</button>
+                    <button id="btn-student" onclick="switchRole('student')" class="hidden text-xs bg-black bg-opacity-20 px-2 py-1 rounded hover:bg-opacity-40">👨‍🎓 Étudiant</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-5 pb-24">
+
+            <!-- PAGE 1 : FILE D'ATTENTE -->
+            <div id="page-queue" class="block space-y-6">
+                <!-- VUE ÉTUDIANT -->
+                <div id="view-student">
+                    <div class="bg-white border border-gray-100 rounded-2xl p-5 text-center shadow-sm">
+                        <p class="text-gray-500 text-sm font-medium uppercase">Numéro au guichet</p>
+                        <p id="student-current-serving" class="text-6xl font-black text-orange-600 mt-2">0</p>
+                        <p class="text-xs mt-3 text-gray-400"><i class="fa-solid fa-users"></i> <span id="student-queue-length">0</span> personne(s) en attente</p>
+                    </div>
+
+                    <div id="ticket-action-zone" class="mt-6">
+                        <button onclick="takeTicket()" class="w-full bg-orange-600 text-white font-bold py-4 rounded-xl text-lg shadow-lg active:scale-95 transition">
+                            <i class="fa-solid fa-ticket"></i> Prendre un ticket
+                        </button>
+                    </div>
+
+                    <div id="my-ticket-zone" class="hidden mt-6 border-2 border-orange-500 bg-orange-50 rounded-2xl p-6 text-center">
+                        <p class="text-gray-600 font-medium">Ton numéro :</p>
+                        <p id="my-ticket-number" class="text-7xl font-black text-orange-600 my-2">#0</p>
+                        <div id="waiting-status" class="mt-4">
+                            <p class="font-bold text-gray-800"><span id="people-before-me" class="text-orange-600 text-xl">0</span> avant toi.</p>
+                            <div id="fun-message" class="mt-3 p-3 bg-white rounded-lg text-sm font-bold shadow-sm"></div>
+                        </div>
+                        <div id="ready-status" class="hidden mt-4 p-4 bg-green-500 text-white rounded-xl shadow-md animate-pulse">
+                            <p class="font-bold text-xl">C'EST TON TOUR ! 🍽️</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VUE CANTINE -->
+                <div id="view-resto" class="hidden bg-gray-800 rounded-2xl p-6 text-center text-white shadow-xl">
+                    <p class="text-orange-400 font-bold mb-4">PANEL SERVICE</p>
+                    <p class="text-gray-400 text-sm">Numéro actuel</p>
+                    <p id="resto-current-serving" class="text-7xl font-black mt-2">0</p>
+                    <p class="mb-6 mt-4 text-orange-300 font-medium"><span id="resto-queue-length">0</span> en attente</p>
+                    <button onclick="callNext()" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl text-lg active:scale-95">APPELER LE SUIVANT</button>
+                </div>
+            </div>
+
+            <!-- PAGE 2 : MENU -->
+            <div id="page-menu" class="hidden space-y-4">
+                <h2 class="text-xl font-bold text-gray-800 border-b-2 border-orange-200 pb-2">Menu du jour</h2>
+                
+                <div class="bg-white rounded-xl shadow-sm p-3 flex items-center gap-4">
+                    <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center text-3xl">🍗</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-800 text-sm">Poulet DG</h3>
+                        <p class="text-orange-600 font-black text-sm">1 500 CFA</p>
+                    </div>
+                    <button onclick="addToCart(1500)" class="bg-gray-100 text-orange-600 w-10 h-10 rounded-full font-bold text-xl">+</button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-3 flex items-center gap-4">
+                    <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center text-3xl">🥤</div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-800 text-sm">Jus de Bissap</h3>
+                        <p class="text-orange-600 font-black text-sm">300 CFA</p>
+                    </div>
+                    <button onclick="addToCart(300)" class="bg-gray-100 text-orange-600 w-10 h-10 rounded-full font-bold text-xl">+</button>
+                </div>
+
+                <button id="btn-pay" onclick="openPayment()" class="w-full bg-black text-white font-bold py-4 rounded-xl mt-6 shadow-lg flex justify-between px-6 opacity-50 pointer-events-none transition-all">
+                    <span>Payer la commande</span>
+                    <span id="cart-total">0 CFA</span>
+                </button>
+            </div>
+
+            <!-- PAGE 3 : STATS -->
+            <div id="page-stats" class="hidden space-y-6">
+                <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5 shadow-sm">
+                    <p class="text-blue-800 font-bold text-lg"><i class="fa-solid fa-robot"></i> CampusEat IA</p>
+                    <p class="text-blue-600 text-sm mt-2">Le resto sera plein dans 30 min. Reviens à <strong>13h45</strong> (0 min d'attente estimée).</p>
+                </div>
+            </div>
+
+            <!-- PAGE 4 : PROFIL -->
+            <div id="page-profile" class="hidden space-y-6">
+                <div class="bg-gradient-to-r from-orange-500 to-orange-700 rounded-2xl p-6 text-white shadow-lg">
+                    <p class="text-sm opacity-80 uppercase tracking-wide">Carte Étudiant</p>
+                    <p class="text-2xl font-black mt-1" id="profile-name">Étudiant</p>
+                    <p class="text-sm mt-4 font-mono bg-black bg-opacity-20 inline-block px-3 py-1 rounded" id="profile-mat">MAT-0000</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm p-6 text-center">
+                    <h3 class="font-bold text-gray-800 mb-4">Ton Pass Rapide</h3>
+                    <div class="bg-gray-100 p-4 inline-block rounded-xl border-2 border-dashed border-gray-300">
+                        <i class="fa-solid fa-qrcode text-8xl text-gray-800"></i>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- BARRE DE NAVIGATION -->
+        <nav class="bg-white border-t border-gray-200 absolute bottom-0 w-full flex justify-around p-3 pb-5 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-20">
+            <button onclick="navTo('queue')" id="nav-queue" class="text-orange-600 flex flex-col items-center gap-1 w-1/4">
+                <i class="fa-solid fa-ticket text-xl"></i><span class="text-[10px] font-bold">Attente</span>
+            </button>
+            <button onclick="navTo('menu')" id="nav-menu" class="text-gray-400 flex flex-col items-center gap-1 w-1/4">
+                <i class="fa-solid fa-burger text-xl"></i><span class="text-[10px] font-bold">Menu</span>
+            </button>
+            <button onclick="navTo('stats')" id="nav-stats" class="text-gray-400 flex flex-col items-center gap-1 w-1/4">
+                <i class="fa-solid fa-chart-simple text-xl"></i><span class="text-[10px] font-bold">Stats</span>
+            </button>
+            <button onclick="navTo('profile')" id="nav-profile" class="text-gray-400 flex flex-col items-center gap-1 w-1/4">
+                <i class="fa-solid fa-user text-xl"></i><span class="text-[10px] font-bold">Profil</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // --- 1. CONNEXION (LOGIN) ---
+        function login() {
+            const mat = document.getElementById('matricule-input').value;
+            // Met à jour la page profil
+            document.getElementById('profile-mat').innerText = mat;
+            document.getElementById('profile-name').innerText = "Utilisateur : " + mat.substring(9);
+            
+            // Fait disparaitre l'écran de login
+            const loginScreen = document.getElementById('login-screen');
+            loginScreen.classList.add('opacity-0');
+            setTimeout(() => { loginScreen.classList.add('hidden'); }, 500);
+
+            showNotification("👋 Bienvenue sur CampusEat !");
+        }
+
+        // --- 2. PAIEMENT WAVE / ORANGE MONEY ---
+        let cartTotal = 0;
+        function addToCart(price) {
+            cartTotal += price;
+            const btnPay = document.getElementById('btn-pay');
+            document.getElementById('cart-total').innerText = cartTotal + " CFA";
+            btnPay.classList.remove('opacity-50', 'pointer-events-none', 'bg-black');
+            btnPay.classList.add('bg-orange-600');
+            showNotification("🛒 +1 plat au panier");
+        }
+
+        function openPayment() {
+            document.getElementById('modal-price').innerText = cartTotal + " CFA";
+            const modal = document.getElementById('payment-modal');
+            const box = document.getElementById('payment-box');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                box.classList.remove('modal-leave');
+                box.classList.add('modal-enter');
+            }, 10);
+        }
+
+        function closePayment() {
+            const modal = document.getElementById('payment-modal');
+            const box = document.getElementById('payment-box');
+            box.classList.remove('modal-enter');
+            box.classList.add('modal-leave');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                
+                // Reset de la vue paiement pour la prochaine fois
+                document.getElementById('payment-methods').classList.remove('hidden');
+                document.getElementById('payment-success').classList.replace('flex', 'hidden');
+            }, 300);
+        }
+
+        function processPayment(method) {
+            // Cache les boutons, montre le chargement
+            document.getElementById('payment-methods').classList.add('hidden');
+            document.getElementById('payment-success').classList.replace('hidden', 'flex');
+            document.getElementById('payment-msg').innerText = "Paiement " + method + " en cours...";
+            document.getElementById('loading-spinner').classList.remove('hidden');
+            document.getElementById('success-icon').classList.add('hidden');
+
+            // Simule 2 secondes d'attente réseau
+            setTimeout(() => {
+                document.getElementById('loading-spinner').classList.add('hidden');
+                document.getElementById('success-icon').classList.remove('hidden');
+                document.getElementById('payment-msg').innerText = "✅ Paiement validé !";
+                document.getElementById('payment-msg').classList.replace('text-gray-800', 'text-green-600');
+                
+                // Vide le panier
+                cartTotal = 0;
+                document.getElementById('cart-total').innerText = "0 CFA";
+                const btnPay = document.getElementById('btn-pay');
+                btnPay.classList.add('opacity-50', 'pointer-events-none', 'bg-black');
+                btnPay.classList.remove('bg-orange-600');
+
+                // Ferme automatiquement après 2s
+                setTimeout(() => { closePayment(); showNotification("Paiement reçu en cuisine ! 👨‍🍳"); }, 2000);
+            }, 2000);
+        }
+
+        // --- RESTE DU CODE (Nav, Notification, File d'attente) ---
+        function showNotification(message) {
+            const banner = document.getElementById('notification-banner');
+            document.getElementById('notif-text').innerText = message;
+            banner.classList.remove('notif-leave'); banner.classList.add('notif-enter');
+            setTimeout(() => { banner.classList.remove('notif-enter'); banner.classList.add('notif-leave'); }, 4000);
+        }
+
+        function navTo(page) {
+            ['queue', 'menu', 'stats', 'profile'].forEach(p => {
+                document.getElementById('page-' + p).classList.add('hidden');
+                document.getElementById('nav-' + p).classList.replace('text-orange-600', 'text-gray-400');
+            });
+            document.getElementById('page-' + page).classList.remove('hidden');
+            document.getElementById('nav-' + page).classList.replace('text-gray-400', 'text-orange-600');
+        }
+
+        // Système de File
+        let lastTicket = 0, currentServing = 0, myTicket = null;
+
+        function switchRole(role) {
+            const stu = document.getElementById('view-student'), res = document.getElementById('view-resto');
+            const bStu = document.getElementById('btn-student'), bRes = document.getElementById('btn-resto');
+            if(role === 'student') {
+                stu.classList.remove('hidden'); res.classList.add('hidden');
+                bStu.classList.add('hidden'); bRes.classList.remove('hidden');
+            } else {
+                res.classList.remove('hidden'); stu.classList.add('hidden');
+                bRes.classList.add('hidden'); bStu.classList.remove('hidden');
+            }
+        }
+
+        function takeTicket() {
+            if(lastTicket === 0) { lastTicket = 5; currentServing = 1; }
+            lastTicket++; myTicket = lastTicket;
+            document.getElementById('ticket-action-zone').classList.add('hidden');
+            document.getElementById('my-ticket-zone').classList.remove('hidden');
+            document.getElementById('my-ticket-number').innerText = "#" + myTicket;
+            updateQueue(); showNotification("🎟️ Ton ticket #" + myTicket + " est généré !");
+        }
+
+        function callNext() {
+            if(currentServing < lastTicket) { currentServing++; updateQueue(); }
+        }
+
+        function updateQueue() {
+            let qLen = lastTicket - currentServing;
+            document.getElementById('student-current-serving').innerText = currentServing;
+            document.getElementById('resto-current-serving').innerText = currentServing;
+            document.getElementById('student-queue-length').innerText = qLen;
+            document.getElementById('resto-queue-length').innerText = qLen;
+
+            if(myTicket) {
+                let pos = myTicket - currentServing;
+                if(pos <= 0) {
+                    document.getElementById('waiting-status').classList.add('hidden');
+                    document.getElementById('ready-status').classList.remove('hidden');
+                    if(pos === 0) showNotification("🚨 C'EST TON TOUR !");
+                } else {
+                    document.getElementById('people-before-me').innerText = pos;
+                    let funBox = document.getElementById('fun-message');
+                    if(pos > 5) funBox.innerHTML = '<span class="text-blue-500">📱 Scrolle sur TikTok.</span>';
+                    else funBox.innerHTML = '<span class="text-green-600">🔥 Prépare-toi !</span>';
+                }
+            }
+        }
+    </script>
+</body>
+  </html>
