@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CampusEat - QR Instantané</title>
+    <title>CampusEat - Système Complet</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Librairie Scanner Gérant -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <!-- NOUVEAU : Librairie Générateur de QR Code Instantané -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         ::-webkit-scrollbar { display: none; }
@@ -23,17 +21,30 @@
     <div class="w-full max-w-md bg-gray-50 h-screen flex flex-col shadow-2xl relative overflow-hidden">
         
         <!-- ========================================== -->
+        <!-- 💳 MODAL POUR VOIR SA CARTE (ÉTUDIANT)     -->
+        <!-- ========================================== -->
+        <div id="student-card-modal" class="hidden absolute inset-0 bg-gray-900 bg-opacity-90 z-[300] flex-col items-center justify-center p-4">
+            <div class="bg-white p-5 rounded-3xl w-full max-w-sm text-center shadow-2xl">
+                <h3 class="font-black text-xl mb-4 text-gray-800"><i class="fa-solid fa-id-card text-orange-500"></i> Ma Carte Enregistrée</h3>
+                <img id="my-saved-card-img" src="" class="w-full h-48 object-cover rounded-xl border-4 border-gray-100 mb-6 shadow-sm">
+                <button onclick="document.getElementById('student-card-modal').classList.add('hidden')" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-xl transition active:scale-95">
+                    Fermer
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
         <!-- 📷 MODAL SCANNER GÉRANT                    -->
         <!-- ========================================== -->
         <div id="scanner-modal" class="hidden absolute inset-0 bg-gray-900 z-[200] flex-col">
             <div class="p-5 flex justify-between items-center text-white border-b border-gray-700">
-                <h3 class="font-bold text-lg"><i class="fa-solid fa-camera"></i> Contrôle Sécurité</h3>
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-camera"></i> Scanner au guichet</h3>
                 <button onclick="window.closeScanner()" class="text-red-500 font-bold text-3xl leading-none">&times;</button>
             </div>
             <div class="flex-1 flex flex-col items-center justify-center p-4">
                 <div id="reader" class="w-full max-w-sm rounded-2xl overflow-hidden shadow-lg border-4 border-blue-500 bg-black min-h-[300px]"></div>
                 <div class="mt-6 flex gap-4 w-full">
-                    <button onclick="window.restartScanner()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-xl font-bold">
+                    <button onclick="window.restartScanner()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-xl font-bold shadow-lg">
                         <i class="fa-solid fa-rotate"></i> Relancer Caméra
                     </button>
                 </div>
@@ -50,8 +61,8 @@
             
             <div class="bg-white w-full rounded-2xl p-6 text-gray-800 shadow-2xl">
                 <div class="flex mb-4 border-b border-gray-200">
-                    <button id="tab-login" onclick="window.switchAuthTab('login')" class="flex-1 pb-2 text-center font-bold tab-active">Connexion</button>
-                    <button id="tab-register" onclick="window.switchAuthTab('register')" class="flex-1 pb-2 text-center font-bold text-gray-400">S'inscrire</button>
+                    <button id="tab-login" onclick="window.switchAuthTab('login')" class="flex-1 pb-2 text-center font-bold tab-active transition-all">Connexion</button>
+                    <button id="tab-register" onclick="window.switchAuthTab('register')" class="flex-1 pb-2 text-center font-bold text-gray-400 transition-all">S'inscrire</button>
                 </div>
 
                 <div id="form-auth">
@@ -59,15 +70,20 @@
                         <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Matricule</label>
                         <input type="text" id="mat-input" placeholder="Ex: MAT-1234" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 font-mono font-bold focus:outline-none focus:border-orange-500">
                     </div>
-                    <div class="mb-4">
+                    <div class="mb-4 relative">
                         <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Mot de passe</label>
                         <input type="password" id="pwd-input" placeholder="••••••••" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500">
                     </div>
                     
                     <div id="register-fields" class="hidden mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
-                        <label class="block text-xs font-bold text-gray-500 mb-2 uppercase"><i class="fa-solid fa-id-card"></i> Photo Carte Étudiant</label>
-                        <input type="file" id="id-card-upload" accept="image/*" class="w-full text-xs" onchange="window.handleImageUpload(event)">
-                        <img id="card-preview" class="mt-2 hidden w-full h-32 object-cover rounded-lg border border-gray-300">
+                        <label class="block text-xs font-bold text-gray-500 mb-2 uppercase"><i class="fa-solid fa-id-card text-orange-500"></i> Photo Carte Étudiant</label>
+                        <input type="file" id="id-card-upload" accept="image/*" class="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" onchange="window.handleImageUpload(event)">
+                        <img id="card-preview" class="mt-2 hidden w-full h-32 object-cover rounded-lg border border-gray-300 shadow-sm">
+                    </div>
+
+                    <!-- BOUTON MOT DE PASSE OUBLIÉ -->
+                    <div id="forgot-pwd-zone" class="mb-4 text-right">
+                        <button onclick="window.forgotPassword()" class="text-xs text-gray-400 font-medium hover:text-orange-500 underline transition">Mot de passe oublié ?</button>
                     </div>
 
                     <button id="btn-action" onclick="window.processAuth()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all">
@@ -76,7 +92,7 @@
                 </div>
             </div>
             
-            <button onclick="window.loginAsResto()" class="mt-6 text-xs text-orange-300 underline opacity-70">
+            <button onclick="window.loginAsResto()" class="mt-8 text-xs text-orange-300 underline opacity-70 hover:opacity-100 transition">
                 <i class="fa-solid fa-lock"></i> Accès Gérant (Admin)
             </button>
         </div>
@@ -97,10 +113,16 @@
         <!-- ========================================== -->
         <header class="bg-orange-600 text-white p-5 rounded-b-3xl shadow-md z-10 flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-bold"><i class="fa-solid fa-utensils"></i> CampusEat</h1>
-                <p id="user-display" class="text-xs text-orange-200 mt-1 font-mono"></p>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-xl font-black tracking-tight"><i class="fa-solid fa-utensils"></i> CampusEat</h1>
+                    <!-- BOUTON MA CARTE (Seulement Étudiant) -->
+                    <button id="btn-show-card" onclick="document.getElementById('student-card-modal').classList.remove('hidden')" class="hidden text-[10px] bg-white text-orange-600 font-bold px-2 py-1 rounded-md shadow-sm active:scale-95 transition">
+                        <i class="fa-solid fa-id-card"></i> Ma Carte
+                    </button>
+                </div>
+                <p id="user-display" class="text-xs text-orange-200 mt-1 font-mono font-bold"></p>
             </div>
-            <button onclick="window.logout()" class="text-xs bg-black bg-opacity-20 px-3 py-2 rounded-lg hover:bg-opacity-40 transition">
+            <button onclick="window.logout()" class="text-xs bg-black bg-opacity-20 px-3 py-2 rounded-lg hover:bg-opacity-40 transition font-bold">
                 Déconnexion
             </button>
         </header>
@@ -127,16 +149,12 @@
                     <p id="ticket-closed-msg" class="text-center text-xs text-red-500 mt-2 font-bold hidden">La cantine est actuellement fermée.</p>
                 </div>
 
-                <!-- ZONE DU TICKET DÉJÀ PRIS (QR Code + Rang) -->
                 <div id="my-ticket-zone" class="hidden mt-6 border-2 border-orange-500 bg-white rounded-2xl p-6 text-center shadow-lg relative">
-                    
-                    <!-- Le Compteur de Rang en temps réel -->
                     <div id="queue-status-box" class="bg-orange-50 border border-orange-200 p-3 rounded-lg mb-4 text-gray-700 shadow-inner">
                         <p class="font-bold text-sm">⏳ Personnes avant toi :</p>
                         <p id="people-before-me" class="text-3xl font-black text-orange-600">0</p>
                     </div>
                     
-                    <!-- L'alerte quand c'est son tour -->
                     <div id="turn-status-box" class="hidden bg-green-500 text-white p-4 rounded-lg mb-4 font-bold shadow-md animate-pulse">
                         <p class="text-xl">🍽️ C'EST TON TOUR !</p>
                         <p class="text-xs mt-1">Présente ton QR Code au guichet.</p>
@@ -145,13 +163,11 @@
                     <p class="text-gray-600 font-medium mt-2">Ton numéro :</p>
                     <p id="my-ticket-number" class="text-6xl font-black text-orange-600 mb-4">#0</p>
                     
-                    <!-- LE QR CODE GENERÉ INSTANTANÉMENT EN JAVASCRIPT -->
                     <div class="bg-white p-4 rounded-xl inline-block border border-gray-200 shadow-sm">
                         <p class="text-xs text-gray-500 mb-2 font-bold uppercase"><i class="fa-solid fa-qrcode"></i> Scan au guichet</p>
-                        <!-- Le QR Code va apparaître DANS cette div -->
                         <div id="qrcode-container" class="flex justify-center mx-auto"></div>
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-3 uppercase font-bold">Ticket valable pour le <span id="my-ticket-service-name" class="text-orange-600"></span></p>
+                    <p class="text-[10px] text-gray-400 mt-3 uppercase font-bold">Valable pour le <span id="my-ticket-service-name" class="text-orange-600"></span></p>
                 </div>
             </div>
 
@@ -160,39 +176,68 @@
             <!-- ========================================== -->
             <div id="view-resto" class="hidden h-full flex flex-col">
                 <div class="flex bg-gray-800 rounded-xl p-1 mb-4">
-                    <button onclick="window.switchAdminTab('service')" id="btn-tab-service" class="flex-1 py-2 text-sm font-bold text-white bg-gray-600 rounded-lg">Service</button>
-                    <button onclick="window.switchAdminTab('history')" id="btn-tab-history" class="flex-1 py-2 text-sm font-bold text-gray-400 hover:text-white">Historique</button>
+                    <button onclick="window.switchAdminTab('service')" id="btn-tab-service" class="flex-1 py-2 text-xs font-bold text-white bg-gray-600 rounded-lg">Service</button>
+                    <button onclick="window.switchAdminTab('history')" id="btn-tab-history" class="flex-1 py-2 text-xs font-bold text-gray-400 hover:text-white">Historique</button>
+                    <button onclick="window.switchAdminTab('students')" id="btn-tab-students" class="flex-1 py-2 text-xs font-bold text-gray-400 hover:text-white">Étudiants</button>
                 </div>
 
+                <!-- ONGLET 1: SERVICE -->
                 <div id="admin-service" class="bg-gray-800 rounded-2xl p-6 text-center text-white shadow-xl">
                     <div class="flex justify-between gap-2 mb-6 border-b border-gray-600 pb-4">
-                        <button onclick="window.setService('MATIN')" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-xs font-bold py-2 rounded-lg text-white">MATIN</button>
-                        <button onclick="window.setService('SOIR')" class="flex-1 bg-orange-500 hover:bg-orange-600 text-xs font-bold py-2 rounded-lg text-white">SOIR</button>
-                        <button onclick="window.setService('NUIT')" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-xs font-bold py-2 rounded-lg text-white">NUIT</button>
-                        <button onclick="window.setService('FERMÉ')" class="flex-1 bg-red-600 hover:bg-red-700 text-xs font-bold py-2 rounded-lg text-white"><i class="fa-solid fa-stop"></i></button>
+                        <button onclick="window.setService('MATIN')" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-[10px] sm:text-xs font-bold py-2 rounded-lg">MATIN</button>
+                        <button onclick="window.setService('SOIR')" class="flex-1 bg-orange-500 hover:bg-orange-600 text-[10px] sm:text-xs font-bold py-2 rounded-lg">SOIR</button>
+                        <button onclick="window.setService('NUIT')" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-[10px] sm:text-xs font-bold py-2 rounded-lg">NUIT</button>
+                        <button onclick="window.setService('FERMÉ')" class="flex-1 bg-red-600 hover:bg-red-700 text-xs font-bold py-2 rounded-lg"><i class="fa-solid fa-stop"></i></button>
                     </div>
 
-                    <div class="bg-gray-700 rounded-xl p-6 mb-6 relative">
-                        <p class="text-gray-400 text-sm">Appel en cours</p>
+                    <div class="bg-gray-700 rounded-xl p-6 mb-6 relative shadow-inner">
+                        <p class="text-gray-400 text-sm font-medium">Appel en cours</p>
                         <p id="resto-current-serving" class="text-7xl font-black text-orange-400 mt-2">-</p>
                     </div>
                     
-                    <button onclick="window.callNext()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-5 rounded-xl text-xl shadow-lg mb-4">
+                    <button onclick="window.callNext()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-5 rounded-xl text-xl shadow-lg mb-4 active:scale-95 transition">
                         👉 APPELER SUIVANT
                     </button>
                     
-                    <button onclick="window.openScanner()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2">
+                    <button onclick="window.openScanner()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 active:scale-95 transition">
                         <i class="fa-solid fa-qrcode text-2xl"></i> SCANNER LE PASS
                     </button>
                 </div>
 
+                <!-- ONGLET 2: HISTORIQUE -->
                 <div id="admin-history" class="hidden bg-white rounded-2xl shadow-xl flex-1 flex flex-col overflow-hidden border border-gray-200">
                     <div class="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                        <h3 class="font-bold text-gray-800"><i class="fa-solid fa-list-check"></i> Historique (<span id="history-service-name"></span>)</h3>
-                        <span id="total-served" class="bg-orange-100 text-orange-600 px-2 py-1 rounded-md text-xs font-bold">0</span>
+                        <h3 class="font-bold text-gray-800"><i class="fa-solid fa-list-check"></i> <span id="history-service-name"></span></h3>
+                        <span id="total-served" class="bg-orange-100 text-orange-600 px-2 py-1 rounded-md text-xs font-bold shadow-sm">0</span>
                     </div>
-                    <div id="history-list" class="flex-1 overflow-y-auto p-2 space-y-2"></div>
+                    <div id="history-list" class="flex-1 overflow-y-auto p-2 space-y-2 bg-gray-50"></div>
                 </div>
+
+                <!-- ONGLET 3: GESTION ÉTUDIANTS (NOUVEAU) -->
+                <div id="admin-students" class="hidden bg-white rounded-2xl shadow-xl flex-1 flex flex-col p-4 border border-gray-200 overflow-y-auto">
+                    <h3 class="font-bold text-gray-800 mb-4"><i class="fa-solid fa-users text-blue-500"></i> Dossiers Étudiants</h3>
+                    <p class="text-xs text-gray-500 mb-4">Recherchez un étudiant pour voir son mot de passe ou sa carte.</p>
+                    
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="search-mat-input" placeholder="Matricule (ex: MAT-123)" class="flex-1 bg-gray-100 border border-gray-300 rounded-xl px-4 py-2 font-mono font-bold focus:outline-none focus:border-blue-500 uppercase">
+                        <button onclick="window.searchStudent()" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2 rounded-xl font-bold shadow-md"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </div>
+
+                    <div id="search-result" class="hidden text-center bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm mt-2">
+                        <p class="font-black text-2xl text-gray-800 mb-1" id="res-mat"></p>
+                        <div class="bg-orange-100 text-orange-800 p-2 rounded-lg font-mono font-bold text-sm mb-4 border border-orange-200">
+                            Mot de passe : <span id="res-pwd" class="text-orange-600"></span>
+                        </div>
+                        <p class="text-xs font-bold text-gray-500 mb-2 uppercase">Carte Étudiant Enregistrée</p>
+                        <img id="res-img" src="" class="w-full h-40 object-cover rounded-xl border-2 border-gray-300 mb-4 shadow-inner">
+                        
+                        <button onclick="window.deleteStudent()" class="w-full bg-white text-red-500 border border-red-500 py-3 rounded-xl text-sm font-bold hover:bg-red-50 transition">
+                            <i class="fa-solid fa-trash"></i> Réinitialiser (Supprimer le compte)
+                        </button>
+                        <p class="text-[10px] text-gray-400 mt-2">Permet à l'étudiant de se réinscrire.</p>
+                    </div>
+                </div>
+
             </div>
 
         </main>
@@ -205,6 +250,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue, set, get, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // REMPLACE PAR TES CLÉS FIREBASE ICI
         const firebaseConfig = {
             apiKey: "AIzaSyCCYz11kL3ATDZ9qrKm7ZV0ztggMO_cutE",
             authDomain: "campuseat-cdede.firebaseapp.com",
@@ -223,6 +269,7 @@
         
         let myTicket = null;
         let myTicketMeal = null;
+        let currentSearchMat = null; // Pour le gérant
 
         let todayDate = new Date().toISOString().split('T')[0]; 
         let currentServing = 0;
@@ -237,7 +284,12 @@
             document.getElementById('tab-register').classList.toggle('tab-active', mode === 'register');
             document.getElementById('tab-register').classList.toggle('text-gray-400', mode !== 'register');
             document.getElementById('register-fields').classList.toggle('hidden', mode === 'login');
+            document.getElementById('forgot-pwd-zone').classList.toggle('hidden', mode === 'register');
             document.getElementById('btn-action').innerText = mode === 'login' ? "Se connecter" : "Créer mon compte";
+        };
+
+        window.forgotPassword = function() {
+            alert("🔒 Mot de passe oublié ?\n\nVeuillez vous présenter à la cantine. Le gérant pourra rechercher votre matricule pour vous redonner votre mot de passe, ou réinitialiser votre compte grâce à votre carte étudiant.");
         };
 
         window.handleImageUpload = function(event) {
@@ -268,12 +320,13 @@
             const snapshot = await get(userRef);
 
             if (authMode === 'register') {
-                if (snapshot.exists()) return window.showNotification("❌ Compte déjà existant !", true);
-                if (!cardImageBase64) return window.showNotification("⚠️ Photo carte obligatoire.", true);
+                if (snapshot.exists()) return window.showNotification("❌ Compte déjà existant ! Connectez-vous.", true);
+                if (!cardImageBase64) return window.showNotification("⚠️ La photo de votre carte étudiant est obligatoire.", true);
                 await set(userRef, { password: pwd, cardImage: cardImageBase64, createdAt: Date.now() });
                 doLogin(mat);
             } else {
-                if (!snapshot.exists() || snapshot.val().password !== pwd) return window.showNotification("❌ Identifiants incorrects.", true);
+                if (!snapshot.exists()) return window.showNotification("❌ Compte introuvable.", true);
+                if (snapshot.val().password !== pwd) return window.showNotification("❌ Mot de passe incorrect.", true);
                 doLogin(mat);
             }
         };
@@ -293,11 +346,23 @@
 
         window.logout = function() { localStorage.clear(); location.reload(); };
 
+        // CHARGEMENT DE L'IMAGE POUR L'ÉTUDIANT CONNECTÉ
+        async function fetchStudentCard() {
+            if(currentUser === 'student') {
+                const snap = await get(ref(db, `users/${matricule}`));
+                if(snap.exists()) {
+                    document.getElementById('my-saved-card-img').src = snap.val().cardImage;
+                    document.getElementById('btn-show-card').classList.remove('hidden');
+                }
+            }
+        }
+
         function checkLoginState() {
             document.getElementById('auth-screen').classList.add('hidden');
             if (currentUser === 'student') {
                 document.getElementById('view-student').classList.remove('hidden');
                 document.getElementById('user-display').innerText = "👤 " + matricule;
+                fetchStudentCard();
                 checkMyTicketInDB(); 
             } else if (currentUser === 'resto') {
                 document.getElementById('view-resto').classList.remove('hidden');
@@ -308,21 +373,45 @@
         }
 
         // ==========================================
+        // 🔒 RECHERCHE D'ÉTUDIANTS (POUR LE GÉRANT)
+        // ==========================================
+        window.searchStudent = async function() {
+            const matToSearch = document.getElementById('search-mat-input').value.trim().toUpperCase();
+            if(!matToSearch) return;
+            
+            const snap = await get(ref(db, `users/${matToSearch}`));
+            if(snap.exists()) {
+                const data = snap.val();
+                currentSearchMat = matToSearch;
+                document.getElementById('res-mat').innerText = matToSearch;
+                document.getElementById('res-pwd').innerText = data.password;
+                document.getElementById('res-img').src = data.cardImage;
+                document.getElementById('search-result').classList.remove('hidden');
+            } else {
+                window.showNotification("❌ Étudiant introuvable dans la base.", true);
+                document.getElementById('search-result').classList.add('hidden');
+            }
+        };
+
+        window.deleteStudent = async function() {
+            if(confirm(`⚠️ Êtes-vous sûr de vouloir supprimer le compte de ${currentSearchMat} ?\nToutes ses données (mot de passe, carte) seront effacées.`)) {
+                await set(ref(db, `users/${currentSearchMat}`), null);
+                document.getElementById('search-result').classList.add('hidden');
+                document.getElementById('search-mat-input').value = "";
+                window.showNotification(`✅ Compte ${currentSearchMat} supprimé.`);
+            }
+        };
+
+        // ==========================================
         // 🔒 VÉRIFICATION TICKET DANS LA BASE DE DONNÉES
         // ==========================================
         async function checkMyTicketInDB() {
-            if (currentUser !== 'student' || activeService === 'FERMÉ') {
-                myTicket = null; updateUI(); return;
-            }
+            if (currentUser !== 'student' || activeService === 'FERMÉ') { myTicket = null; updateUI(); return; }
             const myTicketRef = ref(db, `service_tickets/${todayDate}/${activeService}/${matricule}`);
             const snap = await get(myTicketRef);
             if (snap.exists()) {
-                myTicket = snap.val();
-                myTicketMeal = activeService;
-                generateQR();
-            } else {
-                myTicket = null;
-            }
+                myTicket = snap.val(); myTicketMeal = activeService; generateQR();
+            } else { myTicket = null; }
             updateUI();
         }
 
@@ -337,11 +426,8 @@
             if (currentUser === 'student') {
                 const btn = document.getElementById('btn-take-ticket');
                 const msg = document.getElementById('ticket-closed-msg');
-                if (activeService === 'FERMÉ') {
-                    btn.disabled = true; msg.classList.remove('hidden');
-                } else {
-                    btn.disabled = false; msg.classList.add('hidden');
-                }
+                if (activeService === 'FERMÉ') { btn.disabled = true; msg.classList.remove('hidden'); } 
+                else { btn.disabled = false; msg.classList.add('hidden'); }
                 checkMyTicketInDB(); 
             }
 
@@ -370,7 +456,7 @@
         });
 
         // ==========================================
-        // 🎟️ PRENDRE UN TICKET (SÉCURISÉ)
+        // 🎟️ PRENDRE UN TICKET
         // ==========================================
         window.takeTicket = async function() {
             if(activeService === 'FERMÉ') return alert("La cantine est fermée.");
@@ -378,11 +464,7 @@
 
             const myTicketRef = ref(db, `service_tickets/${todayDate}/${activeService}/${matricule}`);
             const ticketSnap = await get(myTicketRef);
-            if(ticketSnap.exists()) {
-                window.showNotification("Tu as déjà un ticket pour ce service !", true);
-                checkMyTicketInDB(); 
-                return;
-            }
+            if(ticketSnap.exists()) { window.showNotification("Tu as déjà un ticket !", true); checkMyTicketInDB(); return; }
 
             const historyRef = ref(db, `history/${todayDate}/${activeService}`);
             const histSnap = await get(historyRef);
@@ -391,43 +473,27 @@
             
             if(alreadyPassed) {
                 window.showNotification(`🚫 Tu as déjà mangé ce ${activeService.toLowerCase()}.`, true);
-                document.getElementById('btn-take-ticket').disabled = false;
-                return;
+                document.getElementById('btn-take-ticket').disabled = false; return;
             }
 
             runTransaction(ref(db, 'queue/lastTicket'), (val) => (val || 0) + 1).then(async (res) => {
-                myTicket = res.snapshot.val();
-                myTicketMeal = activeService;
+                myTicket = res.snapshot.val(); myTicketMeal = activeService;
                 await set(myTicketRef, myTicket);
-                generateQR();
-                updateUI();
+                generateQR(); updateUI();
                 window.showNotification(`🎟️ Ton ticket est validé !`);
             });
         };
 
-        // ==========================================
-        // 📷 GÉNÉRATION DU QR CODE INSTANTANÉE (OFFLINE)
-        // ==========================================
         function generateQR() {
             const qrData = `${matricule}|${myTicket}|${todayDate}|${myTicketMeal}`;
             document.getElementById('my-ticket-service-name').innerText = myTicketMeal;
-            
             const qrContainer = document.getElementById("qrcode-container");
-            qrContainer.innerHTML = ""; // Vider l'ancien QR Code s'il y en a un
-
-            // Génération avec la librairie intégrée
-            new QRCode(qrContainer, {
-                text: qrData,
-                width: 160,
-                height: 160,
-                colorDark : "#000000",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
+            qrContainer.innerHTML = ""; 
+            new QRCode(qrContainer, { text: qrData, width: 160, height: 160, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
         }
 
         // ==========================================
-        // 👨‍🍳 CONTRÔLE GÉRANT
+        // 👨‍🍳 CONTRÔLE GÉRANT (SCAN & ONGLETS)
         // ==========================================
         window.setService = function(serviceName) {
             if(confirm(`Ouvrir le service : ${serviceName} ?\nCela va réinitialiser la file.`)) {
@@ -480,12 +546,18 @@
         window.switchAdminTab = function(tab) {
             document.getElementById('admin-service').classList.toggle('hidden', tab !== 'service');
             document.getElementById('admin-history').classList.toggle('hidden', tab !== 'history');
-            document.getElementById('btn-tab-service').className = tab === 'service' ? "flex-1 py-2 text-sm font-bold text-white bg-gray-600 rounded-lg" : "flex-1 py-2 text-sm font-bold text-gray-400";
-            document.getElementById('btn-tab-history').className = tab === 'history' ? "flex-1 py-2 text-sm font-bold text-white bg-gray-600 rounded-lg" : "flex-1 py-2 text-sm font-bold text-gray-400";
+            document.getElementById('admin-students').classList.toggle('hidden', tab !== 'students');
+            
+            const activeClass = "flex-1 py-2 text-xs font-bold text-white bg-gray-600 rounded-lg";
+            const inactiveClass = "flex-1 py-2 text-xs font-bold text-gray-400 hover:text-white";
+            
+            document.getElementById('btn-tab-service').className = tab === 'service' ? activeClass : inactiveClass;
+            document.getElementById('btn-tab-history').className = tab === 'history' ? activeClass : inactiveClass;
+            document.getElementById('btn-tab-students').className = tab === 'students' ? activeClass : inactiveClass;
         };
 
         // ==========================================
-        // 🔄 MISE A JOUR INTERFACE ET RANG
+        // 🔄 MISE A JOUR UI
         // ==========================================
         function updateUI() {
             document.getElementById('student-current-serving').innerText = currentServing > 0 ? currentServing : "-";
@@ -505,7 +577,6 @@
                     document.getElementById('turn-status-box').classList.add('hidden');
                     document.getElementById('people-before-me').innerText = peopleBefore;
                 }
-
             } else if (currentUser === 'student') {
                 document.getElementById('ticket-action-zone').classList.remove('hidden');
                 document.getElementById('my-ticket-zone').classList.add('hidden');
