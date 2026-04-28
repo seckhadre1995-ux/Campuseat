@@ -1,720 +1,690 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CampusEat - Système Complet V4</title>
+<div class="w-full max-w-md bg-gray-50 h-screen flex flex-col shadow-2xl relative overflow-hidden">
     
-    <!-- PWA META TAGS OBLIGATOIRES -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ea580c">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1046/1046784.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <style>
-        ::-webkit-scrollbar { display: none; }
-        .notif-enter { transform: translateY(0); opacity: 1; }
-        .notif-leave { transform: translateY(-150%); opacity: 0; }
-        #reader video { object-fit: cover; border-radius: 1rem; width: 100%; }
-        .tab-active { border-bottom: 4px solid #f97316; color: #f97316; }
-    </style>
-</head>
-<body class="bg-gray-200 font-sans antialiased text-gray-800 flex justify-center">
-
-    <div class="w-full max-w-md bg-gray-50 h-screen flex flex-col shadow-2xl relative overflow-hidden">
-        
-        <!-- BANNIÈRE INSTALLATION PWA -->
-        <div id="install-banner" class="hidden bg-gray-900 text-white p-3 flex justify-between items-center text-xs z-[400] shadow-md">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-download text-orange-500 text-lg"></i>
-                <span>Installer CampusEat sur ce téléphone</span>
-            </div>
-            <button onclick="window.installApp()" class="bg-orange-600 px-3 py-2 rounded-lg font-bold shadow-md active:scale-95 transition">Installer</button>
+    <!-- BANNIÈRE INSTALLATION PWA -->
+    <div id="install-banner" class="hidden bg-gray-900 text-white p-3 flex justify-between items-center text-xs z-[400] shadow-md">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-download text-orange-500 text-lg"></i>
+            <span>Installer CampusEat sur ce téléphone</span>
         </div>
+        <button onclick="window.installApp()" class="bg-orange-600 px-3 py-2 rounded-lg font-bold shadow-md active:scale-95 transition">Installer</button>
+    </div>
 
-        <!-- ========================================== -->
-        <!-- 💳 MODAL POUR VOIR SA CARTE (ÉTUDIANT)     -->
-        <!-- ========================================== -->
-        <div id="student-card-modal" class="hidden absolute inset-0 bg-gray-900 bg-opacity-90 z-[300] flex-col items-center justify-center p-4">
-            <div class="bg-white p-5 rounded-3xl w-full max-w-sm text-center shadow-2xl">
-                <h3 class="font-black text-xl mb-1 text-gray-800"><i class="fa-solid fa-id-card text-orange-500"></i> Ma Carte</h3>
-                <p id="my-saved-name" class="text-sm font-bold text-gray-500 mb-4"></p>
-                <img id="my-saved-card-img" src="" class="w-full h-48 object-cover rounded-xl border-4 border-gray-100 mb-6 shadow-sm">
-                <button onclick="document.getElementById('student-card-modal').classList.add('hidden')" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-xl transition active:scale-95">
-                    Fermer
+    <!-- ========================================== -->
+    <!-- 💳 MODAL POUR VOIR SA CARTE (ÉTUDIANT)     -->
+    <!-- ========================================== -->
+    <div id="student-card-modal" class="hidden absolute inset-0 bg-gray-900 bg-opacity-90 z-[300] flex-col items-center justify-center p-4">
+        <div class="bg-white p-5 rounded-3xl w-full max-w-sm text-center shadow-2xl">
+            <h3 class="font-black text-xl mb-1 text-gray-800"><i class="fa-solid fa-id-card text-orange-500"></i> Ma Carte</h3>
+            <p id="my-saved-name" class="text-sm font-bold text-gray-500 mb-4"></p>
+            <img id="my-saved-card-img" src="" class="w-full h-48 object-cover rounded-xl border-4 border-gray-100 mb-6 shadow-sm">
+            <button onclick="document.getElementById('student-card-modal').classList.add('hidden')" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-xl transition active:scale-95">
+                Fermer
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 📷 MODAL SCANNER GÉRANT                    -->
+    <!-- ========================================== -->
+    <div id="scanner-modal" class="hidden absolute inset-0 bg-gray-900 z-[200] flex-col">
+        <div class="p-5 flex justify-between items-center text-white border-b border-gray-700">
+            <h3 class="font-bold text-lg"><i class="fa-solid fa-camera"></i> Scanner au guichet</h3>
+            <button onclick="window.closeScanner()" class="text-red-500 font-bold text-3xl leading-none">&times;</button>
+        </div>
+        <div class="flex-1 flex flex-col items-center justify-center p-4">
+            <div id="reader" class="w-full max-w-sm rounded-2xl overflow-hidden shadow-lg border-4 border-blue-500 bg-black min-h-[300px]"></div>
+            <div class="mt-6 flex gap-4 w-full">
+                <button onclick="window.restartScanner()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-xl font-bold shadow-lg">
+                    <i class="fa-solid fa-rotate"></i> Relancer Caméra
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 🔐 ÉCRAN AUTHENTIFICATION                  -->
+    <!-- ========================================== -->
+    <div id="auth-screen" class="absolute inset-0 bg-orange-600 z-[100] flex flex-col items-center justify-center p-6 text-white transition-all duration-500 overflow-y-auto">
+        <i class="fa-solid fa-shield-halved text-6xl mb-2"></i>
+        <h1 class="text-3xl font-black mb-1">CampusEat</h1>
+        <p class="text-orange-200 mb-6 text-center text-xs">Accès sécurisé pour la cantine.</p>
+        
+        <div id="login-box" class="bg-white w-full rounded-2xl p-6 text-gray-800 shadow-2xl">
+            <div class="flex mb-4 border-b border-gray-200">
+                <button id="tab-login" onclick="window.switchAuthTab('login')" class="flex-1 pb-2 text-center font-bold tab-active transition-all">Connexion</button>
+                <button id="tab-register" onclick="window.switchAuthTab('register')" class="flex-1 pb-2 text-center font-bold text-gray-400 transition-all">S'inscrire</button>
+            </div>
+
+            <div id="form-auth">
+                <div class="mb-3">
+                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Matricule</label>
+                    <input type="text" id="mat-input" placeholder="Ex: MAT-1234" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 font-mono font-bold focus:outline-none focus:border-orange-500">
+                </div>
+                
+                <div id="register-fields-text" class="hidden">
+                    <div class="mb-3">
+                        <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Nom Complet</label>
+                        <input type="text" id="name-input" placeholder="Ex: Jean Dupont" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500">
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Adresse Email</label>
+                        <input type="email" id="email-input" placeholder="jean.dupont@email.com" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500">
+                    </div>
+                </div>
+
+                <div class="mb-4 relative">
+                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Mot de passe</label>
+                    <input type="password" id="pwd-input" placeholder="••••••••" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500">
+                </div>
+                
+                <div id="register-fields-file" class="hidden mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase"><i class="fa-solid fa-id-card text-orange-500"></i> Photo Carte Étudiant</label>
+                    <input type="file" id="id-card-upload" accept="image/*" class="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" onchange="window.handleImageUpload(event)">
+                    <img id="card-preview" class="mt-2 hidden w-full h-32 object-cover rounded-lg border border-gray-300 shadow-sm">
+                </div>
+
+                <div id="forgot-pwd-zone" class="mb-4 text-right">
+                    <button onclick="window.showResetFlow()" class="text-xs text-gray-400 font-medium hover:text-orange-500 underline transition">Mot de passe oublié ?</button>
+                </div>
+
+                <button id="btn-action" onclick="window.processAuth()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all">
+                    Se connecter
                 </button>
             </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- 📷 MODAL SCANNER GÉRANT                    -->
-        <!-- ========================================== -->
-        <div id="scanner-modal" class="hidden absolute inset-0 bg-gray-900 z-[200] flex-col">
-            <div class="p-5 flex justify-between items-center text-white border-b border-gray-700">
-                <h3 class="font-bold text-lg"><i class="fa-solid fa-camera"></i> Scanner au guichet</h3>
-                <button onclick="window.closeScanner()" class="text-red-500 font-bold text-3xl leading-none">&times;</button>
-            </div>
-            <div class="flex-1 flex flex-col items-center justify-center p-4">
-                <div id="reader" class="w-full max-w-sm rounded-2xl overflow-hidden shadow-lg border-4 border-blue-500 bg-black min-h-[300px]"></div>
-                <div class="mt-6 flex gap-4 w-full">
-                    <button onclick="window.restartScanner()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-xl font-bold shadow-lg">
-                        <i class="fa-solid fa-rotate"></i> Relancer Caméra
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- 🔐 ÉCRAN AUTHENTIFICATION                  -->
-        <!-- ========================================== -->
-        <div id="auth-screen" class="absolute inset-0 bg-orange-600 z-[100] flex flex-col items-center justify-center p-6 text-white transition-all duration-500 overflow-y-auto">
-            <i class="fa-solid fa-shield-halved text-6xl mb-2"></i>
-            <h1 class="text-3xl font-black mb-1">CampusEat</h1>
-            <p class="text-orange-200 mb-6 text-center text-xs">Accès sécurisé pour la cantine.</p>
+        <!-- BLOC MOT DE PASSE OUBLIÉ -->
+        <div id="reset-box" class="hidden bg-white w-full rounded-2xl p-6 text-gray-800 shadow-2xl relative">
+            <button onclick="window.hideResetFlow()" class="absolute top-4 left-4 text-gray-400 hover:text-gray-800"><i class="fa-solid fa-arrow-left"></i> Retour</button>
+            <h2 class="text-center font-black text-xl mb-4 mt-4">Réinitialisation</h2>
             
-            <div id="login-box" class="bg-white w-full rounded-2xl p-6 text-gray-800 shadow-2xl">
-                <div class="flex mb-4 border-b border-gray-200">
-                    <button id="tab-login" onclick="window.switchAuthTab('login')" class="flex-1 pb-2 text-center font-bold tab-active transition-all">Connexion</button>
-                    <button id="tab-register" onclick="window.switchAuthTab('register')" class="flex-1 pb-2 text-center font-bold text-gray-400 transition-all">S'inscrire</button>
-                </div>
-
-                <div id="form-auth">
-                    <div class="mb-3">
-                        <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Matricule</label>
-                        <input type="text" id="mat-input" placeholder="Ex: MAT-1234" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 font-mono font-bold focus:outline-none focus:border-orange-500">
-                    </div>
-                    
-                    <div id="register-fields-text" class="hidden">
-                        <div class="mb-3">
-                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Nom Complet</label>
-                            <input type="text" id="name-input" placeholder="Ex: Jean Dupont" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500">
-                        </div>
-                        <div class="mb-3">
-                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Adresse Email</label>
-                            <input type="email" id="email-input" placeholder="jean.dupont@email.com" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500">
-                        </div>
-                    </div>
-
-                    <div class="mb-4 relative">
-                        <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Mot de passe</label>
-                        <input type="password" id="pwd-input" placeholder="••••••••" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500">
-                    </div>
-                    
-                    <div id="register-fields-file" class="hidden mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
-                        <label class="block text-xs font-bold text-gray-500 mb-2 uppercase"><i class="fa-solid fa-id-card text-orange-500"></i> Photo Carte Étudiant</label>
-                        <input type="file" id="id-card-upload" accept="image/*" class="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" onchange="window.handleImageUpload(event)">
-                        <img id="card-preview" class="mt-2 hidden w-full h-32 object-cover rounded-lg border border-gray-300 shadow-sm">
-                    </div>
-
-                    <div id="forgot-pwd-zone" class="mb-4 text-right">
-                        <button onclick="window.showResetFlow()" class="text-xs text-gray-400 font-medium hover:text-orange-500 underline transition">Mot de passe oublié ?</button>
-                    </div>
-
-                    <button id="btn-action" onclick="window.processAuth()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all">
-                        Se connecter
-                    </button>
-                </div>
+            <div id="reset-step-1">
+                <p class="text-xs text-gray-500 mb-4 text-center">Entrez votre matricule. Un code sera envoyé à votre adresse email.</p>
+                <input type="text" id="reset-mat-input" placeholder="Votre Matricule" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 mb-4 font-mono font-bold focus:outline-none focus:border-orange-500 uppercase">
+                <button onclick="window.sendResetCode()" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-xl shadow-lg">Envoyer le code</button>
             </div>
 
-            <!-- BLOC MOT DE PASSE OUBLIÉ -->
-            <div id="reset-box" class="hidden bg-white w-full rounded-2xl p-6 text-gray-800 shadow-2xl relative">
-                <button onclick="window.hideResetFlow()" class="absolute top-4 left-4 text-gray-400 hover:text-gray-800"><i class="fa-solid fa-arrow-left"></i> Retour</button>
-                <h2 class="text-center font-black text-xl mb-4 mt-4">Réinitialisation</h2>
-                
-                <div id="reset-step-1">
-                    <p class="text-xs text-gray-500 mb-4 text-center">Entrez votre matricule. Un code sera envoyé à votre adresse email.</p>
-                    <input type="text" id="reset-mat-input" placeholder="Votre Matricule" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 mb-4 font-mono font-bold focus:outline-none focus:border-orange-500 uppercase">
-                    <button onclick="window.sendResetCode()" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-xl shadow-lg">Envoyer le code</button>
-                </div>
-
-                <div id="reset-step-2" class="hidden">
-                    <p class="text-xs text-green-600 font-bold mb-4 text-center bg-green-50 p-2 rounded">Code envoyé par email !</p>
-                    <input type="text" id="reset-code-input" placeholder="Code à 4 chiffres" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 mb-4 text-center text-xl font-bold tracking-widest focus:outline-none focus:border-orange-500">
-                    <button onclick="window.verifyResetCode()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl shadow-lg">Vérifier le code</button>
-                </div>
-
-                <div id="reset-step-3" class="hidden">
-                    <p class="text-xs text-gray-500 mb-4 text-center">Créez votre nouveau mot de passe.</p>
-                    <input type="password" id="new-pwd-input" placeholder="Nouveau mot de passe" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 mb-4 focus:outline-none focus:border-orange-500">
-                    <button onclick="window.saveNewPassword()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl shadow-lg">Enregistrer</button>
-                </div>
+            <div id="reset-step-2" class="hidden">
+                <p class="text-xs text-green-600 font-bold mb-4 text-center bg-green-50 p-2 rounded">Code envoyé par email !</p>
+                <input type="text" id="reset-code-input" placeholder="Code à 4 chiffres" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 mb-4 text-center text-xl font-bold tracking-widest focus:outline-none focus:border-orange-500">
+                <button onclick="window.verifyResetCode()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl shadow-lg">Vérifier le code</button>
             </div>
-            
-            <button onclick="window.loginAsResto()" id="btn-admin-access" class="mt-8 text-xs text-orange-300 underline opacity-70 hover:opacity-100 transition">
-                <i class="fa-solid fa-lock"></i> Accès Gérant (Admin)
-            </button>
-        </div>
 
-        <!-- ========================================== -->
-        <!-- 🔔 NOTIFICATION                            -->
-        <!-- ========================================== -->
-        <div id="notification-banner" class="absolute top-4 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-50 flex items-center gap-3 border-l-4 border-orange-500 transition-all duration-500 notif-leave">
-            <div id="notif-icon" class="bg-orange-100 p-2 rounded-full"><i class="fa-solid fa-bell text-orange-600 text-xl"></i></div>
-            <div>
-                <p class="font-bold text-sm text-gray-800">Système</p>
-                <p class="text-xs text-gray-600 font-medium" id="notif-text">Texte</p>
+            <div id="reset-step-3" class="hidden">
+                <p class="text-xs text-gray-500 mb-4 text-center">Créez votre nouveau mot de passe.</p>
+                <input type="password" id="new-pwd-input" placeholder="Nouveau mot de passe" class="w-full bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 mb-4 focus:outline-none focus:border-orange-500">
+                <button onclick="window.saveNewPassword()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl shadow-lg">Enregistrer</button>
             </div>
         </div>
-
-        <!-- ========================================== -->
-        <!-- 📱 L'APPLICATION PRINCIPALE                -->
-        <!-- ========================================== -->
-        <header class="bg-orange-600 text-white p-5 rounded-b-3xl shadow-md z-10 flex justify-between items-center">
-            <div>
-                <div class="flex items-center gap-2">
-                    <h1 class="text-xl font-black tracking-tight"><i class="fa-solid fa-utensils"></i> CampusEat</h1>
-                    <button id="btn-show-card" onclick="document.getElementById('student-card-modal').classList.remove('hidden')" class="hidden text-[10px] bg-white text-orange-600 font-bold px-2 py-1 rounded-md shadow-sm active:scale-95 transition">
-                        <i class="fa-solid fa-id-card"></i> Ma Carte
-                    </button>
-                </div>
-                <p id="user-display" class="text-xs text-orange-200 mt-1 font-mono font-bold"></p>
-            </div>
-            <button onclick="window.logout()" class="text-xs bg-black bg-opacity-20 px-3 py-2 rounded-lg hover:bg-opacity-40 transition font-bold">
-                Déconnexion
-            </button>
-        </header>
-
-        <main class="flex-1 overflow-y-auto p-5 pb-24 relative">
-            <div id="current-service-banner" class="bg-gray-800 text-white text-center py-2 rounded-xl mb-4 text-sm font-bold uppercase tracking-widest shadow-md">
-                Service : <span id="service-name-display" class="text-yellow-400">FERMÉ</span>
-            </div>
-
-            <!-- VUE ÉTUDIANT -->
-            <div id="view-student" class="hidden space-y-6">
-                <div class="bg-white border border-gray-100 rounded-2xl p-5 text-center shadow-sm">
-                    <p class="text-gray-500 text-sm font-medium uppercase">Numéro au guichet</p>
-                    <p id="student-current-serving" class="text-6xl font-black text-orange-600 mt-2">-</p>
-                </div>
-
-                <div id="ticket-action-zone" class="mt-6">
-                    <button id="btn-take-ticket" onclick="window.takeTicket()" class="w-full bg-orange-600 text-white font-bold py-4 rounded-xl text-lg shadow-lg active:scale-95 transition disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed">
-                        <i class="fa-solid fa-ticket"></i> Prendre un ticket
-                    </button>
-                    <p id="ticket-closed-msg" class="text-center text-xs text-red-500 mt-2 font-bold hidden">La cantine est actuellement fermée.</p>
-                </div>
-
-                <div id="my-ticket-zone" class="hidden mt-6 border-2 border-orange-500 bg-white rounded-2xl p-6 text-center shadow-lg relative">
-                    <div id="queue-status-box" class="bg-orange-50 border border-orange-200 p-3 rounded-lg mb-4 text-gray-700 shadow-inner">
-                        <p class="font-bold text-sm">⏳ Personnes avant toi :</p>
-                        <p id="people-before-me" class="text-3xl font-black text-orange-600">0</p>
-                    </div>
-                    <div id="turn-status-box" class="hidden bg-green-500 text-white p-4 rounded-lg mb-4 font-bold shadow-md animate-pulse">
-                        <p class="text-xl">🍽️ C'EST TON TOUR !</p>
-                        <p class="text-xs mt-1">Présente ton QR Code au guichet.</p>
-                    </div>
-                    <p class="text-gray-600 font-medium mt-2">Ton numéro :</p>
-                    <p id="my-ticket-number" class="text-6xl font-black text-orange-600 mb-4">#0</p>
-                    
-                    <div class="bg-white p-4 rounded-xl inline-block border border-gray-200 shadow-sm">
-                        <p class="text-xs text-gray-500 mb-2 font-bold uppercase"><i class="fa-solid fa-qrcode"></i> Scan au guichet</p>
-                        <div id="qrcode-container" class="flex justify-center mx-auto"></div>
-                    </div>
-                    <p class="text-[10px] text-gray-400 mt-3 uppercase font-bold">Valable pour le <span id="my-ticket-service-name" class="text-orange-600"></span></p>
-                </div>
-            </div>
-
-            <!-- VUE CANTINE (GÉRANT) -->
-            <div id="view-resto" class="hidden h-full flex flex-col">
-                <div class="flex bg-gray-800 rounded-xl p-1 mb-4">
-                    <button onclick="window.switchAdminTab('service')" id="btn-tab-service" class="flex-1 py-2 text-xs font-bold text-white bg-gray-600 rounded-lg">Service</button>
-                    <button onclick="window.switchAdminTab('history')" id="btn-tab-history" class="flex-1 py-2 text-xs font-bold text-gray-400 hover:text-white">Historique</button>
-                    <button onclick="window.switchAdminTab('students')" id="btn-tab-students" class="flex-1 py-2 text-xs font-bold text-gray-400 hover:text-white">Étudiants</button>
-                </div>
-
-                <!-- ONGLET SERVICE -->
-                <div id="admin-service" class="bg-gray-800 rounded-2xl p-6 text-center text-white shadow-xl">
-                    <div class="flex justify-between gap-2 mb-6 border-b border-gray-600 pb-4">
-                        <button onclick="window.setService('MATIN')" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-[10px] sm:text-xs font-bold py-2 rounded-lg">MATIN</button>
-                        <button onclick="window.setService('SOIR')" class="flex-1 bg-orange-500 hover:bg-orange-600 text-[10px] sm:text-xs font-bold py-2 rounded-lg">SOIR</button>
-                        <button onclick="window.setService('NUIT')" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-[10px] sm:text-xs font-bold py-2 rounded-lg">NUIT</button>
-                        <button onclick="window.setService('FERMÉ')" class="flex-1 bg-red-600 hover:bg-red-700 text-xs font-bold py-2 rounded-lg"><i class="fa-solid fa-stop"></i></button>
-                    </div>
-
-                    <div class="bg-gray-700 rounded-xl p-6 mb-6 relative shadow-inner">
-                        <p class="text-gray-400 text-sm font-medium">Appel en cours</p>
-                        <p id="resto-current-serving" class="text-7xl font-black text-orange-400 mt-2">-</p>
-                    </div>
-                    
-                    <button onclick="window.callNext()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-5 rounded-xl text-xl shadow-lg mb-4 active:scale-95 transition">
-                        👉 APPELER SUIVANT
-                    </button>
-                    
-                    <button onclick="window.openScanner()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 active:scale-95 transition">
-                        <i class="fa-solid fa-qrcode text-2xl"></i> SCANNER LE PASS
-                    </button>
-                </div>
-
-                <!-- ONGLET HISTORIQUE -->
-                <div id="admin-history" class="hidden bg-white rounded-2xl shadow-xl flex-1 flex flex-col overflow-hidden border border-gray-200">
-                    <div class="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                        <h3 class="font-bold text-gray-800"><i class="fa-solid fa-list-check"></i> <span id="history-service-name"></span></h3>
-                        <span id="total-served" class="bg-orange-100 text-orange-600 px-2 py-1 rounded-md text-xs font-bold shadow-sm">0</span>
-                    </div>
-                    <div id="history-list" class="flex-1 overflow-y-auto p-2 space-y-2 bg-gray-50"></div>
-                </div>
-
-                <!-- ONGLET GESTION ÉTUDIANTS -->
-                <div id="admin-students" class="hidden bg-white rounded-2xl shadow-xl flex-1 flex flex-col p-4 border border-gray-200 overflow-y-auto">
-                    <h3 class="font-bold text-gray-800 mb-4"><i class="fa-solid fa-users text-blue-500"></i> Dossiers Étudiants</h3>
-                    
-                    <div class="flex gap-2 mb-4">
-                        <input type="text" id="search-mat-input" placeholder="Matricule (ex: MAT-123)" class="flex-1 bg-gray-100 border border-gray-300 rounded-xl px-4 py-2 font-mono font-bold focus:outline-none focus:border-blue-500 uppercase">
-                        <button onclick="window.searchStudent()" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2 rounded-xl font-bold shadow-md"><i class="fa-solid fa-magnifying-glass"></i></button>
-                    </div>
-
-                    <div id="search-result" class="hidden text-center bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm mt-2">
-                        <p class="font-black text-2xl text-gray-800" id="res-mat"></p>
-                        <p class="text-orange-600 font-bold mb-1" id="res-name"></p>
-                        <p class="text-xs text-gray-500 mb-4"><i class="fa-solid fa-envelope"></i> <span id="res-email"></span></p>
-                        
-                        <p class="text-xs font-bold text-gray-500 mb-2 uppercase">Carte Étudiant Enregistrée</p>
-                        <img id="res-img" src="" class="w-full h-40 object-cover rounded-xl border-2 border-gray-300 mb-4 shadow-inner">
-                        
-                        <button onclick="window.deleteStudent()" class="w-full bg-white text-red-500 border border-red-500 py-3 rounded-xl text-sm font-bold hover:bg-red-50 transition">
-                            <i class="fa-solid fa-trash"></i> Supprimer le compte
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-        </main>
+        
+        <button onclick="window.loginAsResto()" id="btn-admin-access" class="mt-8 text-xs text-orange-300 underline opacity-70 hover:opacity-100 transition">
+            <i class="fa-solid fa-lock"></i> Accès Gérant (Admin)
+        </button>
     </div>
 
     <!-- ========================================== -->
-    <!-- 🔥 LOGIQUE JAVASCRIPT & FIREBASE           -->
+    <!-- 🔔 NOTIFICATION                            -->
     <!-- ========================================== -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue, set, get, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    <div id="notification-banner" class="absolute top-4 left-4 right-4 bg-white rounded-2xl shadow-2xl p-4 z-50 flex items-center gap-3 border-l-4 border-orange-500 transition-all duration-500 notif-leave">
+        <div id="notif-icon" class="bg-orange-100 p-2 rounded-full"><i class="fa-solid fa-bell text-orange-600 text-xl"></i></div>
+        <div>
+            <p class="font-bold text-sm text-gray-800">Système</p>
+            <p class="text-xs text-gray-600 font-medium" id="notif-text">Texte</p>
+        </div>
+    </div>
 
-        // REMPLACE PAR TES CLÉS FIREBASE ICI
-        const firebaseConfig = {
-            apiKey: "AIzaSyCCYz11kL3ATDZ9qrKm7ZV0ztggMO_cutE",
-            authDomain: "campuseat-cdede.firebaseapp.com",
-            projectId: "campuseat-cdede",
-            databaseURL: "https://campuseat-cdede-default-rtdb.firebaseio.com",
-            storageBucket: "campuseat-cdede.firebasestorage.app"
-        };
+    <!-- ========================================== -->
+    <!-- 📱 L'APPLICATION PRINCIPALE                -->
+    <!-- ========================================== -->
+    <header class="bg-orange-600 text-white p-5 rounded-b-3xl shadow-md z-10 flex justify-between items-center">
+        <div>
+            <div class="flex items-center gap-2">
+                <h1 class="text-xl font-black tracking-tight"><i class="fa-solid fa-utensils"></i> CampusEat</h1>
+                <button id="btn-show-card" onclick="document.getElementById('student-card-modal').classList.remove('hidden')" class="hidden text-[10px] bg-white text-orange-600 font-bold px-2 py-1 rounded-md shadow-sm active:scale-95 transition">
+                    <i class="fa-solid fa-id-card"></i> Ma Carte
+                </button>
+            </div>
+            <p id="user-display" class="text-xs text-orange-200 mt-1 font-mono font-bold"></p>
+        </div>
+        <button onclick="window.logout()" class="text-xs bg-black bg-opacity-20 px-3 py-2 rounded-lg hover:bg-opacity-40 transition font-bold">
+            Déconnexion
+        </button>
+    </header>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+    <main class="flex-1 overflow-y-auto p-5 pb-24 relative">
+        <div id="current-service-banner" class="bg-gray-800 text-white text-center py-2 rounded-xl mb-4 text-sm font-bold uppercase tracking-widest shadow-md">
+            Service : <span id="service-name-display" class="text-yellow-400">FERMÉ</span>
+        </div>
 
-        // ==========================================
-        // ⚙️ GESTION PWA (INSTALLATION APP)
-        // ==========================================
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('install-banner').classList.remove('hidden');
-        });
+        <!-- VUE ÉTUDIANT -->
+        <div id="view-student" class="hidden space-y-6">
+            <div class="bg-white border border-gray-100 rounded-2xl p-5 text-center shadow-sm">
+                <p class="text-gray-500 text-sm font-medium uppercase">Numéro au guichet</p>
+                <p id="student-current-serving" class="text-6xl font-black text-orange-600 mt-2">-</p>
+            </div>
 
-        window.installApp = async function() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    document.getElementById('install-banner').classList.add('hidden');
-                }
-                deferredPrompt = null;
-            }
-        };
+            <div id="ticket-action-zone" class="mt-6">
+                <button id="btn-take-ticket" onclick="window.takeTicket()" class="w-full bg-orange-600 text-white font-bold py-4 rounded-xl text-lg shadow-lg active:scale-95 transition disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    <i class="fa-solid fa-ticket"></i> Prendre un ticket
+                </button>
+                <p id="ticket-closed-msg" class="text-center text-xs text-red-500 mt-2 font-bold hidden">La cantine est actuellement fermée.</p>
+            </div>
 
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('PWA Service Worker Installé', reg))
-                .catch(err => console.log('Erreur PWA', err));
-            });
-        }
-
-        // --- Le reste du code reste exactement le même que la version précédente ---
-        // (Variables globales)
-        let authMode = 'login'; 
-        let cardImageBase64 = null;
-        let currentUser = localStorage.getItem('campusEat_user');
-        let matricule = localStorage.getItem('campusEat_matricule');
-        
-        let myTicket = null;
-        let myTicketMeal = null;
-        let currentSearchMat = null; 
-        let resetTempMat = null; 
-
-        let todayDate = new Date().toISOString().split('T')[0]; 
-        let currentServing = 0;
-        let activeService = 'FERMÉ'; 
-        let html5QrCode = null;
-
-        // AUTHENTIFICATION ET RESET
-        window.switchAuthTab = function(mode) { 
-            authMode = mode;
-            document.getElementById('tab-login').classList.toggle('tab-active', mode === 'login');
-            document.getElementById('tab-login').classList.toggle('text-gray-400', mode !== 'login');
-            document.getElementById('tab-register').classList.toggle('tab-active', mode === 'register');
-            document.getElementById('tab-register').classList.toggle('text-gray-400', mode !== 'register');
-            
-            document.getElementById('register-fields-text').classList.toggle('hidden', mode === 'login');
-            document.getElementById('register-fields-file').classList.toggle('hidden', mode === 'login');
-            document.getElementById('forgot-pwd-zone').classList.toggle('hidden', mode === 'register');
-            
-            document.getElementById('btn-action').innerText = mode === 'login' ? "Se connecter" : "Créer mon compte";
-        };
-
-        window.showResetFlow = function() {
-            document.getElementById('login-box').classList.add('hidden');
-            document.getElementById('btn-admin-access').classList.add('hidden');
-            document.getElementById('reset-box').classList.remove('hidden');
-            document.getElementById('reset-step-1').classList.remove('hidden');
-            document.getElementById('reset-step-2').classList.add('hidden');
-            document.getElementById('reset-step-3').classList.add('hidden');
-        };
-
-        window.hideResetFlow = function() {
-            document.getElementById('reset-box').classList.add('hidden');
-            document.getElementById('login-box').classList.remove('hidden');
-            document.getElementById('btn-admin-access').classList.remove('hidden');
-        };
-
-        window.sendResetCode = async function() {
-            const mat = document.getElementById('reset-mat-input').value.trim().toUpperCase();
-            if(!mat) return alert("Veuillez entrer votre matricule.");
-            
-            const snap = await get(ref(db, `users/${mat}`));
-            if(!snap.exists()) return alert("Matricule introuvable.");
-            
-            const email = snap.val().email || "votre email";
-            const code = Math.floor(1000 + Math.random() * 9000).toString();
-            
-            await set(ref(db, `users/${mat}/resetCode`), code);
-            resetTempMat = mat;
-
-            alert(`✅ SIMULATION EMAIL :\nUn mail vient d'être envoyé à ${email}.\n\n(Pour ce test, le code secret est : ${code})`);
-
-            document.getElementById('reset-step-1').classList.add('hidden');
-            document.getElementById('reset-step-2').classList.remove('hidden');
-        };
-
-        window.verifyResetCode = async function() {
-            const codeInput = document.getElementById('reset-code-input').value.trim();
-            const snap = await get(ref(db, `users/${resetTempMat}/resetCode`));
-            
-            if(snap.exists() && snap.val() === codeInput) {
-                document.getElementById('reset-step-2').classList.add('hidden');
-                document.getElementById('reset-step-3').classList.remove('hidden');
-            } else {
-                alert("❌ Code incorrect.");
-            }
-        };
-
-        window.saveNewPassword = async function() {
-            const newPwd = document.getElementById('new-pwd-input').value.trim();
-            if(newPwd.length < 4) return alert("Le mot de passe doit faire au moins 4 caractères.");
-            
-            await set(ref(db, `users/${resetTempMat}/password`), newPwd);
-            await set(ref(db, `users/${resetTempMat}/resetCode`), null);
-            
-            alert("✅ Mot de passe réinitialisé avec succès ! Vous pouvez vous connecter.");
-            window.hideResetFlow();
-        };
-
-        window.handleImageUpload = function(event) {
-            const file = event.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 500; canvas.height = img.height * (500 / img.width);
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    cardImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
-                    document.getElementById('card-preview').src = cardImageBase64;
-                    document.getElementById('card-preview').classList.remove('hidden');
-                }
-                img.src = e.target.result;
-            }
-            reader.readAsDataURL(file);
-        };
-
-        window.processAuth = async function() {
-            const mat = document.getElementById('mat-input').value.trim().toUpperCase();
-            const pwd = document.getElementById('pwd-input').value.trim();
-            const name = document.getElementById('name-input').value.trim();
-            const email = document.getElementById('email-input').value.trim();
-
-            if(!mat || !pwd) return alert("Matricule et mot de passe obligatoires.");
-            
-            const userRef = ref(db, `users/${mat}`);
-            const snapshot = await get(userRef);
-
-            if (authMode === 'register') {
-                if(!name || !email) return alert("Veuillez renseigner votre nom et email.");
-                if (snapshot.exists()) return window.showNotification("❌ Compte déjà existant ! Connectez-vous.", true);
-                if (!cardImageBase64) return window.showNotification("⚠️ La photo de votre carte est obligatoire.", true);
+            <div id="my-ticket-zone" class="hidden mt-6 border-2 border-orange-500 bg-white rounded-2xl p-6 text-center shadow-lg relative">
+                <div id="queue-status-box" class="bg-orange-50 border border-orange-200 p-3 rounded-lg mb-4 text-gray-700 shadow-inner">
+                    <p class="font-bold text-sm">⏳ Personnes avant toi :</p>
+                    <p id="people-before-me" class="text-3xl font-black text-orange-600">0</p>
+                </div>
+                <div id="turn-status-box" class="hidden bg-green-500 text-white p-4 rounded-lg mb-4 font-bold shadow-md animate-pulse">
+                    <p class="text-xl">🍽️ C'EST TON TOUR !</p>
+                    <p class="text-xs mt-1">Présente ton QR Code au guichet.</p>
+                </div>
+                <p class="text-gray-600 font-medium mt-2">Ton numéro :</p>
+                <p id="my-ticket-number" class="text-6xl font-black text-orange-600 mb-4">#0</p>
                 
-                await set(userRef, { name: name, email: email, password: pwd, cardImage: cardImageBase64, createdAt: Date.now() });
-                doLogin(mat);
-            } else {
-                if (!snapshot.exists()) return window.showNotification("❌ Compte introuvable.", true);
-                if (snapshot.val().password !== pwd) return window.showNotification("❌ Mot de passe incorrect.", true);
-                doLogin(mat);
-            }
-        };
+                <div class="bg-white p-4 rounded-xl inline-block border border-gray-200 shadow-sm">
+                    <p class="text-xs text-gray-500 mb-2 font-bold uppercase"><i class="fa-solid fa-qrcode"></i> Scan au guichet</p>
+                    <div id="qrcode-container" class="flex justify-center mx-auto"></div>
+                </div>
+                <p class="text-[10px] text-gray-400 mt-3 uppercase font-bold">Valable pour le <span id="my-ticket-service-name" class="text-orange-600"></span></p>
+            </div>
+        </div>
 
-        function doLogin(mat) {
-            currentUser = 'student'; matricule = mat;
-            localStorage.setItem('campusEat_user', currentUser);
-            localStorage.setItem('campusEat_matricule', matricule);
-            checkLoginState();
+        <!-- VUE CANTINE (GÉRANT) -->
+        <div id="view-resto" class="hidden h-full flex flex-col">
+            <div class="flex bg-gray-800 rounded-xl p-1 mb-4">
+                <button onclick="window.switchAdminTab('service')" id="btn-tab-service" class="flex-1 py-2 text-xs font-bold text-white bg-gray-600 rounded-lg">Service</button>
+                <button onclick="window.switchAdminTab('history')" id="btn-tab-history" class="flex-1 py-2 text-xs font-bold text-gray-400 hover:text-white">Historique</button>
+                <button onclick="window.switchAdminTab('students')" id="btn-tab-students" class="flex-1 py-2 text-xs font-bold text-gray-400 hover:text-white">Étudiants</button>
+            </div>
+
+            <!-- ONGLET SERVICE -->
+            <div id="admin-service" class="bg-gray-800 rounded-2xl p-6 text-center text-white shadow-xl">
+                <div class="flex justify-between gap-2 mb-6 border-b border-gray-600 pb-4">
+                    <button onclick="window.setService('MATIN')" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-[10px] sm:text-xs font-bold py-2 rounded-lg">MATIN</button>
+                    <button onclick="window.setService('SOIR')" class="flex-1 bg-orange-500 hover:bg-orange-600 text-[10px] sm:text-xs font-bold py-2 rounded-lg">SOIR</button>
+                    <button onclick="window.setService('NUIT')" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-[10px] sm:text-xs font-bold py-2 rounded-lg">NUIT</button>
+                    <button onclick="window.setService('FERMÉ')" class="flex-1 bg-red-600 hover:bg-red-700 text-xs font-bold py-2 rounded-lg"><i class="fa-solid fa-stop"></i></button>
+                </div>
+
+                <div class="bg-gray-700 rounded-xl p-6 mb-6 relative shadow-inner">
+                    <p class="text-gray-400 text-sm font-medium">Appel en cours</p>
+                    <p id="resto-current-serving" class="text-7xl font-black text-orange-400 mt-2">-</p>
+                </div>
+                
+                <button onclick="window.callNext()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-5 rounded-xl text-xl shadow-lg mb-4 active:scale-95 transition">
+                    👉 APPELER SUIVANT
+                </button>
+                
+                <button onclick="window.openScanner()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-2 active:scale-95 transition">
+                    <i class="fa-solid fa-qrcode text-2xl"></i> SCANNER LE PASS
+                </button>
+            </div>
+
+            <!-- ONGLET HISTORIQUE -->
+            <div id="admin-history" class="hidden bg-white rounded-2xl shadow-xl flex-1 flex flex-col overflow-hidden border border-gray-200">
+                <div class="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                    <h3 class="font-bold text-gray-800"><i class="fa-solid fa-list-check"></i> <span id="history-service-name"></span></h3>
+                    <span id="total-served" class="bg-orange-100 text-orange-600 px-2 py-1 rounded-md text-xs font-bold shadow-sm">0</span>
+                </div>
+                <div id="history-list" class="flex-1 overflow-y-auto p-2 space-y-2 bg-gray-50"></div>
+            </div>
+
+            <!-- ONGLET GESTION ÉTUDIANTS -->
+            <div id="admin-students" class="hidden bg-white rounded-2xl shadow-xl flex-1 flex flex-col p-4 border border-gray-200 overflow-y-auto">
+                <h3 class="font-bold text-gray-800 mb-4"><i class="fa-solid fa-users text-blue-500"></i> Dossiers Étudiants</h3>
+                
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="search-mat-input" placeholder="Matricule (ex: MAT-123)" class="flex-1 bg-gray-100 border border-gray-300 rounded-xl px-4 py-2 font-mono font-bold focus:outline-none focus:border-blue-500 uppercase">
+                    <button onclick="window.searchStudent()" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2 rounded-xl font-bold shadow-md"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+
+                <div id="search-result" class="hidden text-center bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-sm mt-2">
+                    <p class="font-black text-2xl text-gray-800" id="res-mat"></p>
+                    <p class="text-orange-600 font-bold mb-1" id="res-name"></p>
+                    <p class="text-xs text-gray-500 mb-4"><i class="fa-solid fa-envelope"></i> <span id="res-email"></span></p>
+                    
+                    <p class="text-xs font-bold text-gray-500 mb-2 uppercase">Carte Étudiant Enregistrée</p>
+                    <img id="res-img" src="" class="w-full h-40 object-cover rounded-xl border-2 border-gray-300 mb-4 shadow-inner">
+                    
+                    <button onclick="window.deleteStudent()" class="w-full bg-white text-red-500 border border-red-500 py-3 rounded-xl text-sm font-bold hover:bg-red-50 transition">
+                        <i class="fa-solid fa-trash"></i> Supprimer le compte
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ========================================== -->
+<!-- 🔥 LOGIQUE JAVASCRIPT & FIREBASE           -->
+<!-- ========================================== -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set, get, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // REMPLACE PAR TES CLÉS FIREBASE ICI
+    const firebaseConfig = {
+        apiKey: "AIzaSyCCYz11kL3ATDZ9qrKm7ZV0ztggMO_cutE",
+        authDomain: "campuseat-cdede.firebaseapp.com",
+        projectId: "campuseat-cdede",
+        databaseURL: "https://campuseat-cdede-default-rtdb.firebaseio.com",
+        storageBucket: "campuseat-cdede.firebasestorage.app"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // ==========================================
+    // ⚙️ GESTION PWA (INSTALLATION APP)
+    // ==========================================
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('install-banner').classList.remove('hidden');
+    });
+
+    window.installApp = async function() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                document.getElementById('install-banner').classList.add('hidden');
+            }
+            deferredPrompt = null;
         }
+    };
 
-        window.loginAsResto = function() {
-            if(prompt("Mot de passe Admin:") === "admin") {
-                currentUser = 'resto'; localStorage.setItem('campusEat_user', currentUser); checkLoginState();
-            }
-        };
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('PWA Service Worker Installé', reg))
+            .catch(err => console.log('Erreur PWA', err));
+        });
+    }
 
-        window.logout = function() { localStorage.clear(); location.reload(); };
+    // --- Le reste du code reste exactement le même que la version précédente ---
+    // (Variables globales)
+    let authMode = 'login'; 
+    let cardImageBase64 = null;
+    let currentUser = localStorage.getItem('campusEat_user');
+    let matricule = localStorage.getItem('campusEat_matricule');
+    
+    let myTicket = null;
+    let myTicketMeal = null;
+    let currentSearchMat = null; 
+    let resetTempMat = null; 
 
-        async function fetchStudentCard() {
-            if(currentUser === 'student') {
-                const snap = await get(ref(db, `users/${matricule}`));
-                if(snap.exists()) {
-                    const data = snap.val();
-                    document.getElementById('my-saved-card-img').src = data.cardImage;
-                    document.getElementById('my-saved-name').innerText = data.name || "Étudiant(e)";
-                    document.getElementById('btn-show-card').classList.remove('hidden');
-                }
-            }
+    let todayDate = new Date().toISOString().split('T')[0]; 
+    let currentServing = 0;
+    let activeService = 'FERMÉ'; 
+    let html5QrCode = null;
+
+    // AUTHENTIFICATION ET RESET
+    window.switchAuthTab = function(mode) { 
+        authMode = mode;
+        document.getElementById('tab-login').classList.toggle('tab-active', mode === 'login');
+        document.getElementById('tab-login').classList.toggle('text-gray-400', mode !== 'login');
+        document.getElementById('tab-register').classList.toggle('tab-active', mode === 'register');
+        document.getElementById('tab-register').classList.toggle('text-gray-400', mode !== 'register');
+        
+        document.getElementById('register-fields-text').classList.toggle('hidden', mode === 'login');
+        document.getElementById('register-fields-file').classList.toggle('hidden', mode === 'login');
+        document.getElementById('forgot-pwd-zone').classList.toggle('hidden', mode === 'register');
+        
+        document.getElementById('btn-action').innerText = mode === 'login' ? "Se connecter" : "Créer mon compte";
+    };
+
+    window.showResetFlow = function() {
+        document.getElementById('login-box').classList.add('hidden');
+        document.getElementById('btn-admin-access').classList.add('hidden');
+        document.getElementById('reset-box').classList.remove('hidden');
+        document.getElementById('reset-step-1').classList.remove('hidden');
+        document.getElementById('reset-step-2').classList.add('hidden');
+        document.getElementById('reset-step-3').classList.add('hidden');
+    };
+
+    window.hideResetFlow = function() {
+        document.getElementById('reset-box').classList.add('hidden');
+        document.getElementById('login-box').classList.remove('hidden');
+        document.getElementById('btn-admin-access').classList.remove('hidden');
+    };
+
+    window.sendResetCode = async function() {
+        const mat = document.getElementById('reset-mat-input').value.trim().toUpperCase();
+        if(!mat) return alert("Veuillez entrer votre matricule.");
+        
+        const snap = await get(ref(db, `users/${mat}`));
+        if(!snap.exists()) return alert("Matricule introuvable.");
+        
+        const email = snap.val().email || "votre email";
+        const code = Math.floor(1000 + Math.random() * 9000).toString();
+        
+        await set(ref(db, `users/${mat}/resetCode`), code);
+        resetTempMat = mat;
+
+        alert(`✅ SIMULATION EMAIL :\nUn mail vient d'être envoyé à ${email}.\n\n(Pour ce test, le code secret est : ${code})`);
+
+        document.getElementById('reset-step-1').classList.add('hidden');
+        document.getElementById('reset-step-2').classList.remove('hidden');
+    };
+
+    window.verifyResetCode = async function() {
+        const codeInput = document.getElementById('reset-code-input').value.trim();
+        const snap = await get(ref(db, `users/${resetTempMat}/resetCode`));
+        
+        if(snap.exists() && snap.val() === codeInput) {
+            document.getElementById('reset-step-2').classList.add('hidden');
+            document.getElementById('reset-step-3').classList.remove('hidden');
+        } else {
+            alert("❌ Code incorrect.");
         }
+    };
 
-        function checkLoginState() {
-            document.getElementById('auth-screen').classList.add('hidden');
-            if (currentUser === 'student') {
-                document.getElementById('view-student').classList.remove('hidden');
-                document.getElementById('user-display').innerText = "👤 " + matricule;
-                fetchStudentCard();
-                checkMyTicketInDB(); 
-            } else if (currentUser === 'resto') {
-                document.getElementById('view-resto').classList.remove('hidden');
-                document.getElementById('user-display').innerText = "👨‍🍳 Panel Gérant";
-            } else {
-                document.getElementById('auth-screen').classList.remove('hidden');
+    window.saveNewPassword = async function() {
+        const newPwd = document.getElementById('new-pwd-input').value.trim();
+        if(newPwd.length < 4) return alert("Le mot de passe doit faire au moins 4 caractères.");
+        
+        await set(ref(db, `users/${resetTempMat}/password`), newPwd);
+        await set(ref(db, `users/${resetTempMat}/resetCode`), null);
+        
+        alert("✅ Mot de passe réinitialisé avec succès ! Vous pouvez vous connecter.");
+        window.hideResetFlow();
+    };
+
+    window.handleImageUpload = function(event) {
+        const file = event.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 500; canvas.height = img.height * (500 / img.width);
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                cardImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
+                document.getElementById('card-preview').src = cardImageBase64;
+                document.getElementById('card-preview').classList.remove('hidden');
             }
+            img.src = e.target.result;
         }
+        reader.readAsDataURL(file);
+    };
 
-        window.searchStudent = async function() {
-            const matToSearch = document.getElementById('search-mat-input').value.trim().toUpperCase();
-            if(!matToSearch) return;
+    window.processAuth = async function() {
+        const mat = document.getElementById('mat-input').value.trim().toUpperCase();
+        const pwd = document.getElementById('pwd-input').value.trim();
+        const name = document.getElementById('name-input').value.trim();
+        const email = document.getElementById('email-input').value.trim();
+
+        if(!mat || !pwd) return alert("Matricule et mot de passe obligatoires.");
+        
+        const userRef = ref(db, `users/${mat}`);
+        const snapshot = await get(userRef);
+
+        if (authMode === 'register') {
+            if(!name || !email) return alert("Veuillez renseigner votre nom et email.");
+            if (snapshot.exists()) return window.showNotification("❌ Compte déjà existant ! Connectez-vous.", true);
+            if (!cardImageBase64) return window.showNotification("⚠️ La photo de votre carte est obligatoire.", true);
             
-            const snap = await get(ref(db, `users/${matToSearch}`));
+            await set(userRef, { name: name, email: email, password: pwd, cardImage: cardImageBase64, createdAt: Date.now() });
+            doLogin(mat);
+        } else {
+            if (!snapshot.exists()) return window.showNotification("❌ Compte introuvable.", true);
+            if (snapshot.val().password !== pwd) return window.showNotification("❌ Mot de passe incorrect.", true);
+            doLogin(mat);
+        }
+    };
+
+    function doLogin(mat) {
+        currentUser = 'student'; matricule = mat;
+        localStorage.setItem('campusEat_user', currentUser);
+        localStorage.setItem('campusEat_matricule', matricule);
+        checkLoginState();
+    }
+
+    window.loginAsResto = function() {
+        if(prompt("Mot de passe Admin:") === "admin") {
+            currentUser = 'resto'; localStorage.setItem('campusEat_user', currentUser); checkLoginState();
+        }
+    };
+
+    window.logout = function() { localStorage.clear(); location.reload(); };
+
+    async function fetchStudentCard() {
+        if(currentUser === 'student') {
+            const snap = await get(ref(db, `users/${matricule}`));
             if(snap.exists()) {
                 const data = snap.val();
-                currentSearchMat = matToSearch;
-                document.getElementById('res-mat').innerText = matToSearch;
-                document.getElementById('res-name').innerText = data.name || "Nom non renseigné";
-                document.getElementById('res-email').innerText = data.email || "Email non renseigné";
-                document.getElementById('res-img').src = data.cardImage;
-                document.getElementById('search-result').classList.remove('hidden');
-            } else {
-                window.showNotification("❌ Étudiant introuvable dans la base.", true);
-                document.getElementById('search-result').classList.add('hidden');
+                document.getElementById('my-saved-card-img').src = data.cardImage;
+                document.getElementById('my-saved-name').innerText = data.name || "Étudiant(e)";
+                document.getElementById('btn-show-card').classList.remove('hidden');
             }
-        };
+        }
+    }
 
-        window.deleteStudent = async function() {
-            if(confirm(`⚠️ Supprimer définitivement le compte de ${currentSearchMat} ?`)) {
-                await set(ref(db, `users/${currentSearchMat}`), null);
-                document.getElementById('search-result').classList.add('hidden');
-                document.getElementById('search-mat-input').value = "";
-                window.showNotification(`✅ Compte ${currentSearchMat} supprimé.`);
-            }
-        };
+    function checkLoginState() {
+        document.getElementById('auth-screen').classList.add('hidden');
+        if (currentUser === 'student') {
+            document.getElementById('view-student').classList.remove('hidden');
+            document.getElementById('user-display').innerText = "👤 " + matricule;
+            fetchStudentCard();
+            checkMyTicketInDB(); 
+        } else if (currentUser === 'resto') {
+            document.getElementById('view-resto').classList.remove('hidden');
+            document.getElementById('user-display').innerText = "👨‍🍳 Panel Gérant";
+        } else {
+            document.getElementById('auth-screen').classList.remove('hidden');
+        }
+    }
 
-        async function checkMyTicketInDB() {
-            if (currentUser !== 'student' || activeService === 'FERMÉ') { myTicket = null; updateUI(); return; }
-            const myTicketRef = ref(db, `service_tickets/${todayDate}/${activeService}/${matricule}`);
-            const snap = await get(myTicketRef);
-            if (snap.exists()) {
-                myTicket = snap.val(); myTicketMeal = activeService; generateQR();
-            } else { myTicket = null; }
-            updateUI();
+    window.searchStudent = async function() {
+        const matToSearch = document.getElementById('search-mat-input').value.trim().toUpperCase();
+        if(!matToSearch) return;
+        
+        const snap = await get(ref(db, `users/${matToSearch}`));
+        if(snap.exists()) {
+            const data = snap.val();
+            currentSearchMat = matToSearch;
+            document.getElementById('res-mat').innerText = matToSearch;
+            document.getElementById('res-name').innerText = data.name || "Nom non renseigné";
+            document.getElementById('res-email').innerText = data.email || "Email non renseigné";
+            document.getElementById('res-img').src = data.cardImage;
+            document.getElementById('search-result').classList.remove('hidden');
+        } else {
+            window.showNotification("❌ Étudiant introuvable dans la base.", true);
+            document.getElementById('search-result').classList.add('hidden');
+        }
+    };
+
+    window.deleteStudent = async function() {
+        if(confirm(`⚠️ Supprimer définitivement le compte de ${currentSearchMat} ?`)) {
+            await set(ref(db, `users/${currentSearchMat}`), null);
+            document.getElementById('search-result').classList.add('hidden');
+            document.getElementById('search-mat-input').value = "";
+            window.showNotification(`✅ Compte ${currentSearchMat} supprimé.`);
+        }
+    };
+
+    async function checkMyTicketInDB() {
+        if (currentUser !== 'student' || activeService === 'FERMÉ') { myTicket = null; updateUI(); return; }
+        const myTicketRef = ref(db, `service_tickets/${todayDate}/${activeService}/${matricule}`);
+        const snap = await get(myTicketRef);
+        if (snap.exists()) {
+            myTicket = snap.val(); myTicketMeal = activeService; generateQR();
+        } else { myTicket = null; }
+        updateUI();
+    }
+
+    onValue(ref(db, 'system/activeService'), (snapshot) => {
+        activeService = snapshot.val() || 'FERMÉ';
+        document.getElementById('service-name-display').innerText = activeService;
+        document.getElementById('history-service-name').innerText = activeService;
+        
+        if (currentUser === 'student') {
+            const btn = document.getElementById('btn-take-ticket');
+            const msg = document.getElementById('ticket-closed-msg');
+            if (activeService === 'FERMÉ') { btn.disabled = true; msg.classList.remove('hidden'); } 
+            else { btn.disabled = false; msg.classList.add('hidden'); }
+            checkMyTicketInDB(); 
         }
 
-        onValue(ref(db, 'system/activeService'), (snapshot) => {
-            activeService = snapshot.val() || 'FERMÉ';
-            document.getElementById('service-name-display').innerText = activeService;
-            document.getElementById('history-service-name').innerText = activeService;
-            
-            if (currentUser === 'student') {
-                const btn = document.getElementById('btn-take-ticket');
-                const msg = document.getElementById('ticket-closed-msg');
-                if (activeService === 'FERMÉ') { btn.disabled = true; msg.classList.remove('hidden'); } 
-                else { btn.disabled = false; msg.classList.add('hidden'); }
-                checkMyTicketInDB(); 
-            }
-
-            if(currentUser === 'resto' && activeService !== 'FERMÉ') {
-                onValue(ref(db, `history/${todayDate}/${activeService}`), (snap) => {
-                    const historyList = document.getElementById('history-list');
-                    historyList.innerHTML = ''; let count = 0;
-                    snap.forEach((child) => {
-                        const data = child.val(); count++;
-                        const timeStr = new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                        const isFraud = data.status === 'fraude';
-                        historyList.innerHTML = `
-                            <div class="p-3 rounded-xl border ${isFraud ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'} flex justify-between items-center shadow-sm">
-                                <div><p class="font-bold text-sm ${isFraud ? 'text-red-600' : 'text-gray-800'}">${data.name || data.matricule}</p><p class="text-xs text-gray-500">#${child.key} • ${timeStr}</p></div>
-                                <span class="text-xs font-bold px-2 py-1 rounded ${isFraud ? 'bg-red-200 text-red-700' : 'bg-green-100 text-green-700'}">${isFraud ? 'FRAUDE' : 'Validé'}</span>
-                            </div>` + historyList.innerHTML;
-                    });
-                    document.getElementById('total-served').innerText = count;
+        if(currentUser === 'resto' && activeService !== 'FERMÉ') {
+            onValue(ref(db, `history/${todayDate}/${activeService}`), (snap) => {
+                const historyList = document.getElementById('history-list');
+                historyList.innerHTML = ''; let count = 0;
+                snap.forEach((child) => {
+                    const data = child.val(); count++;
+                    const timeStr = new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const isFraud = data.status === 'fraude';
+                    historyList.innerHTML = `
+                        <div class="p-3 rounded-xl border ${isFraud ? 'bg-red-50 border-red-200' : 'bg-white border-gray-100'} flex justify-between items-center shadow-sm">
+                            <div><p class="font-bold text-sm ${isFraud ? 'text-red-600' : 'text-gray-800'}">${data.name || data.matricule}</p><p class="text-xs text-gray-500">#${child.key} • ${timeStr}</p></div>
+                            <span class="text-xs font-bold px-2 py-1 rounded ${isFraud ? 'bg-red-200 text-red-700' : 'bg-green-100 text-green-700'}">${isFraud ? 'FRAUDE' : 'Validé'}</span>
+                        </div>` + historyList.innerHTML;
                 });
-            }
-        });
-
-        onValue(ref(db, 'queue'), (snapshot) => {
-            const data = snapshot.val();
-            if (data) { currentServing = data.currentServing || 0; updateUI(); }
-        });
-
-        window.takeTicket = async function() {
-            if(activeService === 'FERMÉ') return alert("La cantine est fermée.");
-            document.getElementById('btn-take-ticket').disabled = true;
-
-            const myTicketRef = ref(db, `service_tickets/${todayDate}/${activeService}/${matricule}`);
-            const ticketSnap = await get(myTicketRef);
-            if(ticketSnap.exists()) { window.showNotification("Tu as déjà un ticket !", true); checkMyTicketInDB(); return; }
-
-            const historyRef = ref(db, `history/${todayDate}/${activeService}`);
-            const histSnap = await get(historyRef);
-            let alreadyPassed = false;
-            histSnap.forEach(child => { if(child.val().matricule === matricule && child.val().status === 'validé') alreadyPassed = true; });
-            
-            if(alreadyPassed) {
-                window.showNotification(`🚫 Tu as déjà mangé ce ${activeService.toLowerCase()}.`, true);
-                document.getElementById('btn-take-ticket').disabled = false; return;
-            }
-
-            runTransaction(ref(db, 'queue/lastTicket'), (val) => (val || 0) + 1).then(async (res) => {
-                myTicket = res.snapshot.val(); myTicketMeal = activeService;
-                await set(myTicketRef, myTicket);
-                generateQR(); updateUI();
-                window.showNotification(`🎟️ Ton ticket est validé !`);
+                document.getElementById('total-served').innerText = count;
             });
-        };
+        }
+    });
 
-        function generateQR() {
-            const qrData = `${matricule}|${myTicket}|${todayDate}|${myTicketMeal}`;
-            document.getElementById('my-ticket-service-name').innerText = myTicketMeal;
-            const qrContainer = document.getElementById("qrcode-container");
-            qrContainer.innerHTML = ""; 
-            new QRCode(qrContainer, { text: qrData, width: 160, height: 160, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
+    onValue(ref(db, 'queue'), (snapshot) => {
+        const data = snapshot.val();
+        if (data) { currentServing = data.currentServing || 0; updateUI(); }
+    });
+
+    window.takeTicket = async function() {
+        if(activeService === 'FERMÉ') return alert("La cantine est fermée.");
+        document.getElementById('btn-take-ticket').disabled = true;
+
+        const myTicketRef = ref(db, `service_tickets/${todayDate}/${activeService}/${matricule}`);
+        const ticketSnap = await get(myTicketRef);
+        if(ticketSnap.exists()) { window.showNotification("Tu as déjà un ticket !", true); checkMyTicketInDB(); return; }
+
+        const historyRef = ref(db, `history/${todayDate}/${activeService}`);
+        const histSnap = await get(historyRef);
+        let alreadyPassed = false;
+        histSnap.forEach(child => { if(child.val().matricule === matricule && child.val().status === 'validé') alreadyPassed = true; });
+        
+        if(alreadyPassed) {
+            window.showNotification(`🚫 Tu as déjà mangé ce ${activeService.toLowerCase()}.`, true);
+            document.getElementById('btn-take-ticket').disabled = false; return;
         }
 
-        window.setService = function(serviceName) {
-            if(confirm(`Ouvrir le service : ${serviceName} ?\nCela va réinitialiser la file.`)) {
-                set(ref(db, 'system/activeService'), serviceName);
-                set(ref(db, 'queue'), { lastTicket: 0, currentServing: 0 });
+        runTransaction(ref(db, 'queue/lastTicket'), (val) => (val || 0) + 1).then(async (res) => {
+            myTicket = res.snapshot.val(); myTicketMeal = activeService;
+            await set(myTicketRef, myTicket);
+            generateQR(); updateUI();
+            window.showNotification(`🎟️ Ton ticket est validé !`);
+        });
+    };
+
+    function generateQR() {
+        const qrData = `${matricule}|${myTicket}|${todayDate}|${myTicketMeal}`;
+        document.getElementById('my-ticket-service-name').innerText = myTicketMeal;
+        const qrContainer = document.getElementById("qrcode-container");
+        qrContainer.innerHTML = ""; 
+        new QRCode(qrContainer, { text: qrData, width: 160, height: 160, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
+    }
+
+    window.setService = function(serviceName) {
+        if(confirm(`Ouvrir le service : ${serviceName} ?\nCela va réinitialiser la file.`)) {
+            set(ref(db, 'system/activeService'), serviceName);
+            set(ref(db, 'queue'), { lastTicket: 0, currentServing: 0 });
+        }
+    };
+
+    window.callNext = function() { set(ref(db, 'queue/currentServing'), currentServing + 1); };
+
+    window.openScanner = function() {
+        if(activeService === 'FERMÉ') return alert("Ouvrez d'abord un service !");
+        document.getElementById('scanner-modal').classList.remove('hidden'); document.getElementById('scanner-modal').classList.add('flex');
+        if(html5QrCode) html5QrCode.clear();
+        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess).catch(e => alert("Erreur Caméra."));
+    };
+
+    window.closeScanner = function() {
+        document.getElementById('scanner-modal').classList.add('hidden'); document.getElementById('scanner-modal').classList.remove('flex');
+        if(html5QrCode) html5QrCode.stop().catch(e=>{});
+    };
+    window.restartScanner = window.openScanner;
+
+    async function onScanSuccess(decodedText) {
+        window.closeScanner(); 
+        try {
+            const parts = decodedText.split('|');
+            const matScan = parts[0]; const ticketScan = parseInt(parts[1]); const dateScan = parts[2]; const mealScan = parts[3];
+
+            if(dateScan !== todayDate) return alert(`🚨 TICKET EXPIRÉ ! Date: ${dateScan}`);
+            if(mealScan !== activeService) return alert(`🚨 MAUVAIS REPAS ! Billet ${mealScan} scanné pendant le ${activeService}.`);
+
+            const userSnap = await get(ref(db, `users/${matScan}`));
+            const studentName = userSnap.exists() ? userSnap.val().name : matScan;
+
+            const historyRef = ref(db, `history/${todayDate}/${activeService}/${ticketScan}`);
+            const snap = await get(historyRef);
+
+            if(snap.exists() && snap.val().status === 'validé') {
+                alert(`🚨 DOUBLE PASSAGE !\n${studentName} a DÉJÀ mangé ce ${activeService} !`);
+                set(ref(db, `history/${todayDate}/${activeService}/FRAUDE_${ticketScan}_${Date.now()}`), { matricule: matScan, name: studentName, timestamp: Date.now(), status: 'fraude' });
+                return;
             }
-        };
 
-        window.callNext = function() { set(ref(db, 'queue/currentServing'), currentServing + 1); };
-
-        window.openScanner = function() {
-            if(activeService === 'FERMÉ') return alert("Ouvrez d'abord un service !");
-            document.getElementById('scanner-modal').classList.remove('hidden'); document.getElementById('scanner-modal').classList.add('flex');
-            if(html5QrCode) html5QrCode.clear();
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess).catch(e => alert("Erreur Caméra."));
-        };
-
-        window.closeScanner = function() {
-            document.getElementById('scanner-modal').classList.add('hidden'); document.getElementById('scanner-modal').classList.remove('flex');
-            if(html5QrCode) html5QrCode.stop().catch(e=>{});
-        };
-        window.restartScanner = window.openScanner;
-
-        async function onScanSuccess(decodedText) {
-            window.closeScanner(); 
-            try {
-                const parts = decodedText.split('|');
-                const matScan = parts[0]; const ticketScan = parseInt(parts[1]); const dateScan = parts[2]; const mealScan = parts[3];
-
-                if(dateScan !== todayDate) return alert(`🚨 TICKET EXPIRÉ ! Date: ${dateScan}`);
-                if(mealScan !== activeService) return alert(`🚨 MAUVAIS REPAS ! Billet ${mealScan} scanné pendant le ${activeService}.`);
-
-                const userSnap = await get(ref(db, `users/${matScan}`));
-                const studentName = userSnap.exists() ? userSnap.val().name : matScan;
-
-                const historyRef = ref(db, `history/${todayDate}/${activeService}/${ticketScan}`);
-                const snap = await get(historyRef);
-
-                if(snap.exists() && snap.val().status === 'validé') {
-                    alert(`🚨 DOUBLE PASSAGE !\n${studentName} a DÉJÀ mangé ce ${activeService} !`);
-                    set(ref(db, `history/${todayDate}/${activeService}/FRAUDE_${ticketScan}_${Date.now()}`), { matricule: matScan, name: studentName, timestamp: Date.now(), status: 'fraude' });
-                    return;
-                }
-
-                if(confirm(`✅ VÉRIFICATION OK\nÉtudiant : ${studentName}\nValider son repas ?`)) {
-                    await set(historyRef, { matricule: matScan, name: studentName, timestamp: Date.now(), status: 'validé' });
-                    window.showNotification(`✅ Repas validé pour ${studentName}.`);
-                }
-            } catch(e) { alert("❌ QR Code invalide."); }
-        }
-
-        window.switchAdminTab = function(tab) {
-            document.getElementById('admin-service').classList.toggle('hidden', tab !== 'service');
-            document.getElementById('admin-history').classList.toggle('hidden', tab !== 'history');
-            document.getElementById('admin-students').classList.toggle('hidden', tab !== 'students');
-            
-            const activeClass = "flex-1 py-2 text-xs font-bold text-white bg-gray-600 rounded-lg";
-            const inactiveClass = "flex-1 py-2 text-xs font-bold text-gray-400 hover:text-white";
-            
-            document.getElementById('btn-tab-service').className = tab === 'service' ? activeClass : inactiveClass;
-            document.getElementById('btn-tab-history').className = tab === 'history' ? activeClass : inactiveClass;
-            document.getElementById('btn-tab-students').className = tab === 'students' ? activeClass : inactiveClass;
-        };
-
-        function updateUI() {
-            document.getElementById('student-current-serving').innerText = currentServing > 0 ? currentServing : "-";
-            document.getElementById('resto-current-serving').innerText = currentServing > 0 ? currentServing : "-";
-
-            if (myTicket && currentUser === 'student') {
-                document.getElementById('ticket-action-zone').classList.add('hidden');
-                document.getElementById('my-ticket-zone').classList.remove('hidden');
-                document.getElementById('my-ticket-number').innerText = "#" + myTicket;
-
-                let peopleBefore = myTicket - currentServing;
-                if (peopleBefore <= 0) {
-                    document.getElementById('queue-status-box').classList.add('hidden');
-                    document.getElementById('turn-status-box').classList.remove('hidden');
-                } else {
-                    document.getElementById('queue-status-box').classList.remove('hidden');
-                    document.getElementById('turn-status-box').classList.add('hidden');
-                    document.getElementById('people-before-me').innerText = peopleBefore;
-                }
-            } else if (currentUser === 'student') {
-                document.getElementById('ticket-action-zone').classList.remove('hidden');
-                document.getElementById('my-ticket-zone').classList.add('hidden');
+            if(confirm(`✅ VÉRIFICATION OK\nÉtudiant : ${studentName}\nValider son repas ?`)) {
+                await set(historyRef, { matricule: matScan, name: studentName, timestamp: Date.now(), status: 'validé' });
+                window.showNotification(`✅ Repas validé pour ${studentName}.`);
             }
+        } catch(e) { alert("❌ QR Code invalide."); }
+    }
+
+    window.switchAdminTab = function(tab) {
+        document.getElementById('admin-service').classList.toggle('hidden', tab !== 'service');
+        document.getElementById('admin-history').classList.toggle('hidden', tab !== 'history');
+        document.getElementById('admin-students').classList.toggle('hidden', tab !== 'students');
+        
+        const activeClass = "flex-1 py-2 text-xs font-bold text-white bg-gray-600 rounded-lg";
+        const inactiveClass = "flex-1 py-2 text-xs font-bold text-gray-400 hover:text-white";
+        
+        document.getElementById('btn-tab-service').className = tab === 'service' ? activeClass : inactiveClass;
+        document.getElementById('btn-tab-history').className = tab === 'history' ? activeClass : inactiveClass;
+        document.getElementById('btn-tab-students').className = tab === 'students' ? activeClass : inactiveClass;
+    };
+
+    function updateUI() {
+        document.getElementById('student-current-serving').innerText = currentServing > 0 ? currentServing : "-";
+        document.getElementById('resto-current-serving').innerText = currentServing > 0 ? currentServing : "-";
+
+        if (myTicket && currentUser === 'student') {
+            document.getElementById('ticket-action-zone').classList.add('hidden');
+            document.getElementById('my-ticket-zone').classList.remove('hidden');
+            document.getElementById('my-ticket-number').innerText = "#" + myTicket;
+
+            let peopleBefore = myTicket - currentServing;
+            if (peopleBefore <= 0) {
+                document.getElementById('queue-status-box').classList.add('hidden');
+                document.getElementById('turn-status-box').classList.remove('hidden');
+            } else {
+                document.getElementById('queue-status-box').classList.remove('hidden');
+                document.getElementById('turn-status-box').classList.add('hidden');
+                document.getElementById('people-before-me').innerText = peopleBefore;
+            }
+        } else if (currentUser === 'student') {
+            document.getElementById('ticket-action-zone').classList.remove('hidden');
+            document.getElementById('my-ticket-zone').classList.add('hidden');
         }
+    }
 
-        window.showNotification = function(message, isError = false) {
-            const banner = document.getElementById('notification-banner');
-            document.getElementById('notif-text').innerText = message;
-            document.getElementById('notif-icon').innerHTML = isError ? '<i class="fa-solid fa-triangle-exclamation text-red-600 text-xl"></i>' : '<i class="fa-solid fa-bell text-orange-600 text-xl"></i>';
-            banner.classList.remove('notif-leave'); banner.classList.add('notif-enter');
-            setTimeout(() => { banner.classList.remove('notif-enter'); banner.classList.add('notif-leave'); }, 4000);
-        };
+    window.showNotification = function(message, isError = false) {
+        const banner = document.getElementById('notification-banner');
+        document.getElementById('notif-text').innerText = message;
+        document.getElementById('notif-icon').innerHTML = isError ? '<i class="fa-solid fa-triangle-exclamation text-red-600 text-xl"></i>' : '<i class="fa-solid fa-bell text-orange-600 text-xl"></i>';
+        banner.classList.remove('notif-leave'); banner.classList.add('notif-enter');
+        setTimeout(() => { banner.classList.remove('notif-enter'); banner.classList.add('notif-leave'); }, 4000);
+    };
 
-        checkLoginState(); 
-    </script>
-</body>
-    </html>
+    checkLoginState(); 
+                                                                   </script>
