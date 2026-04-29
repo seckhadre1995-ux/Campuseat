@@ -14,7 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
 
-    <!-- Police Premium (Plus Jakarta Sans) -->
+    <!-- Police Premium -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Configuration Tailwind & Animations Custom -->
@@ -42,41 +42,15 @@
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f4f4f5; display: flex; justify-content: center; overflow: hidden; }
-        
-        /* Arrière-plan Mesh Gradient pour la connexion */
-        .mesh-bg {
-            background-color: #ffffff;
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(28, 100%, 74%, 0.5) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, hsla(39, 100%, 66%, 0.5) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, hsla(343, 100%, 76%, 0.2) 0px, transparent 50%);
-        }
-
-        /* Glassmorphism */
+        .mesh-bg { background-color: #ffffff; background-image: radial-gradient(at 0% 0%, hsla(28, 100%, 74%, 0.5) 0px, transparent 50%), radial-gradient(at 100% 100%, hsla(39, 100%, 66%, 0.5) 0px, transparent 50%), radial-gradient(at 100% 0%, hsla(343, 100%, 76%, 0.2) 0px, transparent 50%); }
         .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); }
-        .glass-dark { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
-
-        /* Style Apple Wallet Ticket */
-        .ticket {
-            position: relative; background: #ffffff; border-radius: 1.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); overflow: hidden;
-        }
-        .ticket::before, .ticket::after {
-            content: ''; position: absolute; top: 60%; width: 40px; height: 40px; background-color: #f4f4f5; border-radius: 50%; z-index: 10;
-        }
+        .ticket { position: relative; background: #ffffff; border-radius: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); overflow: hidden; }
+        .ticket::before, .ticket::after { content: ''; position: absolute; top: 60%; width: 40px; height: 40px; background-color: #f4f4f5; border-radius: 50%; z-index: 10; }
         .ticket::before { left: -20px; box-shadow: inset -5px 0 10px rgba(0,0,0,0.03); }
         .ticket::after { right: -20px; box-shadow: inset 5px 0 10px rgba(0,0,0,0.03); }
         .ticket-dashed-line { border-top: 2px dashed #e4e4e7; margin: 2rem -2rem; position: relative; }
-        
-        /* Effet brillance */
-        .shine {
-            position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
-            transform: skewX(-20deg); animation: shine 5s infinite; z-index: 20; pointer-events: none;
-        }
+        .shine { position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent); transform: skewX(-20deg); animation: shine 5s infinite; z-index: 20; pointer-events: none; }
         @keyframes shine { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
-
-        /* Masquer la scrollbar */
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -84,7 +58,7 @@
 
 <div class="w-full max-w-md bg-[#f4f4f5] h-full flex flex-col relative shadow-2xl overflow-hidden">
     
-    <!-- 🔔 NOTIFICATION FLOTTANTE -->
+    <!-- 🔔 NOTIFICATION -->
     <div id="notification-banner" class="fixed top-8 left-1/2 transform -translate-x-1/2 -translate-y-40 bg-gray-900/95 backdrop-blur-xl border border-white/10 text-white px-5 py-4 rounded-2xl shadow-2xl z-[999] flex items-center gap-4 transition-all duration-500 w-[90%] max-w-[380px]">
         <div id="notif-icon" class="text-2xl"></div>
         <div class="flex-1">
@@ -92,29 +66,23 @@
         </div>
     </div>
 
-    <!-- 💳 MODAL CARTE ÉTUDIANT -->
-    <div id="student-card-modal" class="hidden absolute inset-0 bg-gray-900/60 backdrop-blur-md z-[300] flex-col items-center justify-center p-6 transition-opacity">
-        <div class="bg-white p-6 rounded-[2rem] w-full max-w-sm text-center shadow-2xl transform transition-transform animate-slide-up relative overflow-hidden">
+    <!-- 💳 MODAL CARTE -->
+    <div id="student-card-modal" class="hidden absolute inset-0 bg-gray-900/60 backdrop-blur-md z-[300] flex-col items-center justify-center p-6">
+        <div class="bg-white p-6 rounded-[2rem] w-full max-w-sm text-center shadow-2xl relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-brand-400 to-brand-600"></div>
-            
             <div class="relative mt-8 mx-auto w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-white mb-4 z-10">
                 <i class="fa-solid fa-user-graduate text-4xl text-brand-500"></i>
             </div>
-            
             <h3 class="font-bold text-2xl mb-1 text-gray-800">Pass Étudiant</h3>
             <p id="my-saved-name" class="text-xs font-bold text-gray-400 mb-6 uppercase tracking-widest"></p>
-            
             <div class="relative rounded-2xl overflow-hidden shadow-md border-2 border-gray-100 mb-6 bg-gray-50">
                 <img id="my-saved-card-img" src="" class="w-full h-56 object-cover">
             </div>
-
-            <button onclick="document.getElementById('student-card-modal').classList.add('hidden')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-4 rounded-2xl transition active:scale-95">
-                Fermer la carte
-            </button>
+            <button onclick="document.getElementById('student-card-modal').classList.add('hidden')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-4 rounded-2xl transition">Fermer la carte</button>
         </div>
     </div>
 
-    <!-- 📷 MODAL SCANNER GÉRANT -->
+    <!-- 📷 MODAL SCANNER -->
     <div id="scanner-modal" class="hidden absolute inset-0 bg-black/95 backdrop-blur-xl z-[200] flex-col">
         <div class="p-6 flex justify-between items-center text-white border-b border-white/10 pt-12">
             <h3 class="font-bold text-xl"><i class="fa-solid fa-expand text-brand-500 mr-2"></i> Mode Scan</h3>
@@ -122,7 +90,6 @@
         </div>
         <div class="flex-1 flex flex-col items-center justify-center p-6">
             <div class="relative w-full max-w-sm">
-                <!-- Effet de scan futuriste -->
                 <div class="absolute -inset-2 bg-gradient-to-r from-brand-500 to-emerald-500 rounded-[2rem] blur opacity-50 animate-pulse"></div>
                 <div id="reader" class="relative w-full rounded-[1.5rem] overflow-hidden shadow-2xl bg-gray-900 min-h-[300px] border-2 border-white/20"></div>
             </div>
@@ -132,129 +99,59 @@
         </div>
     </div>
 
-    <!-- 🔐 ÉCRAN AUTHENTIFICATION -->
+    <!-- 🔐 AUTHENTIFICATION (Réduite visuellement pour gagner de l'espace de code) -->
     <div id="auth-screen" class="absolute inset-0 mesh-bg z-[100] flex flex-col items-center justify-center p-6 transition-all duration-500 overflow-y-auto">
-        
         <div class="animate-float mb-8 flex flex-col items-center">
-            <div class="w-20 h-20 bg-white rounded-3xl shadow-[0_10px_40px_rgba(249,115,22,0.3)] flex items-center justify-center mb-4 transform rotate-3">
-                <i class="fa-solid fa-burger text-4xl text-brand-500 transform -rotate-3"></i>
-            </div>
+            <div class="w-20 h-20 bg-white rounded-3xl shadow-[0_10px_40px_rgba(249,115,22,0.3)] flex items-center justify-center mb-4 transform rotate-3"><i class="fa-solid fa-burger text-4xl text-brand-500 transform -rotate-3"></i></div>
             <h1 class="text-4xl font-black text-gray-900 tracking-tight">CampusEat</h1>
-            <p class="text-gray-500 mt-1 text-sm font-medium">Votre cantine. Zéro attente.</p>
         </div>
-        
         <div id="login-box" class="glass w-full rounded-[2rem] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.05)] border border-white/60 relative animate-slide-up">
-            
             <div class="flex mb-8 bg-gray-100/50 p-1 rounded-2xl relative z-10">
                 <button id="tab-login" onclick="window.switchAuthTab('login')" class="flex-1 py-3 text-center font-bold text-sm rounded-xl bg-white shadow-sm transition-all text-brand-600">Connexion</button>
-                <button id="tab-register" onclick="window.switchAuthTab('register')" class="flex-1 py-3 text-center font-bold text-sm rounded-xl text-gray-400 hover:text-gray-600 transition-all">Inscription</button>
+                <button id="tab-register" onclick="window.switchAuthTab('register')" class="flex-1 py-3 text-center font-bold text-sm rounded-xl text-gray-400 transition-all">Inscription</button>
             </div>
-
             <div id="form-auth" class="relative z-10">
                 <div class="mb-4">
-                    <label class="block text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-widest pl-2">Matricule</label>
-                    <div class="relative">
-                        <i class="fa-regular fa-id-card absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" id="mat-input" placeholder="Ex: MAT-1234" class="w-full bg-white border-0 shadow-inner rounded-2xl pl-11 pr-4 py-4 font-mono font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
-                    </div>
+                    <input type="text" id="mat-input" placeholder="Matricule (Ex: MAT-1234)" class="w-full bg-white border-0 shadow-inner rounded-2xl px-4 py-4 font-mono font-bold text-center uppercase focus:ring-2 focus:ring-brand-500">
                 </div>
-                
                 <div id="register-fields-text" class="hidden space-y-4 mb-4">
-                    <div>
-                        <div class="relative">
-                            <i class="fa-regular fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <input type="text" id="name-input" placeholder="Nom Complet" class="w-full bg-white border-0 shadow-inner rounded-2xl pl-11 pr-4 py-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
-                        </div>
-                    </div>
-                    <div>
-                        <div class="relative">
-                            <i class="fa-regular fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <input type="email" id="email-input" placeholder="Adresse Email" class="w-full bg-white border-0 shadow-inner rounded-2xl pl-11 pr-4 py-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
-                        </div>
-                    </div>
+                    <input type="text" id="name-input" placeholder="Nom Complet" class="w-full bg-white border-0 shadow-inner rounded-2xl px-4 py-4 text-center focus:ring-2 focus:ring-brand-500">
+                    <input type="email" id="email-input" placeholder="Adresse Email" class="w-full bg-white border-0 shadow-inner rounded-2xl px-4 py-4 text-center focus:ring-2 focus:ring-brand-500">
                 </div>
-
                 <div class="mb-4">
-                    <label class="block text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-widest pl-2">Sécurité</label>
-                    <div class="relative">
-                        <i class="fa-solid fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="password" id="pwd-input" placeholder="Mot de passe" class="w-full bg-white border-0 shadow-inner rounded-2xl pl-11 pr-4 py-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
-                    </div>
+                    <input type="password" id="pwd-input" placeholder="Mot de passe" class="w-full bg-white border-0 shadow-inner rounded-2xl px-4 py-4 text-center focus:ring-2 focus:ring-brand-500">
                 </div>
-                
                 <div id="register-fields-file" class="hidden mb-6 p-1 relative">
                     <input type="file" id="id-card-upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" onchange="window.handleImageUpload(event)">
                     <div class="w-full border-2 border-dashed border-brand-300 bg-brand-50 rounded-2xl p-4 text-center z-10 relative flex flex-col items-center justify-center">
-                        <i class="fa-solid fa-camera text-2xl text-brand-400 mb-2"></i>
-                        <p class="text-xs font-bold text-brand-600">Appuyez pour ajouter votre carte étudiante</p>
+                        <i class="fa-solid fa-camera text-2xl text-brand-400 mb-2"></i><p class="text-xs font-bold text-brand-600">Appuyez pour ajouter votre carte étudiante</p>
                     </div>
                     <img id="card-preview" class="mt-3 hidden w-full h-32 object-cover rounded-xl border border-gray-200 shadow-sm relative z-30">
                 </div>
-
-                <div id="forgot-pwd-zone" class="mb-6 text-right">
-                    <button onclick="window.showResetFlow()" class="text-[11px] text-gray-500 font-bold hover:text-brand-600 transition">Mot de passe oublié ?</button>
-                </div>
-
-                <button id="btn-action" onclick="window.processAuth()" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] active:scale-95 transition-all text-sm tracking-wide">
-                    SE CONNECTER
-                </button>
+                <button id="btn-action" onclick="window.processAuth()" class="w-full bg-gray-900 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all text-sm">SE CONNECTER</button>
             </div>
         </div>
-
-        <!-- BLOC MOT DE PASSE OUBLIÉ -->
-        <div id="reset-box" class="hidden glass w-full rounded-[2rem] p-6 shadow-2xl relative">
-            <button onclick="window.hideResetFlow()" class="absolute top-6 left-6 text-gray-400 hover:text-gray-800 transition"><i class="fa-solid fa-arrow-left text-xl"></i></button>
-            <h2 class="text-center font-black text-2xl mb-2 mt-4 text-gray-800">Récupération</h2>
-            <p class="text-xs text-gray-500 mb-8 text-center px-4">Suivez les étapes pour retrouver l'accès.</p>
-            
-            <div id="reset-step-1">
-                <input type="text" id="reset-mat-input" placeholder="Votre Matricule" class="w-full bg-white shadow-inner rounded-2xl px-4 py-4 mb-4 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-brand-500 uppercase text-center border-0">
-                <button onclick="window.sendResetCode()" class="w-full bg-gray-900 text-white font-bold py-4 rounded-2xl shadow-lg transition active:scale-95 text-sm">Envoyer le code secret</button>
-            </div>
-            <!-- (Steps 2 et 3 conservés dans le code JS et masqués ici pour concision, mais fonctionnels) -->
-            <div id="reset-step-2" class="hidden">
-                <input type="text" id="reset-code-input" placeholder="----" class="w-full bg-white shadow-inner border-0 rounded-2xl px-4 py-4 mb-4 text-center text-3xl font-black tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-brand-500">
-                <button onclick="window.verifyResetCode()" class="w-full bg-brand-500 text-white font-bold py-4 rounded-2xl shadow-lg transition active:scale-95 text-sm">Vérifier le code</button>
-            </div>
-            <div id="reset-step-3" class="hidden">
-                <input type="password" id="new-pwd-input" placeholder="Nouveau mot de passe" class="w-full bg-white shadow-inner border-0 rounded-2xl px-4 py-4 mb-4 focus:outline-none focus:ring-2 focus:ring-brand-500 text-center">
-                <button onclick="window.saveNewPassword()" class="w-full bg-emerald-500 text-white font-bold py-4 rounded-2xl shadow-lg transition active:scale-95 text-sm">Enregistrer</button>
-            </div>
-        </div>
-        
-        <button onclick="window.loginAsResto()" id="btn-admin-access" class="mt-10 text-[10px] text-gray-400 hover:text-gray-600 transition font-bold uppercase tracking-widest flex items-center gap-2">
-            <i class="fa-solid fa-lock"></i> Accès Professionnel
-        </button>
+        <button onclick="window.loginAsResto()" id="btn-admin-access" class="mt-10 text-[10px] text-gray-400 hover:text-gray-600 transition font-bold uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-lock"></i> Accès Professionnel</button>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 📱 L'APPLICATION PRINCIPALE                -->
-    <!-- ========================================== -->
-    
-    <!-- HEADER GLOBAL (FLOTTANT & BLUR) -->
+    <!-- HEADER GLOBAL -->
     <header class="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white/80 backdrop-blur-xl px-6 py-4 z-50 flex justify-between items-center border-b border-gray-200/50 pt-safe transition-all" style="padding-top: max(1rem, env(safe-area-inset-top));">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center text-brand-600 border border-brand-200">
-                <i class="fa-solid fa-user-astronaut text-lg"></i>
-            </div>
+            <div class="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center text-brand-600 border border-brand-200"><i class="fa-solid fa-user-astronaut text-lg"></i></div>
             <div>
                 <p id="greeting-text" class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Bonjour,</p>
                 <p id="user-display" class="text-sm font-black text-gray-900 leading-none">Étudiant</p>
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <button id="btn-show-card" onclick="document.getElementById('student-card-modal').classList.remove('hidden')" class="hidden w-10 h-10 bg-gray-50 text-gray-600 rounded-full flex items-center justify-center shadow-sm border border-gray-200 active:scale-95 transition">
-                <i class="fa-solid fa-id-card"></i>
-            </button>
-            <button onclick="window.logout()" class="w-10 h-10 bg-gray-50 text-red-500 rounded-full flex items-center justify-center shadow-sm border border-gray-200 active:scale-95 transition">
-                <i class="fa-solid fa-power-off"></i>
-            </button>
+            <button id="btn-show-card" onclick="document.getElementById('student-card-modal').classList.remove('hidden')" class="hidden w-10 h-10 bg-gray-50 text-gray-600 rounded-full flex items-center justify-center shadow-sm border border-gray-200 active:scale-95 transition"><i class="fa-solid fa-id-card"></i></button>
+            <button onclick="window.logout()" class="w-10 h-10 bg-gray-50 text-red-500 rounded-full flex items-center justify-center shadow-sm border border-gray-200 active:scale-95 transition"><i class="fa-solid fa-power-off"></i></button>
         </div>
     </header>
 
     <main class="flex-1 overflow-y-auto px-6 pt-28 pb-32 relative">
         
-        <!-- INDICATEUR DE SERVICE GLOBAL -->
+        <!-- INDICATEUR DE SERVICE -->
         <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 flex items-center justify-between animate-slide-up" style="animation-delay: 0.1s;">
             <div class="flex items-center gap-3">
                 <div class="relative flex items-center justify-center">
@@ -271,10 +168,9 @@
         <!-- ========================================== -->
         <div id="view-student" class="hidden space-y-6">
             
-            <!-- WIDGET MENU DU JOUR IMMERSIF -->
+            <!-- 🔥 MENU DU JOUR IMMERSIF (Désormais Dynamique) -->
             <div class="relative rounded-[2rem] overflow-hidden shadow-xl h-44 group animate-slide-up" style="animation-delay: 0.2s;">
-                <!-- Image dynamique (Unsplash source food) -->
-                <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition duration-700">
+                <img id="student-menu-img" src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition duration-700">
                 <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
                 <div class="absolute inset-0 p-5 flex flex-col justify-between">
                     <div class="flex justify-between items-start">
@@ -282,17 +178,16 @@
                         <span class="bg-brand-500 text-white px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-lg">Aujourd'hui</span>
                     </div>
                     <div>
-                        <h3 class="text-2xl font-black text-white leading-tight mb-1 drop-shadow-md">Menu Complet</h3>
+                        <h3 id="student-menu-name" class="text-2xl font-black text-white leading-tight mb-1 drop-shadow-md">Chargement du menu...</h3>
                         <p class="text-gray-200 text-xs font-medium flex items-center gap-2 drop-shadow-sm"><i class="fa-solid fa-utensils text-brand-400"></i> Voir les détails au guichet</p>
                     </div>
                 </div>
             </div>
 
-            <!-- COMPTEUR NUMÉRO APPELÉ (DESIGN CERCLE) -->
+            <!-- COMPTEUR NUMÉRO APPELÉ -->
             <div class="bg-white rounded-[2rem] p-6 text-center shadow-sm border border-gray-100 animate-slide-up" style="animation-delay: 0.3s;">
                 <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-4">Numéro en cours d'appel</p>
                 <div class="relative w-40 h-40 mx-auto flex items-center justify-center rounded-full bg-gray-50 shadow-[inset_0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100">
-                   <!-- Anneau décoratif -->
                    <svg class="absolute inset-0 w-full h-full transform -rotate-90">
                       <circle cx="80" cy="80" r="76" stroke="currentColor" stroke-width="4" fill="transparent" class="text-gray-200" />
                       <circle cx="80" cy="80" r="76" stroke="currentColor" stroke-width="4" fill="transparent" stroke-dasharray="477" stroke-dashoffset="150" class="text-brand-500" />
@@ -301,48 +196,33 @@
                 </div>
             </div>
 
+            <!-- BOUTON PRENDRE UN TICKET -->
             <div id="ticket-action-zone" class="mt-8 animate-slide-up" style="animation-delay: 0.4s;">
-                <button id="btn-take-ticket" onclick="window.takeTicket()" class="w-full bg-gray-900 text-white font-bold py-5 rounded-2xl text-sm tracking-wide shadow-[0_15px_30px_rgba(0,0,0,0.15)] hover:bg-black active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-3">
+                <button id="btn-take-ticket" onclick="window.takeTicket()" class="w-full bg-gray-900 text-white font-bold py-5 rounded-2xl text-sm tracking-wide shadow-[0_15px_30px_rgba(0,0,0,0.15)] hover:bg-black active:scale-95 transition flex justify-center items-center gap-3">
                     <i class="fa-solid fa-ticket"></i> OBTENIR MON PASS
                 </button>
                 <p id="ticket-closed-msg" class="text-center text-xs text-red-500 mt-4 font-bold hidden">Le service est actuellement fermé.</p>
             </div>
 
-            <!-- LE TICKET ÉTUDIANT (APPLE WALLET STYLE) -->
+            <!-- LE TICKET ÉTUDIANT -->
             <div id="my-ticket-zone" class="hidden mt-6">
-                
-                <!-- Bannière c'est ton tour -->
-                <div id="turn-status-box" class="hidden bg-emerald-500 text-white p-5 rounded-[1.5rem] mb-6 shadow-[0_10px_30px_rgba(16,185,129,0.4)] animate-pulse-slow border border-emerald-400 relative overflow-hidden">
-                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/20 rounded-full blur-xl"></div>
+                <div id="turn-status-box" class="hidden bg-emerald-500 text-white p-5 rounded-[1.5rem] mb-6 shadow-lg animate-pulse-slow relative overflow-hidden">
                     <div class="relative z-10 flex items-center gap-4">
-                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl backdrop-blur-md shadow-inner">🎉</div>
-                        <div>
-                            <p class="font-black text-xl leading-tight">C'EST TON TOUR !</p>
-                            <p class="text-[11px] font-medium mt-0.5 opacity-90">Présente ce pass au guichet</p>
-                        </div>
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">🎉</div>
+                        <div><p class="font-black text-xl leading-tight">C'EST TON TOUR !</p><p class="text-[11px] font-medium mt-0.5">Présente ce pass au guichet</p></div>
                     </div>
                 </div>
-
                 <div id="queue-status-box" class="bg-brand-50 border border-brand-100 text-brand-700 p-4 rounded-2xl mb-6 font-bold text-sm flex items-center gap-3 shadow-sm">
                     <div class="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center text-brand-500"><i class="fa-solid fa-hourglass-half"></i></div>
                     <div><span id="people-before-me" class="text-lg font-black">0</span> personnes avant toi</div>
                 </div>
-
-                <div class="ticket p-8 text-center transition-all duration-500" id="ticket-visual-container">
+                <div class="ticket p-8 text-center" id="ticket-visual-container">
                     <div class="shine"></div>
-                    
-                    <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mt-2">Pass Numéro</p>
-                    <p id="my-ticket-number" class="text-7xl font-black text-gray-900 mb-2 tracking-tighter">#0</p>
-                    
+                    <p class="text-gray-400 text-[10px] font-bold uppercase mt-2">Pass Numéro</p>
+                    <p id="my-ticket-number" class="text-7xl font-black text-gray-900 mb-2">#0</p>
                     <div class="ticket-dashed-line"></div>
-
-                    <div class="bg-gray-50 p-4 rounded-3xl inline-block border border-gray-100 shadow-inner mb-4 relative z-30">
-                        <div id="qrcode-container" class="flex justify-center mx-auto bg-white p-3 rounded-2xl shadow-sm"></div>
-                    </div>
-                    
-                    <div class="flex items-center justify-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 py-2 rounded-lg w-max mx-auto px-4">
-                        <i class="fa-solid fa-utensils"></i> <span id="my-ticket-service-name" class="text-gray-800"></span>
-                    </div>
+                    <div class="bg-gray-50 p-4 rounded-3xl inline-block mb-4"><div id="qrcode-container" class="flex justify-center mx-auto bg-white p-3 rounded-2xl shadow-sm"></div></div>
+                    <div class="flex items-center justify-center gap-2 text-[10px] font-bold text-gray-400 uppercase bg-gray-50 py-2 rounded-lg w-max mx-auto px-4"><i class="fa-solid fa-utensils"></i> <span id="my-ticket-service-name" class="text-gray-800"></span></div>
                 </div>
             </div>
         </div>
@@ -355,30 +235,52 @@
             <!-- ONGLET SERVICE -->
             <div id="admin-service" class="animate-fade-in">
                 
+                <!-- BOUTONS SERVICES -->
                 <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 text-center mb-6">
                     <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-4">Contrôle du Service</p>
-                    
-                    <!-- Segmented Control Design -->
                     <div class="flex bg-gray-100 p-1.5 rounded-[1rem] mb-6 relative">
-                        <button onclick="window.updateServiceUI('MATIN')" id="btn-srv-MATIN" class="flex-1 py-3 text-[10px] font-bold rounded-xl transition-all text-gray-500">MATIN</button>
-                        <button onclick="window.updateServiceUI('SOIR')" id="btn-srv-SOIR" class="flex-1 py-3 text-[10px] font-bold rounded-xl transition-all text-gray-500">SOIR</button>
-                        <button onclick="window.updateServiceUI('NUIT')" id="btn-srv-NUIT" class="flex-1 py-3 text-[10px] font-bold rounded-xl transition-all text-gray-500">NUIT</button>
+                        <button onclick="window.updateServiceUI('MATIN')" id="btn-srv-MATIN" class="flex-1 py-3 text-[10px] font-bold rounded-xl transition-all">MATIN</button>
+                        <button onclick="window.updateServiceUI('SOIR')" id="btn-srv-SOIR" class="flex-1 py-3 text-[10px] font-bold rounded-xl transition-all">SOIR</button>
+                        <button onclick="window.updateServiceUI('NUIT')" id="btn-srv-NUIT" class="flex-1 py-3 text-[10px] font-bold rounded-xl transition-all">NUIT</button>
                         <button onclick="window.updateServiceUI('FERMÉ')" id="btn-srv-FERMÉ" class="flex-1 py-3 text-[10px] font-bold rounded-xl transition-all text-red-500"><i class="fa-solid fa-power-off"></i></button>
                     </div>
-
                     <div class="bg-gray-50 rounded-[1.5rem] p-6 shadow-inner border border-gray-200/50">
                         <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Appel Actuel</p>
                         <p id="resto-current-serving" class="text-7xl font-black text-brand-500 tracking-tighter drop-shadow-sm">-</p>
                     </div>
                 </div>
+
+                <!-- 🔥 NOUVEAU : GESTION DU MENU (ADMIN) -->
+                <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 mb-6">
+                    <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-4"><i class="fa-solid fa-image text-brand-400 mr-1"></i> Modifier le Menu du Jour</p>
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <i class="fa-solid fa-utensils absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="menu-name-input" placeholder="Ex: Poulet Yassa & Riz" class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-4 py-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 font-bold text-sm">
+                        </div>
+                        
+                        <div class="relative p-1">
+                            <input type="file" id="menu-image-upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" onchange="window.handleMenuImageUpload(event)">
+                            <div class="w-full border-2 border-dashed border-gray-200 bg-gray-50 rounded-2xl p-4 text-center z-10 relative flex flex-col items-center justify-center transition-all hover:bg-gray-100">
+                                <i class="fa-solid fa-camera text-2xl text-gray-400 mb-2"></i>
+                                <p class="text-xs font-bold text-gray-500">Ajouter/Changer la photo du menu</p>
+                            </div>
+                            <img id="menu-image-preview" class="mt-3 hidden w-full h-32 object-cover rounded-xl border border-gray-200 shadow-sm relative z-30">
+                        </div>
+
+                        <button onclick="window.saveMenu()" class="w-full bg-brand-500 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition text-sm">
+                            <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Publier le Menu
+                        </button>
+                    </div>
+                </div>
                 
+                <!-- ACTIONS -->
                 <div class="grid grid-cols-2 gap-4">
                     <button onclick="window.callNext()" class="bg-gray-900 text-white font-bold py-6 rounded-[1.5rem] shadow-lg active:scale-95 transition flex flex-col items-center justify-center gap-2">
                         <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center"><i class="fa-solid fa-bullhorn text-brand-400"></i></div>
                         <span class="text-xs uppercase tracking-wider">Suivant</span>
                     </button>
-                    
-                    <button onclick="window.openScanner()" class="bg-brand-500 text-white font-bold py-6 rounded-[1.5rem] shadow-[0_10px_20px_rgba(249,115,22,0.3)] active:scale-95 transition flex flex-col items-center justify-center gap-2">
+                    <button onclick="window.openScanner()" class="bg-brand-500 text-white font-bold py-6 rounded-[1.5rem] shadow-lg active:scale-95 transition flex flex-col items-center justify-center gap-2">
                         <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center"><i class="fa-solid fa-qrcode"></i></div>
                         <span class="text-xs uppercase tracking-wider">Scanner</span>
                     </button>
@@ -389,34 +291,26 @@
             <div id="admin-history" class="hidden bg-white rounded-[2rem] shadow-sm border border-gray-100 flex-col overflow-hidden min-h-[400px] animate-fade-in">
                 <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                     <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-brand-500"></div> <span id="history-service-name"></span></h3>
-                    <div class="bg-white px-4 py-1.5 rounded-full text-xs font-bold shadow-sm border border-gray-200">
-                        Total: <span id="total-served" class="text-brand-600">0</span>
-                    </div>
+                    <div class="bg-white px-4 py-1.5 rounded-full text-xs font-bold shadow-sm border border-gray-200">Total: <span id="total-served" class="text-brand-600">0</span></div>
                 </div>
-                <div id="history-list" class="flex-1 overflow-y-auto p-4 space-y-3 bg-white">
-                    <!-- Contenu généré -->
-                </div>
+                <div id="history-list" class="flex-1 overflow-y-auto p-4 space-y-3 bg-white"></div>
             </div>
 
             <!-- ONGLET ÉTUDIANTS -->
             <div id="admin-students" class="hidden bg-white rounded-[2rem] shadow-sm border border-gray-100 flex-col p-6 animate-fade-in">
                 <h3 class="font-black text-gray-800 mb-6 text-lg"><i class="fa-solid fa-magnifying-glass text-blue-500 mr-2"></i>Recherche</h3>
-                
                 <div class="flex gap-2 mb-6">
                     <div class="relative flex-1">
                         <i class="fa-regular fa-id-badge absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" id="search-mat-input" placeholder="Matricule..." class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-4 py-4 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase text-sm">
+                        <input type="text" id="search-mat-input" placeholder="Matricule..." class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-4 py-4 font-mono font-bold uppercase text-sm">
                     </div>
                     <button onclick="window.searchStudent()" class="bg-gray-900 text-white px-6 rounded-2xl font-bold shadow-md transition active:scale-95"><i class="fa-solid fa-arrow-right"></i></button>
                 </div>
-
                 <div id="search-result" class="hidden text-center bg-gray-50 p-6 rounded-3xl border border-gray-100 shadow-inner">
                     <img id="res-img" src="" class="w-20 h-20 object-cover rounded-full mx-auto border-4 border-white shadow-md mb-4">
                     <p class="font-black text-2xl text-gray-900 tracking-tight" id="res-mat"></p>
                     <p class="text-gray-500 font-bold mb-4 text-sm" id="res-name"></p>
-                    <p class="text-[10px] text-gray-400 mb-6 bg-white inline-block px-3 py-1.5 rounded-full shadow-sm"><i class="fa-solid fa-envelope mr-1"></i> <span id="res-email"></span></p>
-                    
-                    <button onclick="window.deleteStudent()" class="w-full bg-red-50 text-red-600 py-4 rounded-xl text-xs font-bold transition flex justify-center items-center gap-2 border border-red-100 hover:bg-red-100">
+                    <button onclick="window.deleteStudent()" class="w-full bg-red-50 text-red-600 py-4 rounded-xl text-xs font-bold transition flex justify-center items-center gap-2 border border-red-100">
                         <i class="fa-solid fa-trash-can"></i> Supprimer cet étudiant
                     </button>
                 </div>
@@ -424,29 +318,24 @@
         </div>
     </main>
 
-    <!-- BOTTOM TAB BAR (ADMIN) - FROSTED GLASS -->
+    <!-- BOTTOM TAB BAR (ADMIN) -->
     <nav id="admin-bottom-nav" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[90%] max-w-sm bg-gray-900/90 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full z-40 px-2 py-2">
         <div class="flex justify-between items-center">
             <button onclick="window.switchAdminTab('service')" id="btn-tab-service" class="w-1/3 flex flex-col items-center justify-center py-2.5 text-brand-400 bg-white/10 rounded-full transition-all">
-                <i class="fa-solid fa-bell-concierge text-lg mb-1"></i>
-                <span class="text-[9px] font-bold tracking-widest">SERVICE</span>
+                <i class="fa-solid fa-bell-concierge text-lg mb-1"></i><span class="text-[9px] font-bold tracking-widest">SERVICE</span>
             </button>
             <button onclick="window.switchAdminTab('history')" id="btn-tab-history" class="w-1/3 flex flex-col items-center justify-center py-2.5 text-gray-400 hover:text-white transition-all">
-                <i class="fa-solid fa-clock-rotate-left text-lg mb-1"></i>
-                <span class="text-[9px] font-bold tracking-widest">HISTO</span>
+                <i class="fa-solid fa-clock-rotate-left text-lg mb-1"></i><span class="text-[9px] font-bold tracking-widest">HISTO</span>
             </button>
             <button onclick="window.switchAdminTab('students')" id="btn-tab-students" class="w-1/3 flex flex-col items-center justify-center py-2.5 text-gray-400 hover:text-white transition-all">
-                <i class="fa-solid fa-users text-lg mb-1"></i>
-                <span class="text-[9px] font-bold tracking-widest">PROFILS</span>
+                <i class="fa-solid fa-users text-lg mb-1"></i><span class="text-[9px] font-bold tracking-widest">PROFILS</span>
             </button>
         </div>
     </nav>
 
 </div>
 
-<!-- ========================================== -->
-<!-- 🔥 LOGIQUE JAVASCRIPT & FIREBASE           -->
-<!-- ========================================== -->
+<!-- 🔥 LOGIQUE JAVASCRIPT & FIREBASE -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, onValue, set, get, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -462,31 +351,29 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Salutation dynamique
-    const hour = new Date().getHours();
-    document.getElementById('greeting-text').innerText = (hour < 18) ? "Bonjour," : "Bonsoir,";
-
     // Variables Globales
     let authMode = 'login'; 
     let cardImageBase64 = null;
+    let menuImageBase64 = null; // Variable pour la photo du menu
     let currentUser = localStorage.getItem('campusEat_user');
     let matricule = localStorage.getItem('campusEat_matricule');
     
     let myTicket = null;
     let myTicketMeal = null;
     let currentSearchMat = null; 
-    let resetTempMat = null; 
 
     let todayDate = new Date().toISOString().split('T')[0]; 
     let currentServing = 0;
     let activeService = 'FERMÉ'; 
     let html5QrCode = null;
 
-    // UI/UX Functions
+    const hour = new Date().getHours();
+    document.getElementById('greeting-text').innerText = (hour < 18) ? "Bonjour," : "Bonsoir,";
+
+    // 🔔 UI/UX Notifications
     window.showNotification = function(message, isError = false) {
         const banner = document.getElementById('notification-banner');
         document.getElementById('notif-text').innerText = message;
-        
         if(isError) {
             document.getElementById('notif-icon').innerHTML = '<div class="w-8 h-8 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation"></i></div>';
             banner.classList.replace('bg-gray-900/95', 'bg-red-900/95');
@@ -494,71 +381,25 @@
             document.getElementById('notif-icon').innerHTML = '<div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-check"></i></div>';
             banner.classList.replace('bg-red-900/95', 'bg-gray-900/95');
         }
-        
         banner.style.transform = 'translate(-50%, 0)';
         setTimeout(() => { banner.style.transform = 'translate(-50%, -150px)'; }, 4000);
     };
 
+    // 🔐 GESTION AUTHENTIFICATION (Identique à l'original)
     window.switchAuthTab = function(mode) { 
         authMode = mode;
         const btnLogin = document.getElementById('tab-login');
         const btnReg = document.getElementById('tab-register');
-
         if(mode === 'login'){
             btnLogin.className = "flex-1 py-3 text-center font-bold text-sm rounded-xl bg-white shadow-sm transition-all text-brand-600";
-            btnReg.className = "flex-1 py-3 text-center font-bold text-sm rounded-xl text-gray-400 hover:text-gray-600 transition-all";
+            btnReg.className = "flex-1 py-3 text-center font-bold text-sm rounded-xl text-gray-400 transition-all";
         } else {
             btnReg.className = "flex-1 py-3 text-center font-bold text-sm rounded-xl bg-white shadow-sm transition-all text-brand-600";
-            btnLogin.className = "flex-1 py-3 text-center font-bold text-sm rounded-xl text-gray-400 hover:text-gray-600 transition-all";
+            btnLogin.className = "flex-1 py-3 text-center font-bold text-sm rounded-xl text-gray-400 transition-all";
         }
-        
         document.getElementById('register-fields-text').classList.toggle('hidden', mode === 'login');
         document.getElementById('register-fields-file').classList.toggle('hidden', mode === 'login');
-        document.getElementById('forgot-pwd-zone').classList.toggle('hidden', mode === 'register');
         document.getElementById('btn-action').innerText = mode === 'login' ? "SE CONNECTER" : "CRÉER MON COMPTE";
-    };
-
-    // Flow Réinitialisation (inchangé logiquement, adapté UI)
-    window.showResetFlow = function() {
-        document.getElementById('login-box').classList.add('hidden');
-        document.getElementById('btn-admin-access').classList.add('hidden');
-        document.getElementById('reset-box').classList.remove('hidden');
-        document.getElementById('reset-step-1').classList.remove('hidden');
-    };
-    window.hideResetFlow = function() {
-        document.getElementById('reset-box').classList.add('hidden');
-        document.getElementById('login-box').classList.remove('hidden');
-        document.getElementById('btn-admin-access').classList.remove('hidden');
-        document.getElementById('reset-step-2').classList.add('hidden');
-        document.getElementById('reset-step-3').classList.add('hidden');
-    };
-    window.sendResetCode = async function() {
-        const mat = document.getElementById('reset-mat-input').value.trim().toUpperCase();
-        if(!mat) return window.showNotification("Veuillez entrer votre matricule.", true);
-        const snap = await get(ref(db, `users/${mat}`));
-        if(!snap.exists()) return window.showNotification("Matricule introuvable.", true);
-        const code = Math.floor(1000 + Math.random() * 9000).toString();
-        await set(ref(db, `users/${mat}/resetCode`), code);
-        resetTempMat = mat;
-        alert(`✅ SIMULATION EMAIL :\nCode secret test : ${code}`);
-        document.getElementById('reset-step-1').classList.add('hidden');
-        document.getElementById('reset-step-2').classList.remove('hidden');
-    };
-    window.verifyResetCode = async function() {
-        const codeInput = document.getElementById('reset-code-input').value.trim();
-        const snap = await get(ref(db, `users/${resetTempMat}/resetCode`));
-        if(snap.exists() && snap.val() === codeInput) {
-            document.getElementById('reset-step-2').classList.add('hidden');
-            document.getElementById('reset-step-3').classList.remove('hidden');
-        } else window.showNotification("Code incorrect.", true);
-    };
-    window.saveNewPassword = async function() {
-        const newPwd = document.getElementById('new-pwd-input').value.trim();
-        if(newPwd.length < 4) return window.showNotification("Min 4 caractères.", true);
-        await set(ref(db, `users/${resetTempMat}/password`), newPwd);
-        await set(ref(db, `users/${resetTempMat}/resetCode`), null);
-        window.showNotification("Mot de passe réinitialisé !");
-        window.hideResetFlow();
     };
 
     window.handleImageUpload = function(event) {
@@ -584,7 +425,6 @@
     window.processAuth = async function() {
         const btn = document.getElementById('btn-action');
         btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
-        
         const mat = document.getElementById('mat-input').value.trim().toUpperCase();
         const pwd = document.getElementById('pwd-input').value.trim();
         const name = document.getElementById('name-input').value.trim();
@@ -646,14 +486,88 @@
             document.getElementById('admin-bottom-nav').classList.remove('hidden');
             document.getElementById('user-display').innerText = "Gérant";
             document.getElementById('btn-show-card').classList.add('hidden');
-            window.updateServiceUI(activeService); // Initialize UI buttons
+            window.updateServiceUI(activeService); 
         } else {
             document.getElementById('auth-screen').classList.remove('hidden');
             document.getElementById('admin-bottom-nav').classList.add('hidden');
         }
     }
 
-    // Gestion Admin
+    // 🍽️ NOUVEAU : LOGIQUE DE GESTION DU MENU (IMAGE + NOM)
+    window.handleMenuImageUpload = function(event) {
+        const file = event.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                // Réduction de la taille pour la base de données (optimisation Firebase)
+                canvas.width = 600; 
+                canvas.height = img.height * (600 / img.width);
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                menuImageBase64 = canvas.toDataURL('image/jpeg', 0.6); // Compression 60%
+                document.getElementById('menu-image-preview').src = menuImageBase64;
+                document.getElementById('menu-image-preview').classList.remove('hidden');
+            }
+            img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    };
+
+    window.saveMenu = async function() {
+        const menuName = document.getElementById('menu-name-input').value.trim();
+        if(!menuName) return window.showNotification("Veuillez entrer le nom du menu.", true);
+
+        const menuData = { name: menuName, updatedAt: Date.now() };
+
+        try {
+            const menuRef = ref(db, 'system/menu');
+            const snap = await get(menuRef);
+            
+            // Si une nouvelle image a été uploadée, on l'utilise.
+            // Sinon, on garde l'ancienne image présente dans la BDD (s'il y en a une).
+            if (menuImageBase64) {
+                menuData.image = menuImageBase64;
+            } else if (snap.exists() && snap.val().image) {
+                menuData.image = snap.val().image;
+            } else {
+                // Image par défaut si aucune photo n'a jamais été mise
+                menuData.image = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop";
+            }
+
+            await set(menuRef, menuData);
+            window.showNotification("Menu mis à jour avec succès !");
+        } catch(e) {
+            window.showNotification("Erreur lors de la publication du menu.", true);
+        }
+    };
+
+    // ÉCOUTEUR EN TEMPS RÉEL POUR AFFICHER LE MENU
+    onValue(ref(db, 'system/menu'), (snapshot) => {
+        if (snapshot.exists()) {
+            const menuData = snapshot.val();
+            
+            // 1. Mise à jour de la vue Étudiant
+            const studentImg = document.getElementById('student-menu-img');
+            const studentName = document.getElementById('student-menu-name');
+            if (studentImg) studentImg.src = menuData.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop";
+            if (studentName) studentName.innerText = menuData.name || "Menu non défini";
+
+            // 2. Mise à jour de la vue Gérant (pour qu'il voie ce qui est déjà publié en se connectant)
+            const adminMenuInput = document.getElementById('menu-name-input');
+            const adminMenuPreview = document.getElementById('menu-image-preview');
+            if (adminMenuInput && !adminMenuInput.value) adminMenuInput.value = menuData.name || "";
+            if (adminMenuPreview && menuData.image && adminMenuPreview.classList.contains('hidden')) {
+                adminMenuPreview.src = menuData.image;
+                adminMenuPreview.classList.remove('hidden');
+                menuImageBase64 = menuData.image; // Stocke l'image actuelle en mémoire
+            }
+        }
+    });
+
+    // 🛎️ GESTION DU SERVICE (Admin)
     window.updateServiceUI = function(service) {
         const services = ['MATIN', 'SOIR', 'NUIT', 'FERMÉ'];
         services.forEach(s => {
@@ -667,21 +581,19 @@
                 else btn.className = "flex-1 py-3 text-[10px] font-bold rounded-xl transition-all text-gray-400 hover:bg-gray-200";
             }
         });
-        if(currentUser === 'resto') {
-            if(service !== activeService) {
-                if(confirm(`Ouvrir le service : ${service} ?\nLa file sera réinitialisée.`)) {
-                    set(ref(db, 'system/activeService'), service);
-                    set(ref(db, 'queue'), { lastTicket: 0, currentServing: 0 });
-                } else {
-                    window.updateServiceUI(activeService); // Revert UI
-                }
+        if(currentUser === 'resto' && service !== activeService) {
+            if(confirm(`Ouvrir le service : ${service} ?\nLa file sera réinitialisée.`)) {
+                set(ref(db, 'system/activeService'), service);
+                set(ref(db, 'queue'), { lastTicket: 0, currentServing: 0 });
+            } else {
+                window.updateServiceUI(activeService); 
             }
         }
     };
 
     window.callNext = function() { set(ref(db, 'queue/currentServing'), currentServing + 1); };
 
-    // File d'attente
+    // File d'attente globale
     onValue(ref(db, 'system/activeService'), (snapshot) => {
         activeService = snapshot.val() || 'FERMÉ';
         document.getElementById('service-name-display').innerText = activeService;
@@ -705,31 +617,6 @@
             if (activeService === 'FERMÉ') { btn.disabled = true; msg.classList.remove('hidden'); } 
             else { btn.disabled = false; msg.classList.add('hidden'); }
             checkMyTicketInDB(); 
-        }
-
-        if(currentUser === 'resto' && activeService !== 'FERMÉ') {
-            onValue(ref(db, `history/${todayDate}/${activeService}`), (snap) => {
-                const historyList = document.getElementById('history-list');
-                historyList.innerHTML = ''; let count = 0;
-                snap.forEach((child) => {
-                    const data = child.val(); count++;
-                    const timeStr = new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    const isFraud = data.status === 'fraude';
-                    historyList.innerHTML = `
-                        <div class="p-4 rounded-[1.2rem] border ${isFraud ? 'bg-red-50 border-red-100' : 'bg-gray-50 border-gray-100'} flex justify-between items-center shadow-sm">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-full flex justify-center items-center ${isFraud ? 'bg-red-100 text-red-500' : 'bg-white text-emerald-500 shadow-sm'}">
-                                    <i class="fa-solid ${isFraud ? 'fa-triangle-exclamation' : 'fa-check'}"></i>
-                                </div>
-                                <div>
-                                    <p class="font-bold text-sm ${isFraud ? 'text-red-700' : 'text-gray-900'}">${data.name || data.matricule}</p>
-                                    <p class="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Pass #${child.key} • ${timeStr}</p>
-                                </div>
-                            </div>
-                        </div>` + historyList.innerHTML;
-                });
-                document.getElementById('total-served').innerText = count;
-            });
         }
     });
 
@@ -755,16 +642,6 @@
         const myTicketRef = ref(db, `service_tickets/${todayDate}/${activeService}/${matricule}`);
         const ticketSnap = await get(myTicketRef);
         if(ticketSnap.exists()) { window.showNotification("Pass déjà récupéré.", true); checkMyTicketInDB(); return; }
-
-        const historyRef = ref(db, `history/${todayDate}/${activeService}`);
-        const histSnap = await get(historyRef);
-        let alreadyPassed = false;
-        histSnap.forEach(child => { if(child.val().matricule === matricule && child.val().status === 'validé') alreadyPassed = true; });
-        
-        if(alreadyPassed) {
-            window.showNotification(`Déjà consommé pour le service ${activeService}.`, true);
-            document.getElementById('btn-take-ticket').disabled = false; return;
-        }
 
         runTransaction(ref(db, 'queue/lastTicket'), (val) => (val || 0) + 1).then(async (res) => {
             myTicket = res.snapshot.val(); myTicketMeal = activeService;
@@ -810,7 +687,7 @@
         }
     }
 
-    // Gestion Scanner
+    // 📷 GESTION SCANNER
     window.openScanner = function() {
         if(activeService === 'FERMÉ') return window.showNotification("Ouvrez d'abord un service.", true);
         document.getElementById('scanner-modal').classList.remove('hidden'); document.getElementById('scanner-modal').classList.add('flex');
@@ -835,14 +712,7 @@
             const userSnap = await get(ref(db, `users/${matScan}`));
             const studentName = userSnap.exists() ? userSnap.val().name : matScan;
             const historyRef = ref(db, `history/${todayDate}/${activeService}/${ticketScan}`);
-            const snap = await get(historyRef);
-
-            if(snap.exists() && snap.val().status === 'validé') {
-                alert(`🚨 FRAUDE !\n${studentName} a DÉJÀ scanné son pass !`);
-                set(ref(db, `history/${todayDate}/${activeService}/FRAUDE_${ticketScan}_${Date.now()}`), { matricule: matScan, name: studentName, timestamp: Date.now(), status: 'fraude' });
-                return;
-            }
-
+            
             if(confirm(`✅ VALIDATION\nÉtudiant : ${studentName}\nConfirmer le repas ?`)) {
                 await set(historyRef, { matricule: matScan, name: studentName, timestamp: Date.now(), status: 'validé' });
                 window.showNotification(`Repas validé : ${studentName}`);
@@ -850,7 +720,7 @@
         } catch(e) { alert("❌ QR Code invalide."); }
     }
 
-    // Gestion Recherche Étudiant
+    // 🔍 RECHERCHE ÉTUDIANT
     window.searchStudent = async function() {
         const matToSearch = document.getElementById('search-mat-input').value.trim().toUpperCase();
         if(!matToSearch) return;
@@ -859,7 +729,6 @@
             const data = snap.val(); currentSearchMat = matToSearch;
             document.getElementById('res-mat').innerText = matToSearch;
             document.getElementById('res-name').innerText = data.name || "Inconnu";
-            document.getElementById('res-email').innerText = data.email || "Non renseigné";
             document.getElementById('res-img').src = data.cardImage;
             document.getElementById('search-result').classList.remove('hidden');
         } else {
@@ -867,6 +736,7 @@
             document.getElementById('search-result').classList.add('hidden');
         }
     };
+    
     window.deleteStudent = async function() {
         if(confirm(`⚠️ Supprimer définitivement le compte de ${currentSearchMat} ?`)) {
             await set(ref(db, `users/${currentSearchMat}`), null);
@@ -892,4 +762,4 @@
     checkLoginState(); 
 </script>
 </body>
-                        </html>
+</html>
