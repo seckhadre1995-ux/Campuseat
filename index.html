@@ -3,17 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>CampusEat - V2 Connectée</title>
+    <title>CampusEat - Cantine Connectée</title>
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f97316">
+    <link rel="apple-touch-icon" href="icon.png">
 
     <!-- Bibliothèques -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <!-- Configuration Tailwind & Styles -->
+    <!-- Police Premium -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Configuration Tailwind & Animations Custom -->
     <script>
         tailwind.config = {
             theme: {
@@ -21,12 +25,15 @@
                     fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
                     colors: { brand: { 50: '#fff7ed', 400: '#fb923c', 500: '#f97316', 600: '#ea580c' } },
                     animation: {
-                        'fade-in': 'fadeIn 0.4s ease-out forwards',
-                        'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'fade-in': 'fadeIn 0.6s ease-out forwards',
+                        'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
                     },
                     keyframes: {
                         fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-                        slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+                        slideUp: { '0%': { transform: 'translateY(40px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } }
                     }
                 }
             }
@@ -35,17 +42,16 @@
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f4f4f5; display: flex; justify-content: center; overflow: hidden; }
-        .mesh-bg { background-image: radial-gradient(at 0% 0%, hsla(28, 100%, 74%, 0.3) 0px, transparent 50%), radial-gradient(at 100% 100%, hsla(39, 100%, 66%, 0.3) 0px, transparent 50%); background-color: #ffffff; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        .pt-safe { padding-top: max(1rem, env(safe-area-inset-top)); }
-        .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
-        
-        .ticket-cutout { position: relative; background: white; border-radius: 1.5rem; }
-        .ticket-cutout::before, .ticket-cutout::after { content: ''; position: absolute; top: 55%; width: 30px; height: 30px; background-color: #f4f4f5; border-radius: 50%; z-index: 10; transform: translateY(-50%); }
-        .ticket-cutout::before { left: -15px; box-shadow: inset -4px 0 6px rgba(0,0,0,0.04); }
-        .ticket-cutout::after { right: -15px; box-shadow: inset 4px 0 6px rgba(0,0,0,0.04); }
-        .ticket-dashed-line { border-top: 2px dashed #e4e4e7; margin: 1.5rem -1rem; position: relative; }
+        .mesh-bg { background-color: #ffffff; background-image: radial-gradient(at 0% 0%, hsla(28, 100%, 74%, 0.5) 0px, transparent 50%), radial-gradient(at 100% 100%, hsla(39, 100%, 66%, 0.5) 0px, transparent 50%), radial-gradient(at 100% 0%, hsla(343, 100%, 76%, 0.2) 0px, transparent 50%); }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); }
+        .ticket { position: relative; background: #ffffff; border-radius: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); overflow: hidden; }
+        .ticket::before, .ticket::after { content: ''; position: absolute; top: 60%; width: 40px; height: 40px; background-color: #f4f4f5; border-radius: 50%; z-index: 10; }
+        .ticket::before { left: -20px; box-shadow: inset -5px 0 10px rgba(0,0,0,0.03); }
+        .ticket::after { right: -20px; box-shadow: inset 5px 0 10px rgba(0,0,0,0.03); }
+        .ticket-dashed-line { border-top: 2px dashed #e4e4e7; margin: 2rem -2rem; position: relative; }
+        .shine { position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent); transform: skewX(-20deg); animation: shine 5s infinite; z-index: 20; pointer-events: none; }
+        @keyframes shine { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="h-screen w-full">
@@ -55,460 +61,387 @@
     <!-- 🔔 NOTIFICATION -->
     <div id="notification-banner" class="fixed top-8 left-1/2 transform -translate-x-1/2 -translate-y-40 bg-gray-900/95 backdrop-blur-xl border border-white/10 text-white px-5 py-4 rounded-2xl shadow-2xl z-[999] flex items-center gap-4 transition-all duration-500 w-[90%] max-w-[380px]">
         <div id="notif-icon" class="text-2xl"></div>
-        <div class="flex-1"><p class="text-sm font-semibold leading-tight" id="notif-text">Texte</p></div>
+        <div class="flex-1">
+            <p class="text-sm font-semibold leading-tight tracking-wide" id="notif-text">Texte</p>
+        </div>
+    </div>
+
+    <!-- 💳 MODAL CARTE -->
+    <div id="student-card-modal" class="hidden absolute inset-0 bg-gray-900/60 backdrop-blur-md z-[300] flex-col items-center justify-center p-6">
+        <div class="bg-white p-6 rounded-[2rem] w-full max-w-sm text-center shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-brand-400 to-brand-600"></div>
+            <div class="relative mt-8 mx-auto w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-white mb-4 z-10">
+                <i class="fa-solid fa-user-graduate text-4xl text-brand-500"></i>
+            </div>
+            <h3 class="font-bold text-2xl mb-1 text-gray-800">Pass Étudiant</h3>
+            <p id="my-saved-name" class="text-xs font-bold text-gray-400 mb-6 uppercase tracking-widest"></p>
+            <div class="relative rounded-2xl overflow-hidden shadow-md border-2 border-gray-100 mb-6 bg-gray-50">
+                <img id="my-saved-card-img" src="" class="w-full h-56 object-cover">
+            </div>
+            <button onclick="document.getElementById('student-card-modal').classList.add('hidden')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-4 rounded-2xl transition">Fermer la carte</button>
+        </div>
     </div>
 
     <!-- 📷 MODAL SCANNER -->
     <div id="scanner-modal" class="hidden absolute inset-0 bg-black/95 backdrop-blur-xl z-[200] flex-col">
         <div class="p-6 flex justify-between items-center text-white border-b border-white/10 pt-12">
-            <h3 class="font-bold text-xl"><i class="fa-solid fa-qrcode text-brand-500 mr-2"></i> Mode Scan</h3>
-            <button onclick="window.closeScanner()" class="bg-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-red-500 transition">&times;</button>
+            <h3 class="font-bold text-xl"><i class="fa-solid fa-expand text-brand-500 mr-2"></i> Mode Scan</h3>
+            <button onclick="window.closeScanner()" class="bg-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-red-500 transition text-white">&times;</button>
         </div>
         <div class="flex-1 flex flex-col items-center justify-center p-6">
-            <div id="reader" class="w-full rounded-[1.5rem] overflow-hidden shadow-2xl bg-gray-900 min-h-[300px] border-2 border-white/20"></div>
-            <button onclick="window.restartScanner()" class="mt-8 w-full bg-white/10 text-white border border-white/20 py-4 rounded-2xl font-bold backdrop-blur-md shadow-lg active:scale-95 transition">
-                <i class="fa-solid fa-rotate-right mr-2"></i> Relancer Caméra
+            <div class="relative w-full max-w-sm">
+                <div class="absolute -inset-2 bg-gradient-to-r from-brand-500 to-emerald-500 rounded-[2rem] blur opacity-50 animate-pulse"></div>
+                <div id="reader" class="relative w-full rounded-[1.5rem] overflow-hidden shadow-2xl bg-gray-900 min-h-[300px] border-2 border-white/20"></div>
+            </div>
+            <button onclick="window.restartScanner()" class="mt-10 w-full bg-white/10 text-white border border-white/20 py-4 rounded-2xl font-bold backdrop-blur-md shadow-lg active:scale-95 transition">
+                <i class="fa-solid fa-rotate-right mr-2"></i> Réinitialiser Caméra
             </button>
         </div>
     </div>
 
-    <!-- 🔐 AUTHENTIFICATION -->
-    <div id="auth-screen" class="absolute inset-0 mesh-bg z-[100] flex flex-col items-center justify-center p-6 hide-scroll overflow-y-auto">
-        <div class="mb-8 flex flex-col items-center">
-            <div class="w-20 h-20 bg-white rounded-3xl shadow-[0_10px_40px_rgba(249,115,22,0.3)] flex items-center justify-center mb-4"><i class="fa-solid fa-burger text-4xl text-brand-500"></i></div>
+    <!-- 🔐 AUTHENTIFICATION (Réduite visuellement pour gagner de l'espace de code) -->
+    <div id="auth-screen" class="absolute inset-0 mesh-bg z-[100] flex flex-col items-center justify-center p-6 transition-all duration-500 overflow-y-auto">
+        <div class="animate-float mb-8 flex flex-col items-center">
+            <div class="w-20 h-20 bg-white rounded-3xl shadow-[0_10px_40px_rgba(249,115,22,0.3)] flex items-center justify-center mb-4 transform rotate-3"><i class="fa-solid fa-burger text-4xl text-brand-500 transform -rotate-3"></i></div>
             <h1 class="text-4xl font-black text-gray-900 tracking-tight">CampusEat</h1>
-            <p class="text-xs text-gray-500 font-bold mt-2 tracking-widest uppercase">Version 2.0</p>
         </div>
-        <div class="bg-white/80 backdrop-blur-xl w-full rounded-[2rem] p-6 shadow-xl border border-white relative">
-            <div class="flex mb-6 bg-gray-100 p-1 rounded-2xl">
-                <button id="tab-login" onclick="window.switchAuthTab('login')" class="flex-1 py-3 text-center font-bold text-sm rounded-xl bg-white shadow-sm text-brand-600 transition-all">Connexion</button>
+        <div id="login-box" class="glass w-full rounded-[2rem] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.05)] border border-white/60 relative animate-slide-up">
+            <div class="flex mb-8 bg-gray-100/50 p-1 rounded-2xl relative z-10">
+                <button id="tab-login" onclick="window.switchAuthTab('login')" class="flex-1 py-3 text-center font-bold text-sm rounded-xl bg-white shadow-sm transition-all text-brand-600">Connexion</button>
                 <button id="tab-register" onclick="window.switchAuthTab('register')" class="flex-1 py-3 text-center font-bold text-sm rounded-xl text-gray-400 transition-all">Inscription</button>
             </div>
-            <div class="space-y-4">
-                <input type="text" id="mat-input" placeholder="Matricule (Ex: MAT-1234)" class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-4 font-mono font-bold text-center uppercase focus:ring-2 focus:ring-brand-500">
-                <div id="register-fields-text" class="hidden space-y-4">
-                    <input type="text" id="name-input" placeholder="Nom Complet" class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-4 text-center focus:ring-2 focus:ring-brand-500">
-                    <input type="email" id="email-input" placeholder="Email" class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-4 text-center focus:ring-2 focus:ring-brand-500">
-                    <div class="p-1 relative">
-                        <input type="file" id="id-card-upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" onchange="window.handleImageUpload(event)">
-                        <div class="w-full border-2 border-dashed border-gray-300 bg-gray-50 rounded-2xl p-4 text-center z-10 flex flex-col items-center justify-center">
-                            <i class="fa-solid fa-camera text-xl text-gray-400 mb-2"></i><p class="text-[10px] font-bold text-gray-500 uppercase">Photo de carte étudiante</p>
-                        </div>
-                    </div>
+            <div id="form-auth" class="relative z-10">
+                <div class="mb-4">
+                    <input type="text" id="mat-input" placeholder="Matricule (Ex: MAT-1234)" class="w-full bg-white border-0 shadow-inner rounded-2xl px-4 py-4 font-mono font-bold text-center uppercase focus:ring-2 focus:ring-brand-500">
                 </div>
-                <input type="password" id="pwd-input" placeholder="Mot de passe" class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-4 text-center focus:ring-2 focus:ring-brand-500">
-                <button id="btn-action" onclick="window.processAuth()" class="w-full bg-gray-900 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">SE CONNECTER</button>
+                <div id="register-fields-text" class="hidden space-y-4 mb-4">
+                    <input type="text" id="name-input" placeholder="Nom Complet" class="w-full bg-white border-0 shadow-inner rounded-2xl px-4 py-4 text-center focus:ring-2 focus:ring-brand-500">
+                    <input type="email" id="email-input" placeholder="Adresse Email" class="w-full bg-white border-0 shadow-inner rounded-2xl px-4 py-4 text-center focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div class="mb-4">
+                    <input type="password" id="pwd-input" placeholder="Mot de passe" class="w-full bg-white border-0 shadow-inner rounded-2xl px-4 py-4 text-center focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div id="register-fields-file" class="hidden mb-6 p-1 relative">
+                    <input type="file" id="id-card-upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" onchange="window.handleImageUpload(event)">
+                    <div class="w-full border-2 border-dashed border-brand-300 bg-brand-50 rounded-2xl p-4 text-center z-10 relative flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-camera text-2xl text-brand-400 mb-2"></i><p class="text-xs font-bold text-brand-600">Appuyez pour ajouter votre carte étudiante</p>
+                    </div>
+                    <img id="card-preview" class="mt-3 hidden w-full h-32 object-cover rounded-xl border border-gray-200 shadow-sm relative z-30">
+                </div>
+                <button id="btn-action" onclick="window.processAuth()" class="w-full bg-gray-900 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all text-sm">SE CONNECTER</button>
             </div>
         </div>
-        <button onclick="window.loginAsResto()" class="mt-8 text-[10px] text-gray-400 font-bold uppercase tracking-widest"><i class="fa-solid fa-lock mr-1"></i> Accès Gérant (Admin)</button>
+        <button onclick="window.loginAsResto()" id="btn-admin-access" class="mt-10 text-[10px] text-gray-400 hover:text-gray-600 transition font-bold uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-lock"></i> Accès Professionnel</button>
     </div>
 
-    <!-- ========================================== -->
-    <!-- INTERFACE ÉTUDIANT                         -->
-    <!-- ========================================== -->
-    <div id="app-student" class="hidden flex-col h-full relative">
-        <!-- HEADER ETUDIANT -->
-        <header class="bg-white px-6 pt-safe pb-4 border-b border-gray-200 flex justify-between items-center z-40 sticky top-0">
-            <div class="flex items-center gap-3">
-                <img id="s-profile-img" src="https://via.placeholder.com/150" class="w-10 h-10 rounded-full object-cover border-2 border-brand-100 shadow-sm">
-                <div>
-                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Étudiant</p>
-                    <p id="s-profile-name" class="text-sm font-black text-gray-900 leading-none">Chargement...</p>
-                </div>
-            </div>
-            <div class="bg-brand-50 border border-brand-100 px-3 py-1.5 rounded-xl flex items-center gap-2 shadow-inner">
-                <i class="fa-solid fa-wallet text-brand-500"></i>
-                <span id="s-wallet-balance" class="font-black text-brand-600 text-sm">0 F</span>
-            </div>
-        </header>
-
-        <!-- MAIN SCROLLABLE AREA -->
-        <main class="flex-1 overflow-y-auto hide-scroll pb-24 relative p-6 bg-[#f4f4f5]">
-            
-            <!-- ONGLET: ACCUEIL -->
-            <div id="s-tab-home" class="space-y-6 animate-fade-in">
-                <!-- Sélecteur de campus -->
-                <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 flex items-center justify-between">
-                    <div class="flex items-center gap-2 text-gray-500 text-xs font-bold"><i class="fa-solid fa-location-dot"></i> Campus Principal</div>
-                    <span class="bg-green-100 text-green-600 text-[9px] px-2 py-0.5 rounded-md font-bold uppercase">En ligne</span>
-                </div>
-
-                <!-- Info Service -->
-                <div class="bg-gray-900 text-white rounded-[2rem] p-6 shadow-lg relative overflow-hidden">
-                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-brand-500 rounded-full blur-3xl opacity-20"></div>
-                    <div class="flex justify-between items-start mb-4 relative z-10">
-                        <div>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Service Actuel</p>
-                            <h2 id="s-active-service" class="text-2xl font-black">FERMÉ</h2>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Appel en cours</p>
-                            <span id="s-current-serving" class="bg-white/20 px-3 py-1 rounded-lg font-black text-xl">-</span>
-                        </div>
-                    </div>
-                    
-                    <div id="s-wait-time-container" class="hidden bg-white/10 rounded-2xl p-4 mt-4 flex justify-between items-center border border-white/10 backdrop-blur-md">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center animate-pulse"><i class="fa-solid fa-clock"></i></div>
-                            <div>
-                                <p class="text-[10px] font-bold uppercase text-gray-300">Temps d'attente estimé</p>
-                                <p class="font-black text-lg"><span id="s-est-time">0</span> min</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Zone Ticket / Action -->
-                <div id="s-action-zone">
-                    <button id="btn-take-ticket" onclick="window.takeTicket()" class="w-full bg-brand-500 text-white font-black py-5 rounded-[1.5rem] text-sm tracking-wide shadow-[0_10px_25px_rgba(249,115,22,0.3)] hover:bg-brand-600 active:scale-95 transition flex justify-center items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i class="fa-solid fa-ticket"></i> OBTENIR MON TICKET (<span id="s-btn-price">500</span> F)
-                    </button>
-                    <p id="s-ticket-msg" class="text-center text-xs text-red-500 mt-3 font-bold hidden">Service fermé.</p>
-                </div>
-
-                <!-- Mon Ticket Visual -->
-                <div id="s-my-ticket-zone" class="hidden">
-                    <div class="ticket-cutout p-6 text-center shadow-lg border border-gray-100">
-                        <p class="text-brand-500 text-[10px] font-bold uppercase tracking-widest mb-1">Pass Numéro</p>
-                        <p id="s-my-ticket-number" class="text-7xl font-black text-gray-900 mb-2">#0</p>
-                        
-                        <div id="s-turn-alert" class="hidden bg-emerald-100 text-emerald-700 py-2 rounded-xl text-xs font-black uppercase mb-4 animate-pulse"><i class="fa-solid fa-bell mr-1"></i> C'est ton tour !</div>
-                        <div id="s-queue-alert" class="bg-gray-50 text-gray-600 py-2 rounded-xl text-xs font-bold mb-4">Il y a <span id="s-people-before" class="text-brand-600 font-black">0</span> personnes avant toi</div>
-
-                        <div class="ticket-dashed-line"></div>
-                        <div class="bg-gray-50 p-3 rounded-2xl inline-block mb-4 border border-gray-100">
-                            <div id="s-qrcode-container" class="flex justify-center bg-white p-2 rounded-xl shadow-sm"></div>
-                        </div>
-                        
-                        <button onclick="window.cancelTicket()" class="w-full bg-red-50 text-red-500 hover:bg-red-100 font-bold py-3 rounded-xl text-xs transition border border-red-100 flex justify-center items-center gap-2">
-                            <i class="fa-solid fa-ban"></i> Annuler & Rembourser
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ONGLET: MENU & AVIS -->
-            <div id="s-tab-menu" class="hidden space-y-6 animate-fade-in">
-                <div class="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-gray-100">
-                    <div class="relative h-48">
-                        <img id="s-menu-img" src="" class="w-full h-full object-cover">
-                        <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-black shadow-lg text-gray-900" id="s-menu-price-display">500 FCFA</div>
-                    </div>
-                    <div class="p-6">
-                        <p class="text-[10px] font-bold uppercase text-brand-500 tracking-widest mb-1">Menu du jour</p>
-                        <h3 id="s-menu-name" class="text-2xl font-black text-gray-900 mb-3 leading-tight">Chargement...</h3>
-                        
-                        <!-- Tags & Allergènes -->
-                        <div class="flex flex-wrap gap-2 mb-6" id="s-menu-tags-container">
-                            <span class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-blue-100"><i class="fa-solid fa-fire text-[8px]"></i> <span id="s-menu-cal">500</span> Kcal</span>
-                        </div>
-
-                        <!-- Gamification / Avis -->
-                        <div class="border-t border-gray-100 pt-4">
-                            <p class="text-xs text-gray-500 font-bold mb-3 text-center">Que pensez-vous de ce plat ?</p>
-                            <div class="flex justify-center gap-4">
-                                <button onclick="window.rateMenu('up')" class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 transition border border-gray-200 active:scale-90"><i class="fa-solid fa-thumbs-up text-xl"></i></button>
-                                <button onclick="window.rateMenu('down')" class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition border border-gray-200 active:scale-90"><i class="fa-solid fa-thumbs-down text-xl"></i></button>
-                            </div>
-                            <p class="text-center text-[10px] text-gray-400 mt-2"><span id="s-menu-likes">0</span> avis positifs</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ONGLET: PROFIL & PORTEFEUILLE -->
-            <div id="s-tab-profile" class="hidden space-y-6 animate-fade-in">
-                <!-- Carte Solde -->
-                <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden">
-                    <i class="fa-brands fa-nfc-symbol absolute right-6 top-6 text-2xl text-white/20"></i>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Solde CampusEat</p>
-                    <h3 class="text-4xl font-black mb-6" id="s-wallet-big">0 FCFA</h3>
-                    <div class="flex gap-3">
-                        <button onclick="window.mockRecharge()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 rounded-xl text-xs transition shadow-lg"><i class="fa-solid fa-plus mr-1"></i> Recharger</button>
-                        <button onclick="window.logout()" class="flex-1 bg-white/10 hover:bg-white/20 text-white font-bold py-3 rounded-xl text-xs transition"><i class="fa-solid fa-power-off mr-1"></i> Déconnexion</button>
-                    </div>
-                </div>
-
-                <!-- Badges & Gamification -->
-                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
-                    <div class="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center border-4 border-gray-100 text-3xl" id="s-badge-icon">🥚</div>
-                    <div class="flex-1">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Niveau Fidélité</p>
-                        <h4 class="font-black text-lg text-gray-800 leading-tight" id="s-badge-name">Nouveau</h4>
-                        <p class="text-xs text-brand-500 font-bold"><span id="s-points">0</span> Points</p>
-                    </div>
-                </div>
-
-                <!-- Historique -->
-                <div>
-                    <h4 class="font-bold text-gray-800 text-sm mb-3 px-2">Derniers Repas</h4>
-                    <div id="s-history-list" class="space-y-3">
-                        <p class="text-xs text-gray-400 text-center py-4 italic">Aucun repas récent.</p>
-                    </div>
-                </div>
-            </div>
-
-        </main>
-
-        <!-- BOTTOM NAV ETUDIANT -->
-        <nav class="absolute bottom-0 w-full bg-white/90 backdrop-blur-xl border-t border-gray-200 flex justify-around p-2 pb-safe z-50">
-            <button onclick="window.switchStudentTab('home')" id="nav-btn-s-home" class="flex flex-col items-center p-2 text-brand-500 transition-colors w-16">
-                <i class="fa-solid fa-ticket text-xl mb-1"></i><span class="text-[9px] font-bold uppercase tracking-wider">Ticket</span>
-            </button>
-            <button onclick="window.switchStudentTab('menu')" id="nav-btn-s-menu" class="flex flex-col items-center p-2 text-gray-400 transition-colors w-16">
-                <i class="fa-solid fa-utensils text-xl mb-1"></i><span class="text-[9px] font-bold uppercase tracking-wider">Menu</span>
-            </button>
-            <button onclick="window.switchStudentTab('profile')" id="nav-btn-s-profile" class="flex flex-col items-center p-2 text-gray-400 transition-colors w-16">
-                <i class="fa-solid fa-user text-xl mb-1"></i><span class="text-[9px] font-bold uppercase tracking-wider">Profil</span>
-            </button>
-        </nav>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- INTERFACE GÉRANT (ADMIN)                   -->
-    <!-- ========================================== -->
-    <div id="app-admin" class="hidden flex-col h-full relative">
-        <header class="bg-gray-900 text-white px-6 pt-safe pb-4 border-b border-gray-800 flex justify-between items-center z-40 sticky top-0">
+    <!-- HEADER GLOBAL -->
+    <header class="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white/80 backdrop-blur-xl px-6 py-4 z-50 flex justify-between items-center border-b border-gray-200/50 pt-safe transition-all" style="padding-top: max(1rem, env(safe-area-inset-top));">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center text-brand-600 border border-brand-200"><i class="fa-solid fa-user-astronaut text-lg"></i></div>
             <div>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Espace Professionnel</p>
-                <p class="text-sm font-black text-white leading-none">Gérant Cantine</p>
+                <p id="greeting-text" class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Bonjour,</p>
+                <p id="user-display" class="text-sm font-black text-gray-900 leading-none">Étudiant</p>
             </div>
-            <button onclick="window.logout()" class="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-red-400"><i class="fa-solid fa-power-off"></i></button>
-        </header>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="btn-show-card" onclick="document.getElementById('student-card-modal').classList.remove('hidden')" class="hidden w-10 h-10 bg-gray-50 text-gray-600 rounded-full flex items-center justify-center shadow-sm border border-gray-200 active:scale-95 transition"><i class="fa-solid fa-id-card"></i></button>
+            <button onclick="window.logout()" class="w-10 h-10 bg-gray-50 text-red-500 rounded-full flex items-center justify-center shadow-sm border border-gray-200 active:scale-95 transition"><i class="fa-solid fa-power-off"></i></button>
+        </div>
+    </header>
 
-        <main class="flex-1 overflow-y-auto hide-scroll pb-24 relative p-6 bg-gray-50">
+    <main class="flex-1 overflow-y-auto px-6 pt-28 pb-32 relative">
+        
+        <!-- INDICATEUR DE SERVICE -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 flex items-center justify-between animate-slide-up" style="animation-delay: 0.1s;">
+            <div class="flex items-center gap-3">
+                <div class="relative flex items-center justify-center">
+                    <div id="status-dot-pulse" class="absolute w-4 h-4 bg-emerald-400 rounded-full animate-ping opacity-75"></div>
+                    <div id="status-dot" class="relative w-3 h-3 bg-emerald-500 rounded-full"></div>
+                </div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">État du Service</p>
+            </div>
+            <span id="service-name-display" class="font-black text-gray-900 text-sm bg-gray-100 px-3 py-1 rounded-lg">FERMÉ</span>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VUE ÉTUDIANT                               -->
+        <!-- ========================================== -->
+        <div id="view-student" class="hidden space-y-6">
             
-            <!-- ONGLET: SERVICE -->
-            <div id="a-tab-service" class="space-y-6 animate-fade-in">
-                <!-- Contrôle Service -->
-                <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-200 text-center">
-                    <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-4">Gestion du Service</p>
-                    <div class="flex bg-gray-100 p-1.5 rounded-[1rem] mb-6">
+            <!-- 🔥 MENU DU JOUR IMMERSIF (Désormais Dynamique) -->
+            <div class="relative rounded-[2rem] overflow-hidden shadow-xl h-44 group animate-slide-up" style="animation-delay: 0.2s;">
+                <img id="student-menu-img" src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition duration-700">
+                <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
+                <div class="absolute inset-0 p-5 flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest border border-white/20 shadow-sm">À la une</span>
+                        <span class="bg-brand-500 text-white px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest shadow-lg">Aujourd'hui</span>
+                    </div>
+                    <div>
+                        <h3 id="student-menu-name" class="text-2xl font-black text-white leading-tight mb-1 drop-shadow-md">Chargement du menu...</h3>
+                        <p class="text-gray-200 text-xs font-medium flex items-center gap-2 drop-shadow-sm"><i class="fa-solid fa-utensils text-brand-400"></i> Voir les détails au guichet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPTEUR NUMÉRO APPELÉ -->
+            <div class="bg-white rounded-[2rem] p-6 text-center shadow-sm border border-gray-100 animate-slide-up" style="animation-delay: 0.3s;">
+                <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-4">Numéro en cours d'appel</p>
+                <div class="relative w-40 h-40 mx-auto flex items-center justify-center rounded-full bg-gray-50 shadow-[inset_0_4px_20px_rgba(0,0,0,0.03)] border border-gray-100">
+                   <svg class="absolute inset-0 w-full h-full transform -rotate-90">
+                      <circle cx="80" cy="80" r="76" stroke="currentColor" stroke-width="4" fill="transparent" class="text-gray-200" />
+                      <circle cx="80" cy="80" r="76" stroke="currentColor" stroke-width="4" fill="transparent" stroke-dasharray="477" stroke-dashoffset="150" class="text-brand-500" />
+                   </svg>
+                   <p id="student-current-serving" class="text-6xl font-black text-gray-800 tracking-tighter relative z-10">-</p>
+                </div>
+            </div>
+
+            <!-- BOUTON PRENDRE UN TICKET -->
+            <div id="ticket-action-zone" class="mt-8 animate-slide-up" style="animation-delay: 0.4s;">
+                <button id="btn-take-ticket" onclick="window.takeTicket()" class="w-full bg-gray-900 text-white font-bold py-5 rounded-2xl text-sm tracking-wide shadow-[0_15px_30px_rgba(0,0,0,0.15)] hover:bg-black active:scale-95 transition flex justify-center items-center gap-3">
+                    <i class="fa-solid fa-ticket"></i> OBTENIR MON PASS
+                </button>
+                <p id="ticket-closed-msg" class="text-center text-xs text-red-500 mt-4 font-bold hidden">Le service est actuellement fermé.</p>
+            </div>
+
+            <!-- LE TICKET ÉTUDIANT -->
+            <div id="my-ticket-zone" class="hidden mt-6">
+                <div id="turn-status-box" class="hidden bg-emerald-500 text-white p-5 rounded-[1.5rem] mb-6 shadow-lg animate-pulse-slow relative overflow-hidden">
+                    <div class="relative z-10 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">🎉</div>
+                        <div><p class="font-black text-xl leading-tight">C'EST TON TOUR !</p><p class="text-[11px] font-medium mt-0.5">Présente ce pass au guichet</p></div>
+                    </div>
+                </div>
+                <div id="queue-status-box" class="bg-brand-50 border border-brand-100 text-brand-700 p-4 rounded-2xl mb-6 font-bold text-sm flex items-center gap-3 shadow-sm">
+                    <div class="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center text-brand-500"><i class="fa-solid fa-hourglass-half"></i></div>
+                    <div><span id="people-before-me" class="text-lg font-black">0</span> personnes avant toi</div>
+                </div>
+                <div class="ticket p-8 text-center" id="ticket-visual-container">
+                    <div class="shine"></div>
+                    <p class="text-gray-400 text-[10px] font-bold uppercase mt-2">Pass Numéro</p>
+                    <p id="my-ticket-number" class="text-7xl font-black text-gray-900 mb-2">#0</p>
+                    <div class="ticket-dashed-line"></div>
+                    <div class="bg-gray-50 p-4 rounded-3xl inline-block mb-4"><div id="qrcode-container" class="flex justify-center mx-auto bg-white p-3 rounded-2xl shadow-sm"></div></div>
+                    <div class="flex items-center justify-center gap-2 text-[10px] font-bold text-gray-400 uppercase bg-gray-50 py-2 rounded-lg w-max mx-auto px-4"><i class="fa-solid fa-utensils"></i> <span id="my-ticket-service-name" class="text-gray-800"></span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VUE CANTINE (GÉRANT)                       -->
+        <!-- ========================================== -->
+        <div id="view-resto" class="hidden flex-col space-y-6">
+            
+            <!-- ONGLET SERVICE -->
+            <div id="admin-service" class="animate-fade-in">
+                
+                <!-- BOUTONS SERVICES -->
+                <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 text-center mb-6">
+                    <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-4">Contrôle du Service</p>
+                    <div class="flex bg-gray-100 p-1.5 rounded-[1rem] mb-6 relative">
                         <button onclick="window.updateServiceUI('MATIN')" id="btn-srv-MATIN" class="flex-1 py-3 text-[10px] font-bold rounded-xl transition-all">MATIN</button>
                         <button onclick="window.updateServiceUI('SOIR')" id="btn-srv-SOIR" class="flex-1 py-3 text-[10px] font-bold rounded-xl transition-all">SOIR</button>
                         <button onclick="window.updateServiceUI('NUIT')" id="btn-srv-NUIT" class="flex-1 py-3 text-[10px] font-bold rounded-xl transition-all">NUIT</button>
                         <button onclick="window.updateServiceUI('FERMÉ')" id="btn-srv-FERMÉ" class="flex-1 py-3 text-[10px] font-bold rounded-xl transition-all text-red-500"><i class="fa-solid fa-power-off"></i></button>
                     </div>
-                    <div class="bg-brand-50 rounded-[1.5rem] p-6 border border-brand-100 shadow-inner">
-                        <p class="text-brand-600 text-xs font-bold uppercase tracking-wider mb-2">Ticket Actuel</p>
-                        <p id="a-current-serving" class="text-7xl font-black text-brand-500 tracking-tighter drop-shadow-sm">-</p>
+                    <div class="bg-gray-50 rounded-[1.5rem] p-6 shadow-inner border border-gray-200/50">
+                        <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Appel Actuel</p>
+                        <p id="resto-current-serving" class="text-7xl font-black text-brand-500 tracking-tighter drop-shadow-sm">-</p>
                     </div>
                 </div>
 
-                <!-- Actions Rapides -->
-                <div class="grid grid-cols-2 gap-4">
-                    <button onclick="window.callNext()" class="bg-gray-900 text-white font-bold py-6 rounded-[1.5rem] shadow-lg active:scale-95 transition flex flex-col items-center gap-3">
-                        <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-bullhorn text-brand-400"></i></div>
-                        <span class="text-xs uppercase tracking-wider">Appeler Suivant</span>
-                    </button>
-                    <button onclick="window.openScanner()" class="bg-brand-500 text-white font-bold py-6 rounded-[1.5rem] shadow-lg active:scale-95 transition flex flex-col items-center gap-3">
-                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-qrcode"></i></div>
-                        <span class="text-xs uppercase tracking-wider">Scanner QR</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- ONGLET: FILE D'ATTENTE -->
-            <div id="a-tab-queue" class="hidden space-y-4 animate-fade-in">
-                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 flex justify-between items-center">
-                    <div>
-                        <h3 class="font-black text-gray-800">File d'attente globale</h3>
-                        <p class="text-xs text-gray-500 font-bold mt-1">Total générés : <span id="a-queue-total" class="text-brand-500">0</span></p>
-                    </div>
-                    <div class="w-12 h-12 rounded-full border-4 border-brand-100 flex items-center justify-center font-black text-brand-500" id="a-queue-waiting">0</div>
-                </div>
-                
-                <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-200">
-                    <div class="flex gap-2">
-                        <input type="number" id="a-specific-call-input" placeholder="Appeler ticket #" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-center focus:ring-2 focus:ring-brand-500">
-                        <button onclick="window.callSpecific()" class="bg-gray-900 text-white px-5 rounded-xl font-bold shadow-md transition active:scale-95"><i class="fa-solid fa-phone"></i></button>
-                    </div>
-                </div>
-
-                <div id="a-queue-list" class="space-y-2 max-h-80 overflow-y-auto hide-scroll">
-                    <p class="text-xs text-gray-400 text-center py-4 italic">Aucun ticket en attente.</p>
-                </div>
-            </div>
-
-            <!-- ONGLET: GESTION MENU -->
-            <div id="a-tab-menu" class="hidden space-y-4 animate-fade-in">
-                <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-200">
-                    <h3 class="font-black text-gray-800 mb-4"><i class="fa-solid fa-pen-to-square text-brand-500 mr-2"></i>Éditer le Menu</h3>
+                <!-- 🔥 NOUVEAU : GESTION DU MENU (ADMIN) -->
+                <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 mb-6">
+                    <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-4"><i class="fa-solid fa-image text-brand-400 mr-1"></i> Modifier le Menu du Jour</p>
                     <div class="space-y-4">
-                        <input type="text" id="a-menu-name" placeholder="Nom du plat (ex: Thiep)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-sm font-bold text-gray-800">
+                        <div class="relative">
+                            <i class="fa-solid fa-utensils absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="menu-name-input" placeholder="Ex: Poulet Yassa & Riz" class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-4 py-4 text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500 font-bold text-sm">
+                        </div>
                         
-                        <div class="flex gap-2">
-                            <input type="number" id="a-menu-price" placeholder="Prix (FCFA)" class="w-1/2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-sm font-bold text-gray-800">
-                            <input type="number" id="a-menu-cal" placeholder="Calories" class="w-1/2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-4 text-sm font-bold text-gray-800">
+                        <div class="relative p-1">
+                            <input type="file" id="menu-image-upload" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" onchange="window.handleMenuImageUpload(event)">
+                            <div class="w-full border-2 border-dashed border-gray-200 bg-gray-50 rounded-2xl p-4 text-center z-10 relative flex flex-col items-center justify-center transition-all hover:bg-gray-100">
+                                <i class="fa-solid fa-camera text-2xl text-gray-400 mb-2"></i>
+                                <p class="text-xs font-bold text-gray-500">Ajouter/Changer la photo du menu</p>
+                            </div>
+                            <img id="menu-image-preview" class="mt-3 hidden w-full h-32 object-cover rounded-xl border border-gray-200 shadow-sm relative z-30">
                         </div>
 
-                        <!-- Mini Image Upload -->
-                        <div class="p-1 relative border-2 border-dashed border-gray-300 bg-gray-50 rounded-xl flex items-center justify-center h-24 overflow-hidden group">
-                            <input type="file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" onchange="window.handleMenuImg(event)">
-                            <div class="text-center z-10 group-hover:scale-105 transition"><i class="fa-solid fa-image text-gray-400 mb-1 text-xl"></i><p class="text-[9px] font-bold text-gray-500">Changer Photo</p></div>
-                            <img id="a-menu-img-preview" class="absolute inset-0 w-full h-full object-cover hidden z-15 opacity-50">
-                        </div>
-
-                        <div class="flex gap-2">
-                            <label class="flex-1 bg-gray-50 border border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="a-tag-halal" class="w-4 h-4 text-brand-500"><span class="text-xs font-bold text-gray-600">Halal</span>
-                            </label>
-                            <label class="flex-1 bg-gray-50 border border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="a-tag-veg" class="w-4 h-4 text-green-500"><span class="text-xs font-bold text-gray-600">Végétarien</span>
-                            </label>
-                        </div>
-
-                        <button onclick="window.saveMenuAdmin()" class="w-full bg-brand-500 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition text-sm">
-                            Mettre à jour le menu
+                        <button onclick="window.saveMenu()" class="w-full bg-brand-500 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition text-sm">
+                            <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Publier le Menu
                         </button>
                     </div>
                 </div>
-            </div>
-
-            <!-- ONGLET: STATS & USERS (Simplifié pour espace) -->
-            <div id="a-tab-users" class="hidden space-y-4 animate-fade-in">
-                <div class="bg-gray-900 text-white rounded-2xl p-5 shadow-lg flex justify-between items-center">
-                    <div><p class="text-[10px] uppercase font-bold text-gray-400">Total Repas Servis</p><p id="a-stats-total" class="text-3xl font-black text-brand-400">0</p></div>
-                    <i class="fa-solid fa-chart-line text-3xl opacity-20"></i>
-                </div>
-
-                <div class="bg-white rounded-[2rem] shadow-sm border border-gray-200 p-6">
-                    <h3 class="font-black text-gray-800 mb-4">Rechercher Étudiant</h3>
-                    <div class="flex gap-2 mb-4">
-                        <input type="text" id="a-search-mat" placeholder="Matricule..." class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-mono font-bold uppercase text-sm">
-                        <button onclick="window.searchUser()" class="bg-gray-900 text-white px-5 rounded-xl font-bold shadow-md transition active:scale-95"><i class="fa-solid fa-search"></i></button>
-                    </div>
-                    <div id="a-user-result" class="hidden text-center bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                        <p class="font-black text-xl text-gray-900" id="a-res-mat"></p>
-                        <p class="text-xs font-bold text-gray-500 mb-2" id="a-res-name"></p>
-                        <div class="flex justify-center gap-4 text-xs font-bold mt-3 border-t border-gray-200 pt-3">
-                            <p class="text-brand-600">Solde: <span id="a-res-wallet"></span></p>
-                            <p class="text-blue-500">Points: <span id="a-res-points"></span></p>
-                        </div>
-                    </div>
+                
+                <!-- ACTIONS -->
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="window.callNext()" class="bg-gray-900 text-white font-bold py-6 rounded-[1.5rem] shadow-lg active:scale-95 transition flex flex-col items-center justify-center gap-2">
+                        <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center"><i class="fa-solid fa-bullhorn text-brand-400"></i></div>
+                        <span class="text-xs uppercase tracking-wider">Suivant</span>
+                    </button>
+                    <button onclick="window.openScanner()" class="bg-brand-500 text-white font-bold py-6 rounded-[1.5rem] shadow-lg active:scale-95 transition flex flex-col items-center justify-center gap-2">
+                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center"><i class="fa-solid fa-qrcode"></i></div>
+                        <span class="text-xs uppercase tracking-wider">Scanner</span>
+                    </button>
                 </div>
             </div>
-        </main>
 
-        <!-- BOTTOM NAV ADMIN -->
-        <nav class="absolute bottom-0 w-full bg-gray-900 border-t border-gray-800 flex justify-around p-2 pb-safe z-50">
-            <button onclick="window.switchAdminTab('service')" id="nav-btn-a-service" class="flex flex-col items-center p-2 text-brand-400 transition-colors w-16">
-                <i class="fa-solid fa-bell-concierge text-lg mb-1"></i><span class="text-[8px] font-bold uppercase tracking-wider">Service</span>
+            <!-- ONGLET HISTORIQUE -->
+            <div id="admin-history" class="hidden bg-white rounded-[2rem] shadow-sm border border-gray-100 flex-col overflow-hidden min-h-[400px] animate-fade-in">
+                <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                    <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-brand-500"></div> <span id="history-service-name"></span></h3>
+                    <div class="bg-white px-4 py-1.5 rounded-full text-xs font-bold shadow-sm border border-gray-200">Total: <span id="total-served" class="text-brand-600">0</span></div>
+                </div>
+                <div id="history-list" class="flex-1 overflow-y-auto p-4 space-y-3 bg-white"></div>
+            </div>
+
+            <!-- ONGLET ÉTUDIANTS -->
+            <div id="admin-students" class="hidden bg-white rounded-[2rem] shadow-sm border border-gray-100 flex-col p-6 animate-fade-in">
+                <h3 class="font-black text-gray-800 mb-6 text-lg"><i class="fa-solid fa-magnifying-glass text-blue-500 mr-2"></i>Recherche</h3>
+                <div class="flex gap-2 mb-6">
+                    <div class="relative flex-1">
+                        <i class="fa-regular fa-id-badge absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="search-mat-input" placeholder="Matricule..." class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-4 py-4 font-mono font-bold uppercase text-sm">
+                    </div>
+                    <button onclick="window.searchStudent()" class="bg-gray-900 text-white px-6 rounded-2xl font-bold shadow-md transition active:scale-95"><i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+                <div id="search-result" class="hidden text-center bg-gray-50 p-6 rounded-3xl border border-gray-100 shadow-inner">
+                    <img id="res-img" src="" class="w-20 h-20 object-cover rounded-full mx-auto border-4 border-white shadow-md mb-4">
+                    <p class="font-black text-2xl text-gray-900 tracking-tight" id="res-mat"></p>
+                    <p class="text-gray-500 font-bold mb-4 text-sm" id="res-name"></p>
+                    <button onclick="window.deleteStudent()" class="w-full bg-red-50 text-red-600 py-4 rounded-xl text-xs font-bold transition flex justify-center items-center gap-2 border border-red-100">
+                        <i class="fa-solid fa-trash-can"></i> Supprimer cet étudiant
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- BOTTOM TAB BAR (ADMIN) -->
+    <nav id="admin-bottom-nav" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 w-[90%] max-w-sm bg-gray-900/90 backdrop-blur-xl border border-white/10 shadow-2xl rounded-full z-40 px-2 py-2">
+        <div class="flex justify-between items-center">
+            <button onclick="window.switchAdminTab('service')" id="btn-tab-service" class="w-1/3 flex flex-col items-center justify-center py-2.5 text-brand-400 bg-white/10 rounded-full transition-all">
+                <i class="fa-solid fa-bell-concierge text-lg mb-1"></i><span class="text-[9px] font-bold tracking-widest">SERVICE</span>
             </button>
-            <button onclick="window.switchAdminTab('queue')" id="nav-btn-a-queue" class="flex flex-col items-center p-2 text-gray-500 transition-colors w-16">
-                <i class="fa-solid fa-list-ol text-lg mb-1"></i><span class="text-[8px] font-bold uppercase tracking-wider">File</span>
+            <button onclick="window.switchAdminTab('history')" id="btn-tab-history" class="w-1/3 flex flex-col items-center justify-center py-2.5 text-gray-400 hover:text-white transition-all">
+                <i class="fa-solid fa-clock-rotate-left text-lg mb-1"></i><span class="text-[9px] font-bold tracking-widest">HISTO</span>
             </button>
-            <button onclick="window.switchAdminTab('menu')" id="nav-btn-a-menu" class="flex flex-col items-center p-2 text-gray-500 transition-colors w-16">
-                <i class="fa-solid fa-pen text-lg mb-1"></i><span class="text-[8px] font-bold uppercase tracking-wider">Menu</span>
+            <button onclick="window.switchAdminTab('students')" id="btn-tab-students" class="w-1/3 flex flex-col items-center justify-center py-2.5 text-gray-400 hover:text-white transition-all">
+                <i class="fa-solid fa-users text-lg mb-1"></i><span class="text-[9px] font-bold tracking-widest">PROFILS</span>
             </button>
-            <button onclick="window.switchAdminTab('users')" id="nav-btn-a-users" class="flex flex-col items-center p-2 text-gray-500 transition-colors w-16">
-                <i class="fa-solid fa-users text-lg mb-1"></i><span class="text-[8px] font-bold uppercase tracking-wider">Admin</span>
-            </button>
-        </nav>
-    </div>
+        </div>
+    </nav>
+
 </div>
 
+<!-- 🔥 LOGIQUE JAVASCRIPT & FIREBASE -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue, set, get, runTransaction, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, onValue, set, get, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    const firebaseConfig = { apiKey: "AIzaSyCCYz11kL3ATDZ9qrKm7ZV0ztggMO_cutE", authDomain: "campuseat-cdede.firebaseapp.com", projectId: "campuseat-cdede", databaseURL: "https://campuseat-cdede-default-rtdb.firebaseio.com", storageBucket: "campuseat-cdede.firebasestorage.app" };
+    const firebaseConfig = {
+        apiKey: "AIzaSyCCYz11kL3ATDZ9qrKm7ZV0ztggMO_cutE",
+        authDomain: "campuseat-cdede.firebaseapp.com",
+        projectId: "campuseat-cdede",
+        databaseURL: "https://campuseat-cdede-default-rtdb.firebaseio.com",
+        storageBucket: "campuseat-cdede.firebasestorage.app"
+    };
+
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // ETAT GLOBAL
+    // Variables Globales
     let authMode = 'login'; 
     let cardImageBase64 = null;
-    let newMenuImgBase64 = null;
-    
+    let menuImageBase64 = null; // Variable pour la photo du menu
     let currentUser = localStorage.getItem('campusEat_user');
     let matricule = localStorage.getItem('campusEat_matricule');
     
-    let todayDate = new Date().toISOString().split('T')[0];
-    
-    let state = {
-        service: 'FERMÉ',
-        queue: { current: 0, last: 0 },
-        menu: { name: 'Non défini', price: 500, cal: 0, image: '', tags: { halal: false, veg: false }, likes: 0 },
-        user: { name: '', wallet: 0, points: 0, cardImage: '' },
-        myTicket: null
-    };
+    let myTicket = null;
+    let myTicketMeal = null;
+    let currentSearchMat = null; 
 
+    let todayDate = new Date().toISOString().split('T')[0]; 
+    let currentServing = 0;
+    let activeService = 'FERMÉ'; 
     let html5QrCode = null;
 
-    // --- UTILS ---
-    window.showNotification = function(msg, isError = false) {
+    const hour = new Date().getHours();
+    document.getElementById('greeting-text').innerText = (hour < 18) ? "Bonjour," : "Bonsoir,";
+
+    // 🔔 UI/UX Notifications
+    window.showNotification = function(message, isError = false) {
         const banner = document.getElementById('notification-banner');
-        document.getElementById('notif-text').innerText = msg;
-        document.getElementById('notif-icon').innerHTML = isError ? '<div class="w-8 h-8 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation"></i></div>' : '<div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-check"></i></div>';
-        banner.className = `fixed top-8 left-1/2 transform -translate-x-1/2 -translate-y-40 ${isError?'bg-red-900/95':'bg-gray-900/95'} backdrop-blur-xl border border-white/10 text-white px-5 py-4 rounded-2xl shadow-2xl z-[999] flex items-center gap-4 transition-all duration-500 w-[90%] max-w-[380px]`;
+        document.getElementById('notif-text').innerText = message;
+        if(isError) {
+            document.getElementById('notif-icon').innerHTML = '<div class="w-8 h-8 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation"></i></div>';
+            banner.classList.replace('bg-gray-900/95', 'bg-red-900/95');
+        } else {
+            document.getElementById('notif-icon').innerHTML = '<div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center"><i class="fa-solid fa-check"></i></div>';
+            banner.classList.replace('bg-red-900/95', 'bg-gray-900/95');
+        }
         banner.style.transform = 'translate(-50%, 0)';
-        setTimeout(() => { banner.style.transform = 'translate(-50%, -150px)'; }, 3500);
+        setTimeout(() => { banner.style.transform = 'translate(-50%, -150px)'; }, 4000);
     };
 
-    // --- NAVIGATION ---
-    window.switchAuthTab = function(mode) {
+    // 🔐 GESTION AUTHENTIFICATION (Identique à l'original)
+    window.switchAuthTab = function(mode) { 
         authMode = mode;
-        document.getElementById('tab-login').className = mode === 'login' ? "flex-1 py-3 text-center font-bold text-sm rounded-xl bg-white shadow-sm text-brand-600 transition-all" : "flex-1 py-3 text-center font-bold text-sm rounded-xl text-gray-400 transition-all";
-        document.getElementById('tab-register').className = mode === 'register' ? "flex-1 py-3 text-center font-bold text-sm rounded-xl bg-white shadow-sm text-brand-600 transition-all" : "flex-1 py-3 text-center font-bold text-sm rounded-xl text-gray-400 transition-all";
+        const btnLogin = document.getElementById('tab-login');
+        const btnReg = document.getElementById('tab-register');
+        if(mode === 'login'){
+            btnLogin.className = "flex-1 py-3 text-center font-bold text-sm rounded-xl bg-white shadow-sm transition-all text-brand-600";
+            btnReg.className = "flex-1 py-3 text-center font-bold text-sm rounded-xl text-gray-400 transition-all";
+        } else {
+            btnReg.className = "flex-1 py-3 text-center font-bold text-sm rounded-xl bg-white shadow-sm transition-all text-brand-600";
+            btnLogin.className = "flex-1 py-3 text-center font-bold text-sm rounded-xl text-gray-400 transition-all";
+        }
         document.getElementById('register-fields-text').classList.toggle('hidden', mode === 'login');
+        document.getElementById('register-fields-file').classList.toggle('hidden', mode === 'login');
         document.getElementById('btn-action').innerText = mode === 'login' ? "SE CONNECTER" : "CRÉER MON COMPTE";
     };
 
-    window.switchStudentTab = function(tab) {
-        ['home', 'menu', 'profile'].forEach(t => {
-            document.getElementById(`s-tab-${t}`).classList.toggle('hidden', t !== tab);
-            document.getElementById(`nav-btn-s-${t}`).className = t === tab ? "flex flex-col items-center p-2 text-brand-500 transition-colors w-16" : "flex flex-col items-center p-2 text-gray-400 transition-colors w-16";
-        });
-    };
-
-    window.switchAdminTab = function(tab) {
-        ['service', 'queue', 'menu', 'users'].forEach(t => {
-            document.getElementById(`a-tab-${t}`).classList.toggle('hidden', t !== tab);
-            document.getElementById(`nav-btn-a-${t}`).className = t === tab ? "flex flex-col items-center p-2 text-brand-400 transition-colors w-16" : "flex flex-col items-center p-2 text-gray-500 transition-colors w-16";
-        });
-    };
-
-    // --- GAMIFICATION ---
-    function getBadge(points) {
-        if(points >= 500) return { name: "Légende", icon: "🏆" };
-        if(points >= 200) return { name: "Expert", icon: "🥇" };
-        if(points >= 50) return { name: "Habitué", icon: "🥈" };
-        return { name: "Débutant", icon: "🥉" };
-    }
-
-    // --- AUTHENTIFICATION ---
-    window.handleImageUpload = function(e) {
-        const file = e.target.files[0]; if(!file) return;
+    window.handleImageUpload = function(event) {
+        const file = event.target.files[0];
+        if(!file) return;
         const reader = new FileReader();
-        reader.onload = e => {
-            const img = new Image(); img.onload = () => {
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
                 const canvas = document.createElement('canvas');
-                canvas.width = 400; canvas.height = img.height*(400/img.width);
-                const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                cardImageBase64 = canvas.toDataURL('image/jpeg', 0.5);
-                window.showNotification("Photo chargée !");
-            }; img.src = e.target.result;
-        }; reader.readAsDataURL(file);
+                canvas.width = 500; canvas.height = img.height * (500 / img.width);
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                cardImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
+                document.getElementById('card-preview').src = cardImageBase64;
+                document.getElementById('card-preview').classList.remove('hidden');
+            }
+            img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
     };
 
     window.processAuth = async function() {
+        const btn = document.getElementById('btn-action');
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
         const mat = document.getElementById('mat-input').value.trim().toUpperCase();
         const pwd = document.getElementById('pwd-input').value.trim();
-        if(!mat || !pwd) return window.showNotification("Champs requis.", true);
+        const name = document.getElementById('name-input').value.trim();
+        const email = document.getElementById('email-input').value.trim();
+
+        if(!mat || !pwd) { btn.innerText = authMode==='login'?"SE CONNECTER":"CRÉER MON COMPTE"; return window.showNotification("Champs requis.", true); }
         
         const userRef = ref(db, `users/${mat}`);
-        const snap = await get(userRef);
+        const snapshot = await get(userRef);
 
         if (authMode === 'register') {
-            const name = document.getElementById('name-input').value.trim();
-            if(!name || !cardImageBase64) return window.showNotification("Toutes les infos sont requises.", true);
-            if (snap.exists()) return window.showNotification("Compte déjà existant !", true);
-            // Init Portefeuille (2000F offert au début) et 0 points
-            await set(userRef, { name, password: pwd, cardImage: cardImageBase64, wallet: 2000, points: 0, createdAt: Date.now() });
+            if(!name || !email || !cardImageBase64) { btn.innerText = "CRÉER MON COMPTE"; return window.showNotification("Toutes les infos sont requises.", true); }
+            if (snapshot.exists()) { btn.innerText = "CRÉER MON COMPTE"; return window.showNotification("Compte déjà existant !", true); }
+            await set(userRef, { name: name, email: email, password: pwd, cardImage: cardImageBase64, createdAt: Date.now() });
             doLogin(mat);
         } else {
-            if (!snap.exists() || snap.val().password !== pwd) return window.showNotification("Identifiants incorrects.", true);
+            if (!snapshot.exists() || snapshot.val().password !== pwd) { btn.innerText = "SE CONNECTER"; return window.showNotification("Identifiants incorrects.", true); }
             doLogin(mat);
         }
     };
@@ -521,258 +454,246 @@
     }
 
     window.loginAsResto = function() {
-        if(prompt("Code Gérant:") === "admin") {
+        if(prompt("Mot de passe Professionnel:") === "admin") {
             currentUser = 'resto'; localStorage.setItem('campusEat_user', currentUser); checkLoginState();
         }
     };
+
     window.logout = function() { localStorage.clear(); location.reload(); };
 
-    // --- INIT APP & ECOUTES REALTIME ---
-    async function checkLoginState() {
+    async function fetchStudentCard() {
+        if(currentUser === 'student') {
+            const snap = await get(ref(db, `users/${matricule}`));
+            if(snap.exists()) {
+                const data = snap.val();
+                document.getElementById('my-saved-card-img').src = data.cardImage;
+                document.getElementById('my-saved-name').innerText = data.name || "Étudiant(e)";
+                document.getElementById('btn-show-card').classList.remove('hidden');
+                document.getElementById('user-display').innerText = (data.name ? data.name.split(' ')[0] : matricule);
+            }
+        }
+    }
+
+    function checkLoginState() {
         document.getElementById('auth-screen').classList.add('hidden');
         if (currentUser === 'student') {
-            document.getElementById('app-student').classList.remove('hidden'); document.getElementById('app-student').classList.add('flex');
-            initStudentData(); initRealtimeListeners(); checkMyTicket();
+            document.getElementById('view-student').classList.remove('hidden');
+            fetchStudentCard();
+            checkMyTicketInDB(); 
         } else if (currentUser === 'resto') {
-            document.getElementById('app-admin').classList.remove('hidden'); document.getElementById('app-admin').classList.add('flex');
-            initRealtimeListeners();
+            document.getElementById('view-resto').classList.remove('hidden');
+            document.getElementById('view-resto').classList.add('flex');
+            document.getElementById('admin-bottom-nav').classList.remove('hidden');
+            document.getElementById('user-display').innerText = "Gérant";
+            document.getElementById('btn-show-card').classList.add('hidden');
+            window.updateServiceUI(activeService); 
         } else {
             document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('admin-bottom-nav').classList.add('hidden');
         }
     }
 
-    async function initStudentData() {
-        onValue(ref(db, `users/${matricule}`), (snap) => {
-            if(snap.exists()) {
-                state.user = snap.val();
-                document.getElementById('s-profile-img').src = state.user.cardImage;
-                document.getElementById('s-profile-name').innerText = state.user.name.split(' ')[0];
-                document.getElementById('s-wallet-balance').innerText = `${state.user.wallet || 0} F`;
-                document.getElementById('s-wallet-big').innerText = `${state.user.wallet || 0} FCFA`;
-                
-                const badge = getBadge(state.user.points || 0);
-                document.getElementById('s-badge-icon').innerText = badge.icon;
-                document.getElementById('s-badge-name').innerText = badge.name;
-                document.getElementById('s-points').innerText = state.user.points || 0;
+    // 🍽️ NOUVEAU : LOGIQUE DE GESTION DU MENU (IMAGE + NOM)
+    window.handleMenuImageUpload = function(event) {
+        const file = event.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                // Réduction de la taille pour la base de données (optimisation Firebase)
+                canvas.width = 600; 
+                canvas.height = img.height * (600 / img.width);
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                menuImageBase64 = canvas.toDataURL('image/jpeg', 0.6); // Compression 60%
+                document.getElementById('menu-image-preview').src = menuImageBase64;
+                document.getElementById('menu-image-preview').classList.remove('hidden');
+            }
+            img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    };
+
+    window.saveMenu = async function() {
+        const menuName = document.getElementById('menu-name-input').value.trim();
+        if(!menuName) return window.showNotification("Veuillez entrer le nom du menu.", true);
+
+        const menuData = { name: menuName, updatedAt: Date.now() };
+
+        try {
+            const menuRef = ref(db, 'system/menu');
+            const snap = await get(menuRef);
+            
+            // Si une nouvelle image a été uploadée, on l'utilise.
+            // Sinon, on garde l'ancienne image présente dans la BDD (s'il y en a une).
+            if (menuImageBase64) {
+                menuData.image = menuImageBase64;
+            } else if (snap.exists() && snap.val().image) {
+                menuData.image = snap.val().image;
+            } else {
+                // Image par défaut si aucune photo n'a jamais été mise
+                menuData.image = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop";
+            }
+
+            await set(menuRef, menuData);
+            window.showNotification("Menu mis à jour avec succès !");
+        } catch(e) {
+            window.showNotification("Erreur lors de la publication du menu.", true);
+        }
+    };
+
+    // ÉCOUTEUR EN TEMPS RÉEL POUR AFFICHER LE MENU
+    onValue(ref(db, 'system/menu'), (snapshot) => {
+        if (snapshot.exists()) {
+            const menuData = snapshot.val();
+            
+            // 1. Mise à jour de la vue Étudiant
+            const studentImg = document.getElementById('student-menu-img');
+            const studentName = document.getElementById('student-menu-name');
+            if (studentImg) studentImg.src = menuData.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop";
+            if (studentName) studentName.innerText = menuData.name || "Menu non défini";
+
+            // 2. Mise à jour de la vue Gérant (pour qu'il voie ce qui est déjà publié en se connectant)
+            const adminMenuInput = document.getElementById('menu-name-input');
+            const adminMenuPreview = document.getElementById('menu-image-preview');
+            if (adminMenuInput && !adminMenuInput.value) adminMenuInput.value = menuData.name || "";
+            if (adminMenuPreview && menuData.image && adminMenuPreview.classList.contains('hidden')) {
+                adminMenuPreview.src = menuData.image;
+                adminMenuPreview.classList.remove('hidden');
+                menuImageBase64 = menuData.image; // Stocke l'image actuelle en mémoire
+            }
+        }
+    });
+
+    // 🛎️ GESTION DU SERVICE (Admin)
+    window.updateServiceUI = function(service) {
+        const services = ['MATIN', 'SOIR', 'NUIT', 'FERMÉ'];
+        services.forEach(s => {
+            const btn = document.getElementById(`btn-srv-${s}`);
+            if(!btn) return;
+            if(s === service) {
+                if(s === 'FERMÉ') btn.className = "flex-1 py-3 text-[10px] font-black rounded-xl transition-all shadow-md bg-red-500 text-white transform scale-105";
+                else btn.className = "flex-1 py-3 text-[10px] font-black rounded-xl transition-all shadow-md bg-white text-brand-500 transform scale-105";
+            } else {
+                if(s === 'FERMÉ') btn.className = "flex-1 py-3 text-[10px] font-bold rounded-xl transition-all text-red-300 hover:bg-gray-200";
+                else btn.className = "flex-1 py-3 text-[10px] font-bold rounded-xl transition-all text-gray-400 hover:bg-gray-200";
             }
         });
-    }
+        if(currentUser === 'resto' && service !== activeService) {
+            if(confirm(`Ouvrir le service : ${service} ?\nLa file sera réinitialisée.`)) {
+                set(ref(db, 'system/activeService'), service);
+                set(ref(db, 'queue'), { lastTicket: 0, currentServing: 0 });
+            } else {
+                window.updateServiceUI(activeService); 
+            }
+        }
+    };
 
-    function initRealtimeListeners() {
-        // Service global
-        onValue(ref(db, 'system/activeService'), (snap) => {
-            state.service = snap.val() || 'FERMÉ';
-            if(currentUser === 'student') updateStudentUI();
-            if(currentUser === 'resto') updateAdminServiceUI();
-        });
+    window.callNext = function() { set(ref(db, 'queue/currentServing'), currentServing + 1); };
+
+    // File d'attente globale
+    onValue(ref(db, 'system/activeService'), (snapshot) => {
+        activeService = snapshot.val() || 'FERMÉ';
+        document.getElementById('service-name-display').innerText = activeService;
+        document.getElementById('history-service-name').innerText = activeService;
         
-        // File d'attente
-        onValue(ref(db, 'queue'), (snap) => {
-            if (snap.exists()) { state.queue = snap.val(); }
-            else { state.queue = { current: 0, last: 0 }; }
-            if(currentUser === 'student') updateStudentUI();
-            if(currentUser === 'resto') updateAdminQueueUI();
-        });
-
-        // Menu
-        onValue(ref(db, 'system/menu'), (snap) => {
-            if(snap.exists()) {
-                state.menu = snap.val();
-                if(currentUser === 'student') {
-                    document.getElementById('s-menu-name').innerText = state.menu.name;
-                    document.getElementById('s-menu-price-display').innerText = `${state.menu.price} FCFA`;
-                    document.getElementById('s-btn-price').innerText = state.menu.price;
-                    document.getElementById('s-menu-img').src = state.menu.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800';
-                    document.getElementById('s-menu-cal').innerText = state.menu.cal || 0;
-                    document.getElementById('s-menu-likes').innerText = state.menu.likes || 0;
-                    
-                    let tagsHTML = `<span class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-blue-100"><i class="fa-solid fa-fire text-[8px]"></i> ${state.menu.cal || 0} Kcal</span>`;
-                    if(state.menu.tags?.halal) tagsHTML += `<span class="bg-green-50 text-green-600 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-green-100">Halal</span>`;
-                    if(state.menu.tags?.veg) tagsHTML += `<span class="bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-emerald-100">Végétarien</span>`;
-                    document.getElementById('s-menu-tags-container').innerHTML = tagsHTML;
-                }
-                if(currentUser === 'resto') {
-                    document.getElementById('a-menu-name').value = state.menu.name || '';
-                    document.getElementById('a-menu-price').value = state.menu.price || 500;
-                    document.getElementById('a-menu-cal').value = state.menu.cal || '';
-                    document.getElementById('a-tag-halal').checked = state.menu.tags?.halal || false;
-                    document.getElementById('a-tag-veg').checked = state.menu.tags?.veg || false;
-                }
-            }
-        });
-
-        // Historique tickets du service (Admin File)
-        if(currentUser === 'resto') {
-            onValue(ref(db, `service_tickets/${todayDate}`), (snap) => {
-                if(!snap.exists()) return;
-                const data = snap.val()[state.service];
-                let html = ''; let count = 0;
-                if(data) {
-                    Object.values(data).forEach(t => {
-                        if(t.status !== 'scanned') { count++; html += `<div class="bg-gray-50 p-3 rounded-xl border border-gray-100 flex justify-between items-center"><div class="font-bold text-sm text-gray-800">Pass #${t.num}</div><div class="text-[10px] font-bold bg-white px-2 py-1 rounded shadow-sm text-gray-500">${t.mat}</div></div>`; }
-                    });
-                }
-                document.getElementById('a-queue-list').innerHTML = html || '<p class="text-xs text-gray-400 text-center py-4 italic">Aucun ticket en attente.</p>';
-                document.getElementById('a-queue-waiting').innerText = count;
-            });
+        const dot = document.getElementById('status-dot');
+        const dotPulse = document.getElementById('status-dot-pulse');
+        if(activeService === 'FERMÉ') {
+            dot.className = "relative w-3 h-3 bg-red-500 rounded-full";
+            dotPulse.classList.add('hidden');
+        } else {
+            dot.className = "relative w-3 h-3 bg-emerald-500 rounded-full";
+            dotPulse.classList.remove('hidden');
         }
-    }
 
-    // --- ETUDIANT LOGIC ---
-    async function checkMyTicket() {
-        if(state.service === 'FERMÉ') { state.myTicket = null; updateStudentUI(); return; }
-        const snap = await get(ref(db, `service_tickets/${todayDate}/${state.service}/${matricule}`));
-        if(snap.exists()) { state.myTicket = snap.val().num; generateQR(); } 
-        else { state.myTicket = null; }
-        updateStudentUI();
+        if(currentUser === 'resto') window.updateServiceUI(activeService);
+
+        if (currentUser === 'student') {
+            const btn = document.getElementById('btn-take-ticket');
+            const msg = document.getElementById('ticket-closed-msg');
+            if (activeService === 'FERMÉ') { btn.disabled = true; msg.classList.remove('hidden'); } 
+            else { btn.disabled = false; msg.classList.add('hidden'); }
+            checkMyTicketInDB(); 
+        }
+    });
+
+    onValue(ref(db, 'queue'), (snapshot) => {
+        const data = snapshot.val();
+        if (data) { currentServing = data.currentServing || 0; updateUI(); }
+    });
+
+    async function checkMyTicketInDB() {
+        if (currentUser !== 'student' || activeService === 'FERMÉ') { myTicket = null; updateUI(); return; }
+        const myTicketRef = ref(db, `service_tickets/${todayDate}/${activeService}/${matricule}`);
+        const snap = await get(myTicketRef);
+        if (snap.exists()) {
+            myTicket = snap.val(); myTicketMeal = activeService; generateQR();
+        } else { myTicket = null; }
+        updateUI();
     }
 
     window.takeTicket = async function() {
-        if(state.service === 'FERMÉ') return window.showNotification("Cantine fermée.", true);
-        const price = state.menu.price || 500;
-        if((state.user.wallet || 0) < price) return window.showNotification("Solde insuffisant !", true);
+        if(activeService === 'FERMÉ') return window.showNotification("Cantine fermée.", true);
+        document.getElementById('btn-take-ticket').disabled = true;
 
-        const btn = document.getElementById('btn-take-ticket'); btn.disabled = true;
-        
-        // Transaction: Deduct wallet & increment ticket
-        try {
-            await set(ref(db, `users/${matricule}/wallet`), (state.user.wallet || 0) - price);
-            const res = await runTransaction(ref(db, 'queue/lastTicket'), val => (val || 0) + 1);
-            const newTicket = res.snapshot.val();
-            
-            await set(ref(db, `service_tickets/${todayDate}/${state.service}/${matricule}`), { num: newTicket, mat: matricule, status: 'waiting' });
-            state.myTicket = newTicket; generateQR(); updateStudentUI();
-            window.showNotification(`Payé ${price}F. Pass #${newTicket} généré !`);
-        } catch(e) { window.showNotification("Erreur lors de l'achat.", true); btn.disabled = false; }
-    };
+        const myTicketRef = ref(db, `service_tickets/${todayDate}/${activeService}/${matricule}`);
+        const ticketSnap = await get(myTicketRef);
+        if(ticketSnap.exists()) { window.showNotification("Pass déjà récupéré.", true); checkMyTicketInDB(); return; }
 
-    window.cancelTicket = async function() {
-        if(!confirm("Annuler ce ticket ? Le montant sera remboursé.")) return;
-        const price = state.menu.price || 500;
-        await set(ref(db, `service_tickets/${todayDate}/${state.service}/${matricule}`), null);
-        await set(ref(db, `users/${matricule}/wallet`), (state.user.wallet || 0) + price);
-        state.myTicket = null; updateStudentUI();
-        window.showNotification(`Ticket annulé. ${price}F remboursés.`);
-    };
-
-    window.mockRecharge = async function() {
-        await set(ref(db, `users/${matricule}/wallet`), (state.user.wallet || 0) + 2000);
-        window.showNotification("Recharge virtuelle de +2000F réussie !");
-    };
-
-    window.rateMenu = async function(type) {
-        if(type === 'up') {
-            await set(ref(db, 'system/menu/likes'), (state.menu.likes || 0) + 1);
-            window.showNotification("Merci pour votre avis !");
-        }
+        runTransaction(ref(db, 'queue/lastTicket'), (val) => (val || 0) + 1).then(async (res) => {
+            myTicket = res.snapshot.val(); myTicketMeal = activeService;
+            await set(myTicketRef, myTicket);
+            generateQR(); updateUI();
+            window.showNotification(`Pass #${myTicket} généré avec succès !`);
+        });
     };
 
     function generateQR() {
-        const qrData = `${matricule}|${state.myTicket}|${todayDate}|${state.service}`;
-        const container = document.getElementById("s-qrcode-container"); container.innerHTML = "";
-        new QRCode(container, { text: qrData, width: 140, height: 140, colorDark : "#111827", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.M });
+        const qrData = `${matricule}|${myTicket}|${todayDate}|${myTicketMeal}`;
+        document.getElementById('my-ticket-service-name').innerText = "SERVICE " + myTicketMeal;
+        const qrContainer = document.getElementById("qrcode-container");
+        qrContainer.innerHTML = ""; 
+        new QRCode(qrContainer, { text: qrData, width: 150, height: 150, colorDark : "#111827", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
     }
 
-    function updateStudentUI() {
-        document.getElementById('s-active-service').innerText = state.service;
-        document.getElementById('s-current-serving').innerText = state.queue.current > 0 ? state.queue.current : "-";
+    function updateUI() {
+        document.getElementById('student-current-serving').innerText = currentServing > 0 ? currentServing : "-";
+        document.getElementById('resto-current-serving').innerText = currentServing > 0 ? currentServing : "-";
 
-        const actionZone = document.getElementById('s-action-zone');
-        const ticketZone = document.getElementById('s-my-ticket-zone');
-        const waitTimeZone = document.getElementById('s-wait-time-container');
+        if (myTicket && currentUser === 'student') {
+            document.getElementById('ticket-action-zone').classList.add('hidden');
+            document.getElementById('my-ticket-zone').classList.remove('hidden');
+            document.getElementById('my-ticket-number').innerText = "#" + myTicket;
 
-        if(state.service === 'FERMÉ') {
-            document.getElementById('btn-take-ticket').classList.add('hidden');
-            document.getElementById('s-ticket-msg').classList.remove('hidden');
-            actionZone.classList.remove('hidden'); ticketZone.classList.add('hidden'); waitTimeZone.classList.add('hidden');
-        } else {
-            document.getElementById('btn-take-ticket').classList.remove('hidden');
-            document.getElementById('btn-take-ticket').disabled = false;
-            document.getElementById('s-ticket-msg').classList.add('hidden');
-            
-            if(state.myTicket) {
-                actionZone.classList.add('hidden'); ticketZone.classList.remove('hidden'); waitTimeZone.classList.remove('hidden');
-                document.getElementById('s-my-ticket-number').innerText = "#" + state.myTicket;
-                
-                let peopleBefore = state.myTicket - state.queue.current;
-                document.getElementById('s-est-time').innerText = peopleBefore > 0 ? peopleBefore * 2 : 0; // estimation 2 min par personne
-                
-                if(peopleBefore <= 0) {
-                    document.getElementById('s-queue-alert').classList.add('hidden'); document.getElementById('s-turn-alert').classList.remove('hidden');
-                } else {
-                    document.getElementById('s-queue-alert').classList.remove('hidden'); document.getElementById('s-turn-alert').classList.add('hidden');
-                    document.getElementById('s-people-before').innerText = peopleBefore;
-                }
+            let peopleBefore = myTicket - currentServing;
+            let ticketVis = document.getElementById('ticket-visual-container');
+
+            if (peopleBefore <= 0) {
+                document.getElementById('queue-status-box').classList.add('hidden');
+                document.getElementById('turn-status-box').classList.remove('hidden');
+                ticketVis.classList.add('border-4', 'border-emerald-400');
             } else {
-                actionZone.classList.remove('hidden'); ticketZone.classList.add('hidden'); waitTimeZone.classList.add('hidden');
+                document.getElementById('queue-status-box').classList.remove('hidden');
+                document.getElementById('turn-status-box').classList.add('hidden');
+                document.getElementById('people-before-me').innerText = peopleBefore;
+                ticketVis.classList.remove('border-4', 'border-emerald-400');
             }
+        } else if (currentUser === 'student') {
+            document.getElementById('ticket-action-zone').classList.remove('hidden');
+            document.getElementById('my-ticket-zone').classList.add('hidden');
         }
     }
 
-    // --- ADMIN LOGIC ---
-    window.updateServiceUI = function(srv) {
-        ['MATIN', 'SOIR', 'NUIT', 'FERMÉ'].forEach(s => {
-            const btn = document.getElementById(`btn-srv-${s}`);
-            if(s === srv) btn.className = s==='FERMÉ' ? "flex-1 py-3 text-[10px] font-black rounded-xl transition-all shadow-md bg-red-500 text-white transform scale-105" : "flex-1 py-3 text-[10px] font-black rounded-xl transition-all shadow-md bg-white text-brand-500 transform scale-105";
-            else btn.className = s==='FERMÉ' ? "flex-1 py-3 text-[10px] font-bold rounded-xl transition-all text-red-300 hover:bg-gray-200" : "flex-1 py-3 text-[10px] font-bold rounded-xl transition-all text-gray-400 hover:bg-gray-200";
-        });
-        if(srv !== state.service) {
-            if(confirm(`Ouvrir le service : ${srv} ?`)) { set(ref(db, 'system/activeService'), srv); if(srv!=='FERMÉ') set(ref(db, 'queue'), { current: 0, last: 0 }); }
-            else { updateAdminServiceUI(); }
-        }
-    };
-    function updateAdminServiceUI() { window.updateServiceUI(state.service); }
-    function updateAdminQueueUI() {
-        document.getElementById('a-current-serving').innerText = state.queue.current || "-";
-        document.getElementById('a-queue-total').innerText = state.queue.last || 0;
-    }
-
-    window.callNext = function() { set(ref(db, 'queue/current'), (state.queue.current || 0) + 1); };
-    window.callSpecific = function() {
-        const num = parseInt(document.getElementById('a-specific-call-input').value);
-        if(num > 0) { set(ref(db, 'queue/current'), num); document.getElementById('a-specific-call-input').value = ''; }
-    };
-
-    window.handleMenuImg = function(e) {
-        const file = e.target.files[0]; if(!file) return;
-        const reader = new FileReader(); reader.onload = e => {
-            newMenuImgBase64 = e.target.result;
-            document.getElementById('a-menu-img-preview').src = newMenuImgBase64;
-            document.getElementById('a-menu-img-preview').classList.remove('hidden');
-        }; reader.readAsDataURL(file);
-    };
-
-    window.saveMenuAdmin = async function() {
-        const name = document.getElementById('a-menu-name').value.trim();
-        const price = parseInt(document.getElementById('a-menu-price').value) || 500;
-        const cal = parseInt(document.getElementById('a-menu-cal').value) || 0;
-        const tags = { halal: document.getElementById('a-tag-halal').checked, veg: document.getElementById('a-tag-veg').checked };
-        
-        let updates = { name, price, cal, tags };
-        if(newMenuImgBase64) updates.image = newMenuImgBase64;
-        await update(ref(db, 'system/menu'), updates);
-        window.showNotification("Menu sauvegardé avec succès !");
-    };
-
-    window.searchUser = async function() {
-        const mat = document.getElementById('a-search-mat').value.trim().toUpperCase();
-        const snap = await get(ref(db, `users/${mat}`));
-        if(snap.exists()) {
-            const data = snap.val();
-            document.getElementById('a-res-mat').innerText = mat;
-            document.getElementById('a-res-name').innerText = data.name;
-            document.getElementById('a-res-wallet').innerText = `${data.wallet || 0} F`;
-            document.getElementById('a-res-points').innerText = data.points || 0;
-            document.getElementById('a-user-result').classList.remove('hidden');
-        } else { window.showNotification("Introuvable", true); }
-    };
-
-    // Scanner
+    // 📷 GESTION SCANNER
     window.openScanner = function() {
-        if(state.service === 'FERMÉ') return window.showNotification("Ouvrez un service.", true);
+        if(activeService === 'FERMÉ') return window.showNotification("Ouvrez d'abord un service.", true);
         document.getElementById('scanner-modal').classList.remove('hidden'); document.getElementById('scanner-modal').classList.add('flex');
-        if(html5QrCode) html5QrCode.clear(); html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess).catch(e=>alert("Erreur Caméra."));
+        if(html5QrCode) html5QrCode.clear();
+        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 250, height: 250 } }, onScanSuccess).catch(e => alert("Erreur Caméra."));
     };
     window.closeScanner = function() {
         document.getElementById('scanner-modal').classList.add('hidden'); document.getElementById('scanner-modal').classList.remove('flex');
@@ -780,32 +701,65 @@
     };
     window.restartScanner = window.openScanner;
     async function onScanSuccess(decodedText) {
-        window.closeScanner();
+        window.closeScanner(); 
         try {
-            const[mat, tkt, dte, srv] = decodedText.split('|');
-            if(dte !== todayDate || srv !== state.service) return alert("❌ PASS INVALIDE OU EXPIRÉ");
+            const parts = decodedText.split('|');
+            const matScan = parts[0]; const ticketScan = parseInt(parts[1]); const dateScan = parts[2]; const mealScan = parts[3];
+
+            if(dateScan !== todayDate) return alert(`🚨 PASS EXPIRÉ ! Date: ${dateScan}`);
+            if(mealScan !== activeService) return alert(`🚨 ERREUR SERVICE ! Pass ${mealScan} scanné pendant le ${activeService}.`);
+
+            const userSnap = await get(ref(db, `users/${matScan}`));
+            const studentName = userSnap.exists() ? userSnap.val().name : matScan;
+            const historyRef = ref(db, `history/${todayDate}/${activeService}/${ticketScan}`);
             
-            const userSnap = await get(ref(db, `users/${mat}`));
-            if(userSnap.exists()) {
-                if(confirm(`✅ VALIDER REPAS\nÉtudiant: ${userSnap.val().name}`)) {
-                    // Update ticket status
-                    await update(ref(db, `service_tickets/${todayDate}/${state.service}/${mat}`), { status: 'scanned' });
-                    // Increment Gamification points
-                    await set(ref(db, `users/${mat}/points`), (userSnap.val().points || 0) + 10);
-                    // Update Stats
-                    const statsRef = ref(db, `stats/${todayDate}/total`);
-                    runTransaction(statsRef, val => (val || 0) + 1).then(res => {
-                        document.getElementById('a-stats-total').innerText = res.snapshot.val();
-                    });
-                    window.showNotification("Repas Validé (+10 pts) !");
-                }
+            if(confirm(`✅ VALIDATION\nÉtudiant : ${studentName}\nConfirmer le repas ?`)) {
+                await set(historyRef, { matricule: matScan, name: studentName, timestamp: Date.now(), status: 'validé' });
+                window.showNotification(`Repas validé : ${studentName}`);
             }
-        } catch(e) { alert("❌ QR non reconnu."); }
+        } catch(e) { alert("❌ QR Code invalide."); }
     }
 
-    // Lancement
-    checkLoginState();
+    // 🔍 RECHERCHE ÉTUDIANT
+    window.searchStudent = async function() {
+        const matToSearch = document.getElementById('search-mat-input').value.trim().toUpperCase();
+        if(!matToSearch) return;
+        const snap = await get(ref(db, `users/${matToSearch}`));
+        if(snap.exists()) {
+            const data = snap.val(); currentSearchMat = matToSearch;
+            document.getElementById('res-mat').innerText = matToSearch;
+            document.getElementById('res-name').innerText = data.name || "Inconnu";
+            document.getElementById('res-img').src = data.cardImage;
+            document.getElementById('search-result').classList.remove('hidden');
+        } else {
+            window.showNotification("Étudiant introuvable.", true);
+            document.getElementById('search-result').classList.add('hidden');
+        }
+    };
+    
+    window.deleteStudent = async function() {
+        if(confirm(`⚠️ Supprimer définitivement le compte de ${currentSearchMat} ?`)) {
+            await set(ref(db, `users/${currentSearchMat}`), null);
+            document.getElementById('search-result').classList.add('hidden');
+            document.getElementById('search-mat-input').value = "";
+            window.showNotification(`Compte supprimé avec succès.`);
+        }
+    };
 
+    window.switchAdminTab = function(tab) {
+        document.getElementById('admin-service').classList.toggle('hidden', tab !== 'service');
+        document.getElementById('admin-history').classList.toggle('hidden', tab !== 'history');
+        document.getElementById('admin-students').classList.toggle('hidden', tab !== 'students');
+        
+        const activeClass = "w-1/3 flex flex-col items-center justify-center py-2.5 text-brand-400 bg-white/10 rounded-full transition-all";
+        const inactiveClass = "w-1/3 flex flex-col items-center justify-center py-2.5 text-gray-400 hover:text-white transition-all";
+        
+        document.getElementById('btn-tab-service').className = tab === 'service' ? activeClass : inactiveClass;
+        document.getElementById('btn-tab-history').className = tab === 'history' ? activeClass : inactiveClass;
+        document.getElementById('btn-tab-students').className = tab === 'students' ? activeClass : inactiveClass;
+    };
+
+    checkLoginState(); 
 </script>
 </body>
 </html>
